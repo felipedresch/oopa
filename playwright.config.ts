@@ -20,12 +20,25 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: "desktop-chrome",
+      use: {
+        ...devices["Desktop Chrome"],
+      },
     },
     {
-      name: "mobile-chrome",
-      use: { ...devices["Pixel 7"] },
+      name: "mobile-360",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 360, height: 740 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: "mobile-390",
+      use: {
+        ...devices["iPhone 12"],
+      },
     },
   ],
 });

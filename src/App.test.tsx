@@ -3,18 +3,10 @@ import { render, screen } from "@testing-library/react";
 import App from "@/App";
 
 describe("App", () => {
-  it("renders the project foundation shell", () => {
+  it("renderiza o roteamento da aplicacao", async () => {
     render(<App />);
 
-    expect(
-      screen.getByRole("heading", {
-        name: /fundacao tecnica pronta/i,
-      }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/npm run quality/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /convex ai docs/i })).toHaveAttribute(
-      "href",
-      "https://docs.convex.dev/ai",
-    );
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
+    expect(screen.getByText("OOPA")).toBeInTheDocument();
   });
 });

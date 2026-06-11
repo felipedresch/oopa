@@ -112,17 +112,17 @@ mesmo conjunto de mudancas.
 - [x] Inicializar Convex no projeto.
 - [x] Instalar AI files oficiais do Convex.
 - [x] Criar `convex/schema.ts` inicial.
-- [ ] Ler `convex/_generated/ai/guidelines.md` antes da primeira mudanca real
+- [x] Ler `convex/_generated/ai/guidelines.md` antes da primeira mudanca real
       em Convex.
-- [ ] Criar `convex/permissions.ts` com catalogo granular, modulos de UI,
+- [x] Criar `convex/permissions.ts` com catalogo granular, modulos de UI,
       niveis de acesso e funcao de traducao modulo/nivel -> permissoes.
-- [ ] Criar `convex/audit.ts` com helper `recordAudit`, query protegida de
+- [x] Criar `convex/audit.ts` com helper `recordAudit`, query protegida de
       auditoria e exportacao CSV.
-- [ ] Criar `convex/errors.ts` com codigos de erro sedimentados e helpers para
+- [x] Criar `convex/errors.ts` com codigos de erro sedimentados e helpers para
       `FORBIDDEN`, `NOT_FOUND`, `CONFLICT` e `VALIDATION_ERROR`.
-- [ ] Criar `convex/domainValidators.ts` com validators compartilhados para
+- [x] Criar `convex/domainValidators.ts` com validators compartilhados para
       microchip, CPF, telefone, email, datas, enums, paginacao e IDs.
-- [ ] Criar fixtures de teste com usuarios admin, agente prefeitura,
+- [x] Criar fixtures de teste com usuarios admin, agente prefeitura,
       voluntario, cao com microchip, tutor sem alerta e tutor com alerta.
 
 ### Frontend
@@ -131,17 +131,17 @@ mesmo conjunto de mudancas.
 - [x] Criar shell tecnico inicial da aplicacao.
 - [x] Configurar aliases e estrutura base de `src/app`, `src/components` e
       `src/lib`.
-- [ ] Criar roteamento com as rotas listadas neste arquivo.
-- [ ] Criar layout autenticado mobile-first com header fixo, menu inferior no
+- [x] Criar roteamento com as rotas listadas neste arquivo.
+- [x] Criar layout autenticado mobile-first com header fixo, menu inferior no
       mobile e navegacao lateral no desktop.
-- [ ] Criar componentes base: `PageHeader`, `EmptyState`, `ErrorState`,
+- [x] Criar componentes base: `PageHeader`, `EmptyState`, `ErrorState`,
       `PermissionDenied`, `LoadingSkeleton`, `ConfirmDialog`, `StepperForm`,
       `FilterBar`, `StatusBadge`, `SeverityBadge`, `PermissionSummary`.
-- [ ] Implementar cores de gravidade: info cinza, baixa verde, media amarelo,
+- [x] Implementar cores de gravidade: info cinza, baixa verde, media amarelo,
       alta vermelho.
-- [ ] Implementar cores de status do cao: na ONG azul, adotado verde,
+- [x] Implementar cores de status do cao: na ONG azul, adotado verde,
       desaparecido amarelo, falecido cinza, transferido roxo.
-- [ ] Implementar copy padrao para acoes criticas: "Confirmar", "Cancelar",
+- [x] Implementar copy padrao para acoes criticas: "Confirmar", "Cancelar",
       "Salvar", "Registrar ocorrencia", "Continuar", "Voltar", "Nao tenho
       permissao para isso".
 
@@ -150,79 +150,79 @@ mesmo conjunto de mudancas.
 - [x] Configurar ESLint, Prettier, Vitest, Testing Library e Playwright.
 - [x] Criar `npm run quality`.
 - [x] Criar teste E2E de fundacao.
-- [ ] Criar `src/test/render.tsx` para renderizar componentes com providers.
-- [ ] Criar `src/test/fixtures.ts` com dados realistas de cao, tutor,
+- [x] Criar `src/test/render.tsx` para renderizar componentes com providers.
+- [x] Criar `src/test/fixtures.ts` com dados realistas de cao, tutor,
       ocorrencia, permissao e usuario.
-- [ ] Criar padrao de testes Convex com banco isolado por caso de teste.
-- [ ] Criar Playwright projects para 360px mobile, 390px mobile e desktop.
+- [x] Criar padrao de testes Convex com banco isolado por caso de teste.
+- [x] Criar Playwright projects para 360px mobile, 390px mobile e desktop.
 
 ## Fase 1 - Modelo de dominio, permissoes e seeds
 
 ### Backend
 
-- [ ] Modelar `users` com nome, email, telefone, organizacao, ativo, criado_em,
+- [x] Modelar `users` com nome, email, telefone, organizacao, ativo, criado_em,
       criado_por, atualizado_em, atualizado_por e ultimo_acesso_em.
-- [ ] Modelar `user_permissions` como array de strings no proprio `users` para
+- [x] Modelar `user_permissions` como array de strings no proprio `users` para
       leitura simples e rapida.
-- [ ] Modelar `permission_templates` com nome, descricao, permissions,
+- [x] Modelar `permission_templates` com nome, descricao, permissions,
       ativo, criado_por, criado_em, atualizado_por e atualizado_em.
-- [ ] Modelar `dogs` com microchip unico, nome, sexo,
+- [x] Modelar `dogs` com microchip unico, nome, sexo,
       data_nascimento_aproximada, porte, raca_aparente, cor_pelagem,
       caracteristicas_visuais, caracteristicas_comportamentais, condicoes_saude,
       castrado, vacinas_em_dia, foto_perfil_storage_id, status_atual,
       tutor_atual_id, observacoes, criado_em, criado_por, atualizado_em e
       atualizado_por.
-- [ ] Modelar `dog_photos` com dog_id, storage_id, descricao, criado_em e
+- [x] Modelar `dog_photos` com dog_id, storage_id, descricao, criado_em e
       criado_por.
-- [ ] Modelar `tutors` com nome_completo, cpf, rg, telefone, email,
+- [x] Modelar `tutors` com nome_completo, cpf, rg, telefone, email,
       endereco_logradouro, endereco_numero, endereco_complemento, endereco_cep,
       bairro_id, data_nascimento, observacoes, criado_em, criado_por,
       atualizado_em e atualizado_por.
-- [ ] Modelar `bairros` com nome, ativo, criado_em, criado_por, atualizado_em e
+- [x] Modelar `bairros` com nome, ativo, criado_em, criado_por, atualizado_em e
       atualizado_por.
-- [ ] Modelar `occurrence_types` com nome, categoria, requer_foto,
+- [x] Modelar `occurrence_types` com nome, categoria, requer_foto,
       gravidade_padrao, ativo, criado_por, criado_em, atualizado_por e
       atualizado_em.
-- [ ] Modelar `occurrences` com dog_id, tutor_id, tutor_snapshot,
+- [x] Modelar `occurrences` com dog_id, tutor_id, tutor_snapshot,
       atribuivel_ao_tutor, occurrence_type_id, gravidade, data_ocorrencia,
       bairro_id, local_descricao, descricao, registrado_por, original_id,
       adoption_payload, criado_em.
-- [ ] Modelar `occurrence_photos` com occurrence_id, storage_id, descricao,
+- [x] Modelar `occurrence_photos` com occurrence_id, storage_id, descricao,
       criado_em e criado_por.
-- [ ] Modelar `tutor_dog_history` com dog_id, tutor_id, inicio, fim,
+- [x] Modelar `tutor_dog_history` com dog_id, tutor_id, inicio, fim,
       tipo_inicio, tipo_fim, occurrence_id_inicio e occurrence_id_fim.
-- [ ] Modelar `notifications` com user_id, tipo, titulo, mensagem,
+- [x] Modelar `notifications` com user_id, tipo, titulo, mensagem,
       entidade_tipo, entidade_id, lida, criado_em e lida_em.
-- [ ] Modelar `audit_logs` com `actor_user_id`, `action`, `entity_type`,
+- [x] Modelar `audit_logs` com `actor_user_id`, `action`, `entity_type`,
       `entity_id`, `summary`, `metadata` e `created_at`.
-- [ ] Criar indices `users.by_email`, `users.by_active`, `dogs.by_microchip`,
+- [x] Criar indices `users.by_email`, `users.by_active`, `dogs.by_microchip`,
       `dogs.by_status`, `dogs.by_tutor`, `tutors.by_cpf`, `tutors.by_bairro`,
       `bairros.by_nome`, `occurrences.by_dog`, `occurrences.by_tutor`,
       `occurrences.by_type`, `occurrences.by_gravity`, `occurrences.by_bairro`,
       `occurrences.by_date`, `notifications.by_user_unread` e
       `audit_logs.by_created_at`.
-- [ ] Criar seed inicial dos tipos: Consulta/Visualizacao, Castracao,
+- [x] Criar seed inicial dos tipos: Consulta/Visualizacao, Castracao,
       Vacinacao, Atendimento Veterinario, Resgate na Rua, Devolucao a ONG,
       Adocao, Transferencia de Tutor, Fuga Confirmada, Abandono Suspeito,
       Denuncia de Maus-Tratos, Obito, Correcao/Retificacao e Outro.
-- [ ] Criar seed inicial de bairros: Centro, Zona Rural e Nao informado.
-- [ ] Criar seed inicial de templates: Administrador ONG, Agente Prefeitura,
+- [x] Criar seed inicial de bairros: Centro, Zona Rural e Nao informado.
+- [x] Criar seed inicial de templates: Administrador ONG, Agente Prefeitura,
       Voluntario de Campo, Pet Shop Parceiro e Leitura Restrita.
-- [ ] Testar schema, indices, seeds e mapa de permissoes.
+- [x] Testar schema, indices, seeds e mapa de permissoes.
 
 ### Frontend
 
-- [ ] Criar `src/lib/permissions.ts` espelhando os modulos de UI recebidos do
+- [x] Criar `src/lib/permissions.ts` espelhando os modulos de UI recebidos do
       backend, sem duplicar a fonte granular de permissao.
-- [ ] Criar formatadores de status, gravidade, datas, telefones, CPF, CEP e
+- [x] Criar formatadores de status, gravidade, datas, telefones, CPF, CEP e
       microchip.
-- [ ] Criar mascaras de entrada para CPF, telefone, CEP e microchip de 15
+- [x] Criar mascaras de entrada para CPF, telefone, CEP e microchip de 15
       digitos.
-- [ ] Criar `SeverityBadge`, `DogStatusBadge`, `TutorAlertBadge` e
+- [x] Criar `SeverityBadge`, `DogStatusBadge`, `TutorAlertBadge` e
       `PermissionLevelSelector`.
-- [ ] Criar validacoes client-side com as mesmas mensagens dos validators de
+- [x] Criar validacoes client-side com as mesmas mensagens dos validators de
       dominio.
-- [ ] Testar formatadores, mascaras, badges e seletor de permissao.
+- [x] Testar formatadores, mascaras, badges e seletor de permissao.
 
 ## Fase 2 - Autenticacao, convites e equipe
 

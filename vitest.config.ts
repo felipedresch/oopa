@@ -15,9 +15,26 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "lcov"],
     },
-    environment: "jsdom",
-    globals: true,
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    setupFiles: ["./src/test/setup.ts"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "frontend",
+          environment: "jsdom",
+          globals: true,
+          include: ["src/**/*.{test,spec}.{ts,tsx}"],
+          setupFiles: ["./src/test/setup.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "convex",
+          environment: "edge-runtime",
+          globals: true,
+          include: ["convex/**/*.test.ts"],
+        },
+      },
+    ],
   },
 });
