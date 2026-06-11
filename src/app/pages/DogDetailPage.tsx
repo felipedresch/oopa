@@ -5,6 +5,8 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { DogPhotoGallery } from "@/components/DogPhotoGallery";
+import { OccurrenceTimeline } from "@/components/OccurrenceTimeline";
+import { TutorDogHistoryList } from "@/components/TutorDogHistoryList";
 import { DogStatusBadge } from "@/components/DogStatusBadge";
 import { DogStatusChangeDialog } from "@/components/DogStatusChangeDialog";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
@@ -19,7 +21,7 @@ const TABS = ["Dados", "Historico de tutores", "Ocorrencias", "Fotos"] as const;
 
 export function DogDetailPage() {
   const { dogId } = useParams();
-  const { can } = usePermissions();
+  const { can, canAny } = usePermissions();
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Dados");
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [now] = useState(() => Date.now());
@@ -49,6 +51,18 @@ export function DogDetailPage() {
             {can("dogs.edit") ? (
               <Button asChild className="min-h-11" variant="outline">
                 <Link to={`/dogs/${dog._id}/edit`}>Editar</Link>
+              </Button>
+            ) : null}
+            {canAny([
+              "occurrences.create_rotina",
+              "occurrences.create_clinica",
+              "occurrences.create_risco",
+              "occurrences.create_legal",
+              "occurrences.create_adocao",
+              "occurrences.create_outro",
+            ]) ? (
+              <Button asChild className="min-h-11">
+                <Link to={`/dogs/${dog._id}/occurrences/new`}>Nova ocorrencia</Link>
               </Button>
             ) : null}
             {can("dogs.change_status") ? (
@@ -148,19 +162,9 @@ export function DogDetailPage() {
         </dl>
       ) : null}
 
-      {activeTab === "Historico de tutores" ? (
-        <PlaceholderPage
-          description="O historico de tutores sera preenchido na fase de ocorrencias e adocoes."
-          title="Historico de tutores"
-        />
-      ) : null}
+      {activeTab === "Historico de tutores" ? <TutorDogHistoryList dogId={dog._id} /> : null}
 
-      {activeTab === "Ocorrencias" ? (
-        <PlaceholderPage
-          description="A listagem de ocorrencias chega na proxima fase do produto."
-          title="Ocorrencias"
-        />
-      ) : null}
+      {activeTab === "Ocorrencias" ? <OccurrenceTimeline dogId={dog._id} /> : null}
 
       {activeTab === "Fotos" ? (
         <DogPhotoGallery canEdit={can("dogs.edit")} dogId={dog._id} />

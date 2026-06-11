@@ -408,3 +408,53 @@ export const list = query({
     };
   },
 });
+
+const tutorDogHistoryItemValidator = v.object({
+  _id: v.id("tutor_dog_history"),
+  tutor_id: v.id("tutors"),
+  tutor_nome: v.string(),
+  inicio: v.number(),
+  fim: v.optional(v.number()),
+  tipo_inicio: v.string(),
+  tipo_fim: v.optional(v.string()),
+});
+
+export const listHistoryByDog = query({
+  args: {
+    dogId: v.id("dogs"),
+  },
+  returns: v.array(tutorDogHistoryItemValidator),
+  handler: async (ctx, args) => {
+    const actor = await getCurrentUser(ctx);
+    if (!hasPermission(actor.permissions, "dogs.read")) {
+      throw forbidden();
+    }
+
+    const dog = await ctx.db.get("dogs", args.dogId);
+    if (!dog) {
+      throw notFound("Cao");
+    }
+
+    const entries = await ctx.db
+      .query("tutor_dog_history")
+      .withIndex("by_dog", (q) => q.eq("dog_id", args.dogId))
+      .collect();
+
+    const history = await Promise.all(
+      entries.map(async (entry) => {
+        const tutor = await ctx.db.get("tutors", entry.tutor_id);
+        return {
+          _id: entry._id,
+          tutor_id: entry.tutor_id,
+          tutor_nome: tutor?.nome_completo ?? "Tutor removido",
+          inicio: entry.inicio,
+          fim: entry.fim,
+          tipo_inicio: entry.tipo_inicio,
+          tipo_fim: entry.tipo_fim,
+        };
+      }),
+    );
+
+    return history.sort((left, right) => right.inicio - left.inicio);
+  },
+});

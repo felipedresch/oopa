@@ -365,50 +365,50 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Implementar CRUD de tipos de ocorrencia protegido por
+- [x] Implementar CRUD de tipos de ocorrencia protegido por
       `occurrence_types.manage`.
-- [ ] Desativar tipo usado em vez de excluir fisicamente.
-- [ ] Implementar query `occurrenceTypes.availableForCreate` filtrada pelas
+- [x] Desativar tipo usado em vez de excluir fisicamente.
+- [x] Implementar query `occurrenceTypes.availableForCreate` filtrada pelas
       permissoes do usuario.
-- [ ] Implementar mutation `occurrences.create` com snapshot do tutor atual.
-- [ ] Aplicar gravidade padrao do tipo e aceitar ajuste para `baixa`, `media` ou
+- [x] Implementar mutation `occurrences.create` com snapshot do tutor atual.
+- [x] Aplicar gravidade padrao do tipo e aceitar ajuste para `baixa`, `media` ou
       `alta` por usuarios com permissao de criar aquela categoria.
-- [ ] Exigir pelo menos uma foto para tipo com `requer_foto`.
-- [ ] Aplicar atribuicao default: rotina e clinica = `false`; risco, legal,
+- [x] Exigir pelo menos uma foto para tipo com `requer_foto`.
+- [x] Aplicar atribuicao default: rotina e clinica = `false`; risco, legal,
       adocao e outro = `true`.
-- [ ] Bloquear edicao de ocorrencia criada.
-- [ ] Implementar retificacao criando ocorrencia `Correcao/Retificacao` com
+- [x] Bloquear edicao de ocorrencia criada.
+- [x] Implementar retificacao criando ocorrencia `Correcao/Retificacao` com
       `original_id` obrigatorio.
-- [ ] Implementar fotos adicionais de ocorrencia com JPEG, PNG e WebP ate 8 MB.
-- [ ] Implementar filtros de leitura por categoria: rotina/clinica com
+- [x] Implementar fotos adicionais de ocorrencia com JPEG, PNG e WebP ate 8 MB.
+- [x] Implementar filtros de leitura por categoria: rotina/clinica com
       `occurrences.read`; risco/legal com `occurrences.read_legal`; adocao com
       `dogs.read` e `tutors.read`.
-- [ ] Implementar listagens por cao, tutor, tipo, gravidade, bairro e periodo.
-- [ ] Atualizar `tutor_dog_history` transacionalmente em adocao, devolucao,
+- [x] Implementar listagens por cao, tutor, tipo, gravidade, bairro e periodo.
+- [x] Atualizar `tutor_dog_history` transacionalmente em adocao, devolucao,
       abandono, transferencia, obito e desaparecimento.
-- [ ] Garantir que exista no maximo um historico vigente por cao.
-- [ ] Manter `dogs.tutor_atual_id` igual ao tutor do historico vigente.
-- [ ] Auditar criacao de ocorrencia, upload de foto e retificacao.
-- [ ] Testar snapshots, foto obrigatoria, imutabilidade, retificacao,
+- [x] Garantir que exista no maximo um historico vigente por cao.
+- [x] Manter `dogs.tutor_atual_id` igual ao tutor do historico vigente.
+- [x] Auditar criacao de ocorrencia, upload de foto e retificacao.
+- [x] Testar snapshots, foto obrigatoria, imutabilidade, retificacao,
       permissoes por categoria e historico.
 
 ### Frontend
 
-- [ ] Criar `/dogs/:dogId/occurrences/new` iniciado a partir da ficha do cao.
-- [ ] Mostrar somente tipos de ocorrencia que o usuario pode criar.
-- [ ] Criar formulario com data default agora, bairro, local livre, descricao,
+- [x] Criar `/dogs/:dogId/occurrences/new` iniciado a partir da ficha do cao.
+- [x] Mostrar somente tipos de ocorrencia que o usuario pode criar.
+- [x] Criar formulario com data default agora, bairro, local livre, descricao,
       gravidade, atribuivel ao tutor e fotos.
-- [ ] Bloquear botao de concluir ate anexar foto para tipo que exige foto.
-- [ ] Mostrar texto do toggle de atribuicao: "Conta para o alerta deste tutor".
-- [ ] Mostrar confirmacao final com cao, tutor snapshot, tipo, gravidade,
+- [x] Bloquear botao de concluir ate anexar foto para tipo que exige foto.
+- [x] Mostrar texto do toggle de atribuicao: "Conta para o alerta deste tutor".
+- [x] Mostrar confirmacao final com cao, tutor snapshot, tipo, gravidade,
       atribuicao e fotos antes de criar ocorrencia sensivel.
-- [ ] Criar timeline de ocorrencias na ficha do cao com filtros por gravidade,
+- [x] Criar timeline de ocorrencias na ficha do cao com filtros por gravidade,
       categoria e periodo.
-- [ ] Criar detalhe de ocorrencia com snapshot historico do tutor e fotos.
-- [ ] Criar acao "Registrar retificacao" sem botao de editar ocorrencia.
-- [ ] Criar `/settings/occurrence-types` com categoria, gravidade padrao,
+- [x] Criar detalhe de ocorrencia com snapshot historico do tutor e fotos.
+- [x] Criar acao "Registrar retificacao" sem botao de editar ocorrencia.
+- [x] Criar `/settings/occurrence-types` com categoria, gravidade padrao,
       requer foto, ativo/inativo e preview de permissao.
-- [ ] Testar nova ocorrencia, filtros, permissao, foto obrigatoria, detalhe e
+- [x] Testar nova ocorrencia, filtros, permissao, foto obrigatoria, detalhe e
       retificacao.
 
 ## Fase 6 - Adocoes, devolucoes e decisoes assistidas

@@ -22,6 +22,10 @@ import { BairrosSettingsPage } from "@/app/pages/BairrosSettingsPage";
 import { TutorDetailPage } from "@/app/pages/TutorDetailPage";
 import { TutorFormPage } from "@/app/pages/TutorFormPage";
 import { TutorsListPage } from "@/app/pages/TutorsListPage";
+import { OccurrenceDetailPage } from "@/app/pages/OccurrenceDetailPage";
+import { OccurrenceFormPage } from "@/app/pages/OccurrenceFormPage";
+import { OccurrenceRectifyPage } from "@/app/pages/OccurrenceRectifyPage";
+import { OccurrenceTypesSettingsPage } from "@/app/pages/OccurrenceTypesSettingsPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -42,9 +46,11 @@ export const appRoutes: RouteObject[] = [
       { path: "dogs/new", element: <DogFormPage /> },
       { path: "dogs/:dogId", element: <DogDetailPage /> },
       { path: "dogs/:dogId/edit", element: <DogFormPage /> },
+      { path: "dogs/:dogId/occurrences/new", element: <OccurrenceFormPage /> },
+      { path: "dogs/:dogId/occurrences/:occurrenceId", element: <OccurrenceDetailPage /> },
       {
-        path: "dogs/:dogId/occurrences/new",
-        element: <PlaceholderPage title="Nova ocorrencia" />,
+        path: "dogs/:dogId/occurrences/:occurrenceId/rectify",
+        element: <OccurrenceRectifyPage />,
       },
       { path: "tutors", element: <TutorsListPage /> },
       { path: "tutors/new", element: <TutorFormPage /> },
@@ -60,15 +66,7 @@ export const appRoutes: RouteObject[] = [
         path: "settings/permission-templates",
         element: <PermissionTemplatesPage />,
       },
-      {
-        path: "settings/occurrence-types",
-        element: (
-          <AdminPlaceholderPage
-            permission="occurrence_types.manage"
-            title="Tipos de ocorrencia"
-          />
-        ),
-      },
+      { path: "settings/occurrence-types", element: <OccurrenceTypesSettingsPage /> },
       { path: "settings/bairros", element: <BairrosSettingsPage /> },
       {
         path: "audit",
