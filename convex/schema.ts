@@ -205,7 +205,9 @@ export default defineSchema({
     lida: v.boolean(),
     criado_em: v.number(),
     lida_em: v.optional(v.number()),
-  }).index("by_user_unread", ["user_id", "lida"]),
+  })
+    .index("by_user_unread", ["user_id", "lida"])
+    .index("by_user_and_created", ["user_id", "criado_em"]),
 
   audit_logs: defineTable(auditMetadataFields).index("by_created_at", ["created_at"]),
 

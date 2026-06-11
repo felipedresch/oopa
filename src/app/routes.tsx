@@ -5,7 +5,8 @@ import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { AcceptInvitePage } from "@/app/pages/AcceptInvitePage";
 import { LoginPage } from "@/app/pages/LoginPage";
 import { PermissionTemplatesPage } from "@/app/pages/PermissionTemplatesPage";
-import { AdminPlaceholderPage } from "@/app/pages/AdminPlaceholderPage";
+import { AuditPage } from "@/app/pages/AuditPage";
+import { NotificationsPage } from "@/app/pages/NotificationsPage";
 import { PlaceholderPage } from "@/app/pages/PlaceholderPage";
 import { SettingsPage } from "@/app/pages/SettingsPage";
 import { RequestResetPage } from "@/app/pages/RequestResetPage";
@@ -70,11 +71,8 @@ export const appRoutes: RouteObject[] = [
       },
       { path: "settings/occurrence-types", element: <OccurrenceTypesSettingsPage /> },
       { path: "settings/bairros", element: <BairrosSettingsPage /> },
-      {
-        path: "audit",
-        element: <AdminPlaceholderPage permission="system.audit_log" title="Auditoria" />,
-      },
-      { path: "notifications", element: <PlaceholderPage title="Notificacoes" /> },
+      { path: "audit", element: <AuditPage /> },
+      { path: "notifications", element: <NotificationsPage /> },
       { path: "profile", element: <PlaceholderPage title="Perfil" /> },
     ],
   },

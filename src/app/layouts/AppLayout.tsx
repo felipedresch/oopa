@@ -1,4 +1,5 @@
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useQuery } from "convex/react";
 import {
   BellIcon,
   ClipboardListIcon,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 
+import { api } from "../../../convex/_generated/api";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -113,8 +115,12 @@ function NavItem({
 }
 
 export function AppLayout() {
-  const { can, canAny, user } = usePermissions();
+  const { can, canAny, user, isAuthenticated } = usePermissions();
   const { signOut } = useAuthActions();
+  const unreadCount = useQuery(
+    api.notifications.unreadCount,
+    isAuthenticated ? {} : "skip",
+  );
   const access = { can, canAny };
   const visibleDesktop = desktopNavItems.filter((item) => item.canAccess(access));
   const visibleMobile = mobileNavItems.filter((item) => item.canAccess(access));
@@ -134,9 +140,14 @@ export function AppLayout() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button asChild className="min-h-11 min-w-11" size="icon" variant="ghost">
+              <Button asChild className="relative min-h-11 min-w-11" size="icon" variant="ghost">
                 <NavLink aria-label="Notificacoes" to="/notifications">
                   <BellIcon aria-hidden="true" />
+                  {unreadCount && unreadCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  ) : null}
                 </NavLink>
               </Button>
               <Button asChild className="min-h-11" size="sm" variant="outline">

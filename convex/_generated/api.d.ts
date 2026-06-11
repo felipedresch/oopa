@@ -22,6 +22,7 @@ import type * as http from "../http.js";
 import type * as lib_adoptions from "../lib/adoptions.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_dogs from "../lib/dogs.js";
+import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_occurrences from "../lib/occurrences.js";
 import type * as lib_ocr from "../lib/ocr.js";
 import type * as lib_storage from "../lib/storage.js";
@@ -64,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   "lib/adoptions": typeof lib_adoptions;
   "lib/auth": typeof lib_auth;
   "lib/dogs": typeof lib_dogs;
+  "lib/notifications": typeof lib_notifications;
   "lib/occurrences": typeof lib_occurrences;
   "lib/ocr": typeof lib_ocr;
   "lib/storage": typeof lib_storage;

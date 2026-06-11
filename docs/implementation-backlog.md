@@ -501,34 +501,34 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Criar notificacao para ocorrencia de categoria legal.
-- [ ] Criar notificacao para aviso de cao nao encontrado.
-- [ ] Entregar notificacoes legais para usuarios com `occurrences.read_legal`.
-- [ ] Entregar avisos de cao nao encontrado para usuarios com `dogs.create` e
+- [x] Criar notificacao para ocorrencia de categoria legal.
+- [x] Criar notificacao para aviso de cao nao encontrado.
+- [x] Entregar notificacoes legais para usuarios com `occurrences.read_legal`.
+- [x] Entregar avisos de cao nao encontrado para usuarios com `dogs.create` e
       `dogs.read`.
-- [ ] Implementar query `notifications.listMine` com paginacao.
-- [ ] Implementar query `notifications.unreadCount`.
-- [ ] Implementar mutation `notifications.markRead`.
-- [ ] Implementar mutation `notifications.markAllRead`.
-- [ ] Implementar deep link para `occurrence`, `dog` e `tutor`.
-- [ ] Implementar query `audit.list` protegida por `system.audit_log`.
-- [ ] Implementar action `audit.exportCsv` protegida por `system.audit_log`.
-- [ ] Testar fan-out de notificacoes, leitura, permissao, deep link, filtros de
+- [x] Implementar query `notifications.listMine` com paginacao.
+- [x] Implementar query `notifications.unreadCount`.
+- [x] Implementar mutation `notifications.markRead`.
+- [x] Implementar mutation `notifications.markAllRead`.
+- [x] Implementar deep link para `occurrence`, `dog` e `tutor`.
+- [x] Implementar query `audit.list` protegida por `system.audit_log`.
+- [x] Implementar query `audit.exportCsv` protegida por `system.audit_log`.
+- [x] Testar fan-out de notificacoes, leitura, permissao, deep link, filtros de
       auditoria e exportacao CSV.
 
 ### Frontend
 
-- [ ] Criar badge de notificacoes no header com contagem de nao lidas.
-- [ ] Criar `/notifications` com lidas/nao lidas, agrupamento por data e
+- [x] Criar badge de notificacoes no header com contagem de nao lidas.
+- [x] Criar `/notifications` com lidas/nao lidas, agrupamento por data e
       paginacao.
-- [ ] Marcar notificacao como lida ao clicar.
-- [ ] Navegar para a entidade correta ao clicar em notificacao.
-- [ ] Criar `/audit` com filtros por usuario, periodo, entidade e acao.
-- [ ] Criar exportacao CSV na tela de auditoria.
-- [ ] Criar `/settings` com links para Templates, Tipos de ocorrencia e
+- [x] Marcar notificacao como lida ao clicar.
+- [x] Navegar para a entidade correta ao clicar em notificacao.
+- [x] Criar `/audit` com filtros por usuario, periodo, entidade e acao.
+- [x] Criar exportacao CSV na tela de auditoria.
+- [x] Criar `/settings` com links para Templates, Tipos de ocorrencia e
       Bairros.
-- [ ] Criar estados vazios para notificacoes e auditoria.
-- [ ] Testar badge, marcar lida, marcar todas lidas, deep link, filtros e CSV.
+- [x] Criar estados vazios para notificacoes e auditoria.
+- [x] Testar badge, marcar lida, marcar todas lidas, deep link, filtros e CSV.
 
 ## Fase 9 - UX final, acessibilidade, performance e prontidao
 

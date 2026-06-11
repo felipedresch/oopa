@@ -22,6 +22,7 @@ import {
   resolveSeverity,
   type OccurrenceCategory,
 } from "./lib/occurrences";
+import { notifyLegalOccurrence } from "./lib/notifications";
 import { applyHistoryForOccurrence } from "./lib/tutorDogHistory";
 import { validateImageStorage } from "./lib/storage";
 import { mutation, query } from "./_generated/server";
@@ -213,6 +214,16 @@ export const create = mutation({
       summary: `Ocorrencia criada: ${type.nome} para ${dog.nome}`,
       metadata: { categoria: category, gravidade, atribuivel },
     });
+
+    if (category === "legal") {
+      await notifyLegalOccurrence(ctx, {
+        organizacao: actor.organizacao,
+        occurrenceId,
+        dogNome: dog.nome,
+        typeNome: type.nome,
+        actorNome: actor.nome,
+      });
+    }
 
     return occurrenceId;
   },

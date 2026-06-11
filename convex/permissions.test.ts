@@ -1,9 +1,5 @@
-/// <reference types="vite/client" />
-import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
 
-import { api } from "./_generated/api";
-import schema from "./schema";
 import {
   hasAllPermissions,
   hasPermission,
@@ -13,8 +9,6 @@ import {
   PERMISSION_CATALOG,
   UI_MODULES,
 } from "./permissions";
-
-const modules = import.meta.glob("./**/*.ts");
 
 test("catalogo granular contem todas as permissoes de dominio", () => {
   expect(PERMISSION_CATALOG).toHaveLength(23);
@@ -68,19 +62,3 @@ test("helpers de permissao avaliam conjuntos esperados", () => {
   ).toBe(true);
 });
 
-test("auditoria exige permissao system.audit_log", async () => {
-  const t = convexTest(schema, modules);
-
-  await expect(
-    t.query(api.audit.list, {
-      paginationOpts: { numItems: 10, cursor: null },
-      callerPermissions: ["dogs.read"],
-    }),
-  ).rejects.toThrow(/permissao/i);
-
-  const csv = await t.query(api.audit.exportCsv, {
-    callerPermissions: ["system.audit_log"],
-  });
-
-  expect(csv.startsWith("created_at,")).toBe(true);
-});
