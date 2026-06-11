@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as adoptions from "../adoptions.js";
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as bairros from "../bairros.js";
@@ -18,6 +19,7 @@ import type * as domainValidators from "../domainValidators.js";
 import type * as emails from "../emails.js";
 import type * as errors from "../errors.js";
 import type * as http from "../http.js";
+import type * as lib_adoptions from "../lib/adoptions.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_dogs from "../lib/dogs.js";
 import type * as lib_occurrences from "../lib/occurrences.js";
@@ -43,6 +45,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  adoptions: typeof adoptions;
   audit: typeof audit;
   auth: typeof auth;
   bairros: typeof bairros;
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   emails: typeof emails;
   errors: typeof errors;
   http: typeof http;
+  "lib/adoptions": typeof lib_adoptions;
   "lib/auth": typeof lib_auth;
   "lib/dogs": typeof lib_dogs;
   "lib/occurrences": typeof lib_occurrences;

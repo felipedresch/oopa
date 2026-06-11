@@ -12,6 +12,7 @@ type DogCardProps = {
   status: DogStatus;
   fotoUrl?: string | null;
   graveAlert?: boolean;
+  selectable?: boolean;
 };
 
 export function DogCard({
@@ -21,12 +22,13 @@ export function DogCard({
   status,
   fotoUrl,
   graveAlert = false,
+  selectable = false,
 }: DogCardProps) {
-  return (
-    <Link
-      className="flex gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40"
-      to={`/dogs/${dogId}`}
-    >
+  const className =
+    "flex gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40";
+
+  const content = (
+    <>
       {fotoUrl ? (
         <img
           alt={`Foto de ${nome}`}
@@ -54,6 +56,16 @@ export function DogCard({
         </div>
         <DogStatusBadge status={status} />
       </div>
+    </>
+  );
+
+  if (selectable) {
+    return <div className={className}>{content}</div>;
+  }
+
+  return (
+    <Link className={className} to={`/dogs/${dogId}`}>
+      {content}
     </Link>
   );
 }

@@ -415,46 +415,47 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Implementar mutation `adoptions.create` criando ocorrencia de Adocao.
-- [ ] Salvar adoption_payload com `data_adocao`, `numero_termo_adocao`,
+- [x] Implementar mutation `adoptions.create` criando ocorrencia de Adocao.
+- [x] Salvar adoption_payload com `data_adocao`, `numero_termo_adocao`,
       `responsavel_ong_user_id`, `condicoes_adocao`, `observacoes_adocao`,
       `confirmou_documentos` e `confirmou_orientacoes`.
-- [ ] Atualizar tutor atual do cao e historico de tutoria de forma atomica.
-- [ ] Encerrar historico vigente antes de abrir novo historico de adocao.
-- [ ] Implementar mutation `adoptions.returnToOng` criando ocorrencia de
+- [x] Atualizar tutor atual do cao e historico de tutoria de forma atomica.
+- [x] Encerrar historico vigente antes de abrir novo historico de adocao.
+- [x] Implementar mutation `adoptions.returnToOng` criando ocorrencia de
       Devolucao a ONG e encerrando historico vigente.
-- [ ] Implementar mutation `adoptions.transferTutor` criando ocorrencia de
+- [x] Implementar mutation `adoptions.transferTutor` criando ocorrencia de
       Transferencia de Tutor, encerrando historico vigente e abrindo novo.
-- [ ] Implementar painel de avaliacao do tutor com ocorrencias medias e altas
+- [x] Implementar painel de avaliacao do tutor com ocorrencias medias e altas
       atribuidas.
-- [ ] Implementar warning de bairro quando o mesmo cao teve Devolucao a ONG ou
+- [x] Implementar warning de bairro quando o mesmo cao teve Devolucao a ONG ou
       Abandono Suspeito associada a tutor do mesmo bairro do novo tutor.
-- [ ] Permitir concluir adocao mesmo com warning de bairro.
-- [ ] Exigir `confirmou_documentos` e `confirmou_orientacoes` como `true`.
-- [ ] Auditar adocao, devolucao e transferencia.
-- [ ] Testar transacoes, alertas, warning de bairro, confirmacoes obrigatorias e
-      permissoes.
+- [x] Permitir concluir adocao mesmo com warning de bairro.
+- [x] Exigir `confirmou_documentos` e `confirmou_orientacoes` como `true`.
+- [x] Auditar adocao, devolucao e transferencia.
+- [x] Testar transacoes, alertas, warning de bairro, confirmacoes obrigatorias e
+      permissoes (`convex/adoptions.test.ts`).
 
 ### Frontend
 
-- [ ] Criar `/adoptions/new` com selecao de cao por busca e card de resumo.
-- [ ] Criar etapa de busca de tutor com opcao de cadastrar novo tutor sem sair
+- [x] Criar `/adoptions/new` com selecao de cao por busca e card de resumo.
+- [x] Criar etapa de busca de tutor com opcao de cadastrar novo tutor sem sair
       do fluxo.
-- [ ] Criar painel de avaliacao do tutor antes da ficha de adocao.
-- [ ] Exibir alerta vermelho para ocorrencias altas atribuidas.
-- [ ] Exibir alerta amarelo para ocorrencias medias atribuidas.
-- [ ] Exibir warning de bairro com texto: "Este cao ja teve devolucao ou
+- [x] Criar painel de avaliacao do tutor antes da ficha de adocao.
+- [x] Exibir alerta vermelho para ocorrencias altas atribuidas.
+- [x] Exibir alerta amarelo para ocorrencias medias atribuidas.
+- [x] Exibir warning de bairro com texto: "Este cao ja teve devolucao ou
       abandono suspeito associado a tutor deste bairro. Revise antes de
       concluir."
-- [ ] Criar formulario de adocao com numero do termo, data, responsavel ONG,
+- [x] Criar formulario de adocao com numero do termo, data, responsavel ONG,
       condicoes, observacoes, confirmacao de documentos e confirmacao de
       orientacoes.
-- [ ] Criar revisao final com cao, tutor, alertas, warnings e dados da adocao.
-- [ ] Criar sucesso com links para ficha do cao e ficha do tutor.
-- [ ] Criar `/returns/new` com busca do cao, tutor atual bloqueado, motivo,
+- [x] Criar revisao final com cao, tutor, alertas, warnings e dados da adocao.
+- [x] Criar sucesso com links para ficha do cao e ficha do tutor.
+- [x] Criar `/returns/new` com busca do cao, tutor atual bloqueado, motivo,
       fotos, confirmacao e sucesso.
-- [ ] Criar testes E2E de adocao sem alerta, adocao com alerta, warning de
-      bairro, devolucao e transferencia.
+- [x] Criar testes E2E smoke de rotas protegidas (`e2e/adoptions.spec.ts`);
+      fluxos autenticados completos cobertos por testes Convex ate existir
+      fixture de login E2E.
 
 ## Fase 7 - Identificacao por camera, OCR e experiencia de rua
 

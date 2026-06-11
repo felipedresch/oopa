@@ -26,6 +26,8 @@ import { OccurrenceDetailPage } from "@/app/pages/OccurrenceDetailPage";
 import { OccurrenceFormPage } from "@/app/pages/OccurrenceFormPage";
 import { OccurrenceRectifyPage } from "@/app/pages/OccurrenceRectifyPage";
 import { OccurrenceTypesSettingsPage } from "@/app/pages/OccurrenceTypesSettingsPage";
+import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
+import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -56,8 +58,8 @@ export const appRoutes: RouteObject[] = [
       { path: "tutors/new", element: <TutorFormPage /> },
       { path: "tutors/:tutorId", element: <TutorDetailPage /> },
       { path: "tutors/:tutorId/edit", element: <TutorFormPage /> },
-      { path: "adoptions/new", element: <PlaceholderPage title="Nova adocao" /> },
-      { path: "returns/new", element: <PlaceholderPage title="Nova devolucao" /> },
+      { path: "adoptions/new", element: <AdoptionNewPage /> },
+      { path: "returns/new", element: <ReturnNewPage /> },
       { path: "team", element: <TeamPage /> },
       { path: "team/invite", element: <TeamInvitePage /> },
       { path: "team/:userId", element: <TeamUserPage /> },
