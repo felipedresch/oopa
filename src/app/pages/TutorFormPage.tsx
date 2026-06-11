@@ -11,6 +11,7 @@ import { PermissionDenied } from "@/components/PermissionDenied";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { maskCep, maskCpf, maskPhone } from "@/lib/masks";
@@ -104,6 +105,9 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
   const [observacoes, setObservacoes] = useState(sensitive?.observacoes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useDirtyFormGuard(isDirty);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -190,7 +194,11 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
         title={isEdit ? "Editar tutor" : "Novo tutor"}
       />
 
-      <form className="flex max-w-2xl flex-col gap-4" onSubmit={handleSubmit}>
+      <form
+        className="flex max-w-2xl flex-col gap-4"
+        onChange={() => setIsDirty(true)}
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-2">
           <Label htmlFor="nome">Nome completo</Label>
           <Input

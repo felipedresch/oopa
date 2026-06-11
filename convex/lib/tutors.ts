@@ -40,6 +40,25 @@ export function canReadSensitiveTutorData(permissions: readonly string[]): boole
   return hasPermission(permissions, "tutors.read_sensitive");
 }
 
+export function filterTutorSnapshotForViewer(
+  snapshot: Doc<"occurrences">["tutor_snapshot"],
+  permissions: readonly string[],
+): Doc<"occurrences">["tutor_snapshot"] {
+  if (!snapshot) {
+    return undefined;
+  }
+
+  if (canReadSensitiveTutorData(permissions)) {
+    return snapshot;
+  }
+
+  return {
+    nome_completo: snapshot.nome_completo,
+    bairro_id: snapshot.bairro_id,
+    bairro_nome: snapshot.bairro_nome,
+  };
+}
+
 export async function getAttributableOccurrences(
   ctx: QueryCtx,
   tutorId: Id<"tutors">,

@@ -20,6 +20,7 @@ import { PermissionDenied } from "@/components/PermissionDenied";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { SEVERITY_LABELS } from "@/lib/domain-colors";
 import { validateRequired } from "@/lib/validations";
@@ -58,6 +59,9 @@ export function OccurrenceFormPage() {
   const [newTutorId, setNewTutorId] = useState<Id<"tutors"> | "">("");
   const [tutorSearch, setTutorSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useDirtyFormGuard(isDirty);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -168,7 +172,11 @@ export function OccurrenceFormPage() {
         title="Nova ocorrencia"
       />
 
-      <form className="flex max-w-2xl flex-col gap-4" onSubmit={handleSubmit}>
+      <form
+        className="flex max-w-2xl flex-col gap-4"
+        onChange={() => setIsDirty(true)}
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-2">
           <Label htmlFor="occ-type">Tipo</Label>
           <select

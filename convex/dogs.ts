@@ -15,6 +15,7 @@ import {
   filterDogForViewer,
 } from "./lib/dogs";
 import { getCurrentUser, requirePermission } from "./lib/auth";
+import { normalizePaginationOpts } from "./lib/pagination";
 import { validateImageStorage } from "./lib/storage";
 import { hasPermission } from "./permissions";
 import { mutation, query } from "./_generated/server";
@@ -295,7 +296,9 @@ export const list = query({
       ? ctx.db.query("dogs").withIndex("by_status", (q) => q.eq("status_atual", args.status!))
       : ctx.db.query("dogs");
 
-    const result = await baseQuery.order("desc").paginate(args.paginationOpts);
+    const result = await baseQuery
+      .order("desc")
+      .paginate(normalizePaginationOpts(args.paginationOpts));
 
     const page = (
       await Promise.all(

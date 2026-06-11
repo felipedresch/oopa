@@ -3,14 +3,10 @@ import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
 
 import { api } from "./_generated/api";
-import { asUser, seedAdmin, seedUser, storeTestImage } from "./testHelpers";
+import { asUser, ensureSeeds, seedAdmin, seedUser, storeTestImage } from "./testHelpers";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
-
-async function ensureSeeds(t: ReturnType<typeof convexTest>) {
-  await t.mutation(api.seeds.seedAll, {});
-}
 
 test("reportDogNotFound notifica equipe com dogs.create e dogs.read", async () => {
   const t = convexTest(schema, modules);

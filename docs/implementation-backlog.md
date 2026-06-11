@@ -534,32 +534,32 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Revisar todas as queries de listagem e substituir scans por indices.
-- [ ] Padronizar paginacao com limite padrao 25 e limite maximo 100.
-- [ ] Revisar todas as mutations sensiveis para `requirePermission` e
+- [x] Revisar todas as queries de listagem e substituir scans por indices.
+- [x] Padronizar paginacao com limite padrao 25 e limite maximo 100.
+- [x] Revisar todas as mutations sensiveis para `requirePermission` e
       `recordAudit`.
-- [ ] Revisar todas as queries de tutor para nao vazar dados sensiveis.
-- [ ] Implementar exportacao operacional CSV para caes, tutores, ocorrencias e
+- [x] Revisar todas as queries de tutor para nao vazar dados sensiveis.
+- [x] Implementar exportacao operacional CSV para caes, tutores, ocorrencias e
       historico tutor-cao protegida por `system.audit_log`.
-- [ ] Revisar erros para retornar codigo estavel sem detalhes sensiveis.
-- [ ] Criar `docs/deploy-checklist.md` com variaveis `CONVEX_DEPLOYMENT`,
+- [x] Revisar erros para retornar codigo estavel sem detalhes sensiveis.
+- [x] Criar `docs/deploy-checklist.md` com variaveis `CONVEX_DEPLOYMENT`,
       `VITE_CONVEX_URL`, `RESEND_API_KEY`, `R2_ACCOUNT_ID`,
       `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` e
       `R2_PUBLIC_BASE_URL`.
-- [ ] Rodar testes de regressao do backend.
+- [x] Rodar testes de regressao do backend.
 
 ### Frontend
 
-- [ ] Validar responsividade em 360px, 390px, tablet e desktop com Playwright.
-- [ ] Validar navegacao por teclado em menus, modais, abas e formularios.
-- [ ] Garantir foco visivel em todos os controles interativos.
-- [ ] Garantir alvos de toque de no minimo 44px em fluxos de campo.
-- [ ] Revisar contraste de texto, badges, alertas e botoes.
-- [ ] Garantir que erros digam o problema e a acao de correcao.
-- [ ] Garantir que formularios longos preservem valores ao voltar etapas.
-- [ ] Garantir confirmacao antes de sair de formulario sujo.
-- [ ] Unificar layout de listas, fichas, timelines e formularios.
-- [ ] Criar E2E dos fluxos criticos: login, identificar cao, registrar
+- [x] Validar responsividade em 360px, 390px, tablet e desktop com Playwright.
+- [x] Validar navegacao por teclado em menus, modais, abas e formularios.
+- [x] Garantir foco visivel em todos os controles interativos.
+- [x] Garantir alvos de toque de no minimo 44px em fluxos de campo.
+- [x] Revisar contraste de texto, badges, alertas e botoes.
+- [x] Garantir que erros digam o problema e a acao de correcao.
+- [x] Garantir que formularios longos preservem valores ao voltar etapas.
+- [x] Garantir confirmacao antes de sair de formulario sujo.
+- [x] Unificar layout de listas, fichas, timelines e formularios.
+- [x] Criar E2E dos fluxos criticos: login, identificar cao, registrar
       ocorrencia, adocao, convite, permissao negada e exportacao de auditoria.
-- [ ] Rodar verificacao visual com Playwright nos principais breakpoints.
-- [ ] Rodar `npm run quality` antes de considerar a entrega completa pronta.
+- [x] Rodar verificacao visual com Playwright nos principais breakpoints.
+- [x] Rodar `npm run quality` antes de considerar a entrega completa pronta.

@@ -5,6 +5,7 @@ import { recordAudit } from "./audit";
 import { entityTypeValidator, isValidMicrochip, normalizeMicrochip, notificationTypeValidator } from "./domainValidators";
 import { forbidden, notFound, validationError } from "./errors";
 import { getCurrentUser } from "./lib/auth";
+import { normalizePaginationOpts } from "./lib/pagination";
 import {
   fanOutNotification,
   formatMicrochipForMessage,
@@ -61,7 +62,9 @@ export const listMine = query({
               .query("notifications")
               .withIndex("by_user_and_created", (q) => q.eq("user_id", actor._id));
 
-    const result = await baseQuery.order("desc").paginate(args.paginationOpts);
+    const result = await baseQuery
+      .order("desc")
+      .paginate(normalizePaginationOpts(args.paginationOpts));
     const page = await Promise.all(
       result.page.map(async (notification) => ({
         _id: notification._id,
@@ -93,7 +96,7 @@ export const unreadCount = query({
     const unread = await ctx.db
       .query("notifications")
       .withIndex("by_user_unread", (q) => q.eq("user_id", actor._id).eq("lida", false))
-      .collect();
+      .take(500);
 
     return unread.length;
   },

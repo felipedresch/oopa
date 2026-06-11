@@ -2,6 +2,7 @@ import { v } from "convex/values";
 
 import type { MutationCtx } from "./_generated/server";
 import { internalMutation, mutation, query } from "./_generated/server";
+import { getCurrentUser, requirePermission } from "./lib/auth";
 import {
   moduleMapToPermissions,
   permissionsToModuleMap,
@@ -176,6 +177,9 @@ export const seedAll = mutation({
     permissionTemplates: v.number(),
   }),
   handler: async (ctx) => {
+    const actor = await getCurrentUser(ctx);
+    requirePermission(actor, "templates.manage");
+
     const occurrenceTypes = await seedOccurrenceTypes(ctx);
     const bairros = await seedBairros(ctx);
     const permissionTemplates = await seedPermissionTemplates(ctx);

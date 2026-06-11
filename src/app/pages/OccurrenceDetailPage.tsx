@@ -6,12 +6,16 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
+import { SensitiveDataHidden } from "@/components/SensitiveDataHidden";
+import { usePermissions } from "@/hooks/usePermissions";
 import { PlaceholderPage } from "@/app/pages/PlaceholderPage";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { Button } from "@/components/ui/button";
 import { formatCep, formatCpf, formatDate, formatPhone } from "@/lib/formatters";
 
 export function OccurrenceDetailPage() {
+  const { can } = usePermissions();
+  const canReadSensitive = can("tutors.read_sensitive");
   const { dogId, occurrenceId } = useParams();
 
   const occurrence = useQuery(
@@ -108,19 +112,19 @@ export function OccurrenceDetailPage() {
               <dt className="text-muted-foreground">Bairro</dt>
               <dd>{occurrence.tutor_snapshot.bairro_nome ?? "Nao informado"}</dd>
             </div>
-            {occurrence.tutor_snapshot.cpf ? (
+            {canReadSensitive && occurrence.tutor_snapshot.cpf ? (
               <div>
                 <dt className="text-muted-foreground">CPF</dt>
                 <dd>{formatCpf(occurrence.tutor_snapshot.cpf)}</dd>
               </div>
             ) : null}
-            {occurrence.tutor_snapshot.telefone ? (
+            {canReadSensitive && occurrence.tutor_snapshot.telefone ? (
               <div>
                 <dt className="text-muted-foreground">Telefone</dt>
                 <dd>{formatPhone(occurrence.tutor_snapshot.telefone)}</dd>
               </div>
             ) : null}
-            {occurrence.tutor_snapshot.endereco_logradouro ? (
+            {canReadSensitive && occurrence.tutor_snapshot.endereco_logradouro ? (
               <div className="sm:col-span-2">
                 <dt className="text-muted-foreground">Endereco</dt>
                 <dd>
@@ -134,13 +138,14 @@ export function OccurrenceDetailPage() {
                 </dd>
               </div>
             ) : null}
-            {occurrence.tutor_snapshot.endereco_cep ? (
+            {canReadSensitive && occurrence.tutor_snapshot.endereco_cep ? (
               <div>
                 <dt className="text-muted-foreground">CEP</dt>
                 <dd>{formatCep(occurrence.tutor_snapshot.endereco_cep)}</dd>
               </div>
             ) : null}
           </dl>
+          {!canReadSensitive ? <SensitiveDataHidden /> : null}
         </div>
       ) : null}
 

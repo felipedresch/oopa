@@ -47,7 +47,7 @@ export function DogsListPage() {
           now,
         }
       : "skip",
-    { initialNumItems: 12 },
+    { initialNumItems: 25 },
   );
 
   if (!can("dogs.read")) {

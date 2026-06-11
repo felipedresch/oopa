@@ -1,9 +1,18 @@
 import type { convexTest } from "convex-test";
+
+import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { moduleMapToPermissions, SEED_PERMISSION_TEMPLATES } from "./permissions";
 
 export type ConvexTestClient = ReturnType<typeof convexTest>;
 export type AuthenticatedTestClient = ReturnType<ConvexTestClient["withIdentity"]>;
+
+export async function ensureSeeds(t: ConvexTestClient) {
+  const adminId = await seedAdmin(t);
+  await asUser(t, adminId, async (client) => {
+    await client.mutation(api.seeds.seedAll, {});
+  });
+}
 
 export async function seedAdmin(t: ConvexTestClient) {
   const now = Date.now();

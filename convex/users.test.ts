@@ -242,10 +242,14 @@ test("list exige permissao de equipe", async () => {
   });
 
   await expect(
-    asUser(t, readerId, async (client) => client.query(api.users.list, {})),
+    asUser(t, readerId, async (client) =>
+      client.query(api.users.list, { paginationOpts: { numItems: 25, cursor: null } }),
+    ),
   ).rejects.toThrow();
 
   const adminId = await seedAdmin(t);
-  const list = await asUser(t, adminId, async (client) => client.query(api.users.list, {}));
-  expect(list.length).toBeGreaterThan(0);
+  const list = await asUser(t, adminId, async (client) =>
+    client.query(api.users.list, { paginationOpts: { numItems: 25, cursor: null } }),
+  );
+  expect(list.page.length).toBeGreaterThan(0);
 });

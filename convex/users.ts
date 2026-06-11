@@ -4,6 +4,7 @@ import {
   modifyAccountCredentials,
   retrieveAccount,
 } from "@convex-dev/auth/server";
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 
 import { internal } from "./_generated/api";
@@ -26,6 +27,7 @@ import {
   requireAnyPermission,
   requirePermission,
 } from "./lib/auth";
+import { normalizePaginationOpts } from "./lib/pagination";
 import { generateRawToken, hashToken, INVITE_TTL_MS, RESET_TTL_MS } from "./lib/tokens";
 import {
   permissionValidator,
@@ -134,23 +136,32 @@ export const me = query({
 
 export const list = query({
   args: {
+    paginationOpts: paginationOptsValidator,
     search: v.optional(v.string()),
     ativo: v.optional(v.boolean()),
     organizacao: v.optional(v.string()),
   },
-  returns: v.array(userSummaryValidator),
+  returns: v.object({
+    page: v.array(userSummaryValidator),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
     requireAnyPermission(actor, ["users.invite", "users.manage_permissions"]);
 
-    const users = await ctx.db.query("users").collect();
     const search = args.search?.trim().toLowerCase();
+    const baseQuery =
+      args.ativo === undefined
+        ? ctx.db.query("users")
+        : ctx.db.query("users").withIndex("by_active", (q) => q.eq("ativo", args.ativo!));
 
-    return users
+    const result = await baseQuery
+      .order("desc")
+      .paginate(normalizePaginationOpts(args.paginationOpts));
+
+    const page = result.page
       .filter((user) => {
-        if (args.ativo !== undefined && user.ativo !== args.ativo) {
-          return false;
-        }
         if (
           args.organizacao &&
           user.organizacao.toLowerCase() !== args.organizacao.toLowerCase()
@@ -167,6 +178,26 @@ export const list = query({
       })
       .map(toUserSummary)
       .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+
+    return {
+      page,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
+  },
+});
+
+export const listOrganizations = query({
+  args: {},
+  returns: v.array(v.string()),
+  handler: async (ctx) => {
+    const actor = await getCurrentUser(ctx);
+    requireAnyPermission(actor, ["users.invite", "users.manage_permissions"]);
+
+    const users = await ctx.db.query("users").take(500);
+    return [...new Set(users.map((user) => user.organizacao))].sort((a, b) =>
+      a.localeCompare(b, "pt-BR"),
+    );
   },
 });
 

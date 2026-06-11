@@ -6,6 +6,7 @@ import { recordAudit } from "./audit";
 import { dogStatusValidator, severityValidator } from "./domainValidators";
 import { forbidden, notFound } from "./errors";
 import { getCurrentUser, requirePermission } from "./lib/auth";
+import { normalizePaginationOpts } from "./lib/pagination";
 import {
   assertActiveBairro,
   assertUniqueCpf,
@@ -369,7 +370,9 @@ export const list = query({
       ? ctx.db.query("tutors").withIndex("by_bairro", (q) => q.eq("bairro_id", bairroFilter))
       : ctx.db.query("tutors");
 
-    const result = await baseQuery.order("desc").paginate(args.paginationOpts);
+    const result = await baseQuery
+      .order("desc")
+      .paginate(normalizePaginationOpts(args.paginationOpts));
 
     const page = (
       await Promise.all(
@@ -438,7 +441,8 @@ export const listHistoryByDog = query({
     const entries = await ctx.db
       .query("tutor_dog_history")
       .withIndex("by_dog", (q) => q.eq("dog_id", args.dogId))
-      .collect();
+      .order("desc")
+      .take(100);
 
     const history = await Promise.all(
       entries.map(async (entry) => {

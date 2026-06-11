@@ -12,6 +12,7 @@ import { StepperForm } from "@/components/StepperForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { formatMicrochip } from "@/lib/formatters";
@@ -115,6 +116,10 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
   const [observacoes, setObservacoes] = useState(initial?.observacoes ?? "");
   const [fotoStorageId, setFotoStorageId] = useState(initial?.foto_perfil_storage_id);
   const [fotoPreview, setFotoPreview] = useState<string | null>(initial?.foto_perfil_url ?? null);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useDirtyFormGuard(isDirty);
+  const markDirty = () => setIsDirty(true);
 
   const canContinue = (() => {
     if (step === 0) {
@@ -190,6 +195,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
         title={isEdit ? "Editar cao" : "Novo cao"}
       />
 
+      <div onChange={markDirty}>
       <StepperForm
         canContinue={canContinue}
         continueLabel={step === STEPS.length - 1 ? (loading ? "Salvando..." : "Salvar") : undefined}
@@ -344,6 +350,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
           </div>
         ) : null}
       </StepperForm>
+      </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 

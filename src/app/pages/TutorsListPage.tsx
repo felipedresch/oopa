@@ -30,7 +30,7 @@ export function TutorsListPage() {
           bairro_id: bairroId || undefined,
         }
       : "skip",
-    { initialNumItems: 20 },
+    { initialNumItems: 25 },
   );
 
   if (!can("tutors.read")) {

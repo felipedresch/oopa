@@ -34,6 +34,7 @@ export function AuditPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [exportingOperational, setExportingOperational] = useState<string | null>(null);
 
   const actors = useQuery(api.audit.listActors, can("system.audit_log") ? {} : "skip");
 
@@ -58,6 +59,16 @@ export function AuditPage() {
     return <PermissionDenied />;
   }
 
+  const downloadCsv = (csv: string, filename: string) => {
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleExport = async () => {
     setExporting(true);
     try {
@@ -65,15 +76,23 @@ export function AuditPage() {
         ...filters,
         limit: 2000,
       });
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `auditoria-${new Date().toISOString().slice(0, 10)}.csv`;
-      anchor.click();
-      URL.revokeObjectURL(url);
+      downloadCsv(csv, `auditoria-${new Date().toISOString().slice(0, 10)}.csv`);
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleOperationalExport = async (
+    key: string,
+    queryFn: () => Promise<string>,
+    filename: string,
+  ) => {
+    setExportingOperational(key);
+    try {
+      const csv = await queryFn();
+      downloadCsv(csv, filename);
+    } finally {
+      setExportingOperational(null);
     }
   };
 
@@ -162,6 +181,59 @@ export function AuditPage() {
           </div>
         </div>
       </FilterBar>
+
+      <div className="rounded-xl border bg-card p-4">
+        <h2 className="mb-3 font-medium">Exportacoes operacionais</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Baixe snapshots de caes, tutores, ocorrencias e historico tutor-cao para analise
+          externa.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            {
+              key: "dogs",
+              label: "Caes",
+              query: () => convex.query(api.exports.exportDogsCsv, { limit: 2000 }),
+              file: "caes",
+            },
+            {
+              key: "tutors",
+              label: "Tutores",
+              query: () => convex.query(api.exports.exportTutorsCsv, { limit: 2000 }),
+              file: "tutores",
+            },
+            {
+              key: "occurrences",
+              label: "Ocorrencias",
+              query: () => convex.query(api.exports.exportOccurrencesCsv, { limit: 2000 }),
+              file: "ocorrencias",
+            },
+            {
+              key: "history",
+              label: "Historico tutor-cao",
+              query: () => convex.query(api.exports.exportTutorDogHistoryCsv, { limit: 2000 }),
+              file: "historico-tutor-cao",
+            },
+          ].map((item) => (
+            <Button
+              className="min-h-11"
+              disabled={exportingOperational !== null}
+              key={item.key}
+              onClick={() =>
+                void handleOperationalExport(
+                  item.key,
+                  item.query,
+                  `${item.file}-${new Date().toISOString().slice(0, 10)}.csv`,
+                )
+              }
+              type="button"
+              variant="outline"
+            >
+              {exportingOperational === item.key ? "Exportando..." : item.label}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {status === "LoadingFirstPage" ? <LoadingSkeleton rows={5} /> : null}
 

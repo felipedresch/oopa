@@ -1,5 +1,5 @@
-import { useQuery } from "convex/react";
-import { useMemo, useState } from "react";
+import { usePaginatedQuery } from "convex/react";
+import { useState } from "react";
 
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { FilterBar } from "@/components/FilterBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { OccurrenceCard } from "@/components/OccurrenceCard";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { Severity } from "@/lib/domain-colors";
 import { SEVERITY_LABELS } from "@/lib/domain-colors";
@@ -39,22 +40,19 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
   const from = fromDate ? Date.parse(`${fromDate}T00:00:00.000Z`) : undefined;
   const to = toDate ? Date.parse(`${toDate}T23:59:59.999Z`) : undefined;
 
-  const occurrences = useQuery(api.occurrences.listByDog, {
-    dogId,
-    gravidade: gravidade || undefined,
-    categoria: categoria || undefined,
-    from,
-    to,
-  });
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.occurrences.listByDog,
+    {
+      dogId,
+      gravidade: gravidade || undefined,
+      categoria: categoria || undefined,
+      from,
+      to,
+    },
+    { initialNumItems: 25 },
+  );
 
-  const sorted = useMemo(() => {
-    if (!occurrences) {
-      return [];
-    }
-    return [...occurrences].sort((left, right) => right.data_ocorrencia - left.data_ocorrencia);
-  }, [occurrences]);
-
-  if (occurrences === undefined) {
+  if (results === undefined) {
     return <LoadingSkeleton rows={4} />;
   }
 
@@ -64,7 +62,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-severity">Gravidade</Label>
           <select
-            className="min-h-11 rounded-md border bg-background px-3 text-sm"
+            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             id="occ-severity"
             onChange={(event) => setGravidade(event.target.value as Severity | "")}
             value={gravidade}
@@ -80,7 +78,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-category">Categoria</Label>
           <select
-            className="min-h-11 rounded-md border bg-background px-3 text-sm"
+            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             id="occ-category"
             onChange={(event) =>
               setCategoria(event.target.value as (typeof CATEGORY_OPTIONS)[number]["value"])
@@ -98,7 +96,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-from">De</Label>
           <input
-            className="min-h-11 rounded-md border bg-background px-3 text-sm"
+            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             id="occ-from"
             onChange={(event) => setFromDate(event.target.value)}
             type="date"
@@ -109,7 +107,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-to">Ate</Label>
           <input
-            className="min-h-11 rounded-md border bg-background px-3 text-sm"
+            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             id="occ-to"
             onChange={(event) => setToDate(event.target.value)}
             type="date"
@@ -118,14 +116,14 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         </div>
       </FilterBar>
 
-      {sorted.length === 0 ? (
+      {results.length === 0 ? (
         <EmptyState
           description="Nenhuma ocorrencia visivel com os filtros atuais."
           title="Sem ocorrencias"
         />
       ) : (
         <div className="flex flex-col gap-3">
-          {sorted.map((occurrence) => (
+          {results.map((occurrence) => (
             <OccurrenceCard
               atribuivel={occurrence.atribuivel_ao_tutor}
               bairroNome={occurrence.bairro_nome}
@@ -138,6 +136,12 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
               typeNome={occurrence.type_nome}
             />
           ))}
+          {status === "CanLoadMore" ? (
+            <Button className="min-h-11 self-start" onClick={() => loadMore(25)} variant="outline">
+              Carregar mais
+            </Button>
+          ) : null}
+          {status === "LoadingMore" ? <LoadingSkeleton rows={2} /> : null}
         </div>
       )}
     </div>

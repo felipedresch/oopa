@@ -4,14 +4,10 @@ import { expect, test } from "vitest";
 
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { asUser, seedAdmin, seedBairro, seedUser, storeTestImage } from "./testHelpers";
+import { asUser, ensureSeeds, seedAdmin, seedBairro, seedUser, storeTestImage } from "./testHelpers";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
-
-async function ensureSeeds(t: ReturnType<typeof convexTest>) {
-  await t.mutation(api.seeds.seedAll, {});
-}
 
 async function seedDog(t: ReturnType<typeof convexTest>, adminId: Id<"users">) {
   const storageId = await storeTestImage(t);
@@ -203,4 +199,43 @@ test("adocao atualiza historico vigente e tutor atual", async () => {
   expect(dog?.status_atual).toBe("adotado");
   expect(history.filter((entry) => entry.fim === undefined)).toHaveLength(1);
   expect(history.find((entry) => entry.fim === undefined)?.tutor_id).toBe(newTutorId);
+});
+
+test("get oculta snapshot sensivel do tutor sem tutors.read_sensitive", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const readerId = await seedUser(t, {
+    nome: "Leitor",
+    email: "leitor-occ@ong.local",
+    permissions: ["dogs.read", "occurrences.read", "occurrences.create_rotina"],
+  });
+  const dogId = await seedDog(t, adminId);
+  const tutorId = await seedTutor(t, adminId);
+  const typeId = await getTypeId(t, adminId, "Consulta/Visualizacao");
+
+  await t.run(async (ctx) => {
+    await ctx.db.patch(dogId, { tutor_atual_id: tutorId });
+  });
+
+  const occurrenceId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.occurrences.create, {
+      dogId,
+      occurrenceTypeId: typeId,
+      descricao: "Consulta com tutor",
+      data_ocorrencia: Date.now(),
+      photo_storage_ids: [],
+    }),
+  );
+
+  const asReader = await asUser(t, readerId, async (client) =>
+    client.query(api.occurrences.get, { occurrenceId }),
+  );
+  expect(asReader?.tutor_snapshot?.nome_completo).toBe("Paula Tutora");
+  expect(asReader?.tutor_snapshot?.cpf).toBeUndefined();
+
+  const asAdmin = await asUser(t, adminId, async (client) =>
+    client.query(api.occurrences.get, { occurrenceId }),
+  );
+  expect(asAdmin?.tutor_snapshot?.cpf).toBeDefined();
 });

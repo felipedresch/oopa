@@ -25,7 +25,7 @@ export function NotificationsPage() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.notifications.listMine,
     { readFilter },
-    { initialNumItems: 20 },
+    { initialNumItems: 25 },
   );
 
   const grouped = useMemo(() => groupByDate(results ?? [], now), [now, results]);

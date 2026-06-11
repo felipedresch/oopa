@@ -59,7 +59,7 @@ export const listOngStaff = query({
       throw forbidden();
     }
 
-    const users = await ctx.db.query("users").collect();
+    const users = await ctx.db.query("users").withIndex("by_active", (q) => q.eq("ativo", true)).take(200);
     return users
       .filter((user) => user.ativo && user.organizacao === actor.organizacao)
       .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR"))

@@ -1,5 +1,5 @@
-import { useQuery } from "convex/react";
-import { useMemo, useState } from "react";
+import { usePaginatedQuery, useQuery } from "convex/react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
@@ -21,7 +21,13 @@ export function TeamPage() {
   const [organizacao, setOrganizacao] = useState("");
 
   const canView = canAny(["users.invite", "users.manage_permissions"]);
-  const users = useQuery(
+
+  const organizations = useQuery(
+    api.users.listOrganizations,
+    canView ? {} : "skip",
+  );
+
+  const { results, status, loadMore } = usePaginatedQuery(
     api.users.list,
     canView
       ? {
@@ -30,12 +36,8 @@ export function TeamPage() {
           organizacao: organizacao || undefined,
         }
       : "skip",
+    { initialNumItems: 25 },
   );
-
-  const organizations = useMemo(() => {
-    if (!users) return [];
-    return [...new Set(users.map((user) => user.organizacao))].sort();
-  }, [users]);
 
   if (!canView) {
     return <PermissionDenied />;
@@ -66,7 +68,7 @@ export function TeamPage() {
         <div className="flex min-w-40 flex-col gap-2">
           <Label htmlFor="ativo">Status</Label>
           <select
-            className="h-11 rounded-lg border border-input bg-background px-3 text-sm"
+            className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             id="ativo"
             onChange={(event) => setAtivo(event.target.value as typeof ativo)}
             value={ativo}
@@ -79,13 +81,13 @@ export function TeamPage() {
         <div className="flex min-w-48 flex-col gap-2">
           <Label htmlFor="organizacao">Organizacao</Label>
           <select
-            className="h-11 rounded-lg border border-input bg-background px-3 text-sm"
+            className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             id="organizacao"
             onChange={(event) => setOrganizacao(event.target.value)}
             value={organizacao}
           >
             <option value="">Todas</option>
-            {organizations.map((org) => (
+            {(organizations ?? []).map((org) => (
               <option key={org} value={org}>
                 {org}
               </option>
@@ -94,18 +96,18 @@ export function TeamPage() {
         </div>
       </FilterBar>
 
-      {users === undefined ? (
+      {results === undefined ? (
         <LoadingSkeleton rows={4} />
-      ) : users.length === 0 ? (
+      ) : results.length === 0 ? (
         <EmptyState
           description="Ajuste os filtros ou convide o primeiro membro da equipe."
           title="Nenhum usuario encontrado"
         />
       ) : (
         <div className="grid gap-3">
-          {users.map((user) => (
+          {results.map((user) => (
             <Link
-              className="rounded-xl border bg-card p-4 transition-colors hover:bg-muted/40"
+              className="rounded-xl border bg-card p-4 transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               key={user._id}
               to={`/team/${user._id}`}
             >
@@ -121,6 +123,12 @@ export function TeamPage() {
               </div>
             </Link>
           ))}
+          {status === "CanLoadMore" ? (
+            <Button className="min-h-11 self-start" onClick={() => loadMore(25)} variant="outline">
+              Carregar mais
+            </Button>
+          ) : null}
+          {status === "LoadingMore" ? <LoadingSkeleton rows={2} /> : null}
         </div>
       )}
     </section>

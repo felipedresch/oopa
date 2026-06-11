@@ -5,14 +5,10 @@ import { expect, test } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { BAIRRO_WARNING_MESSAGE } from "./lib/adoptions";
-import { asUser, seedAdmin, seedBairro, seedUser, storeTestImage } from "./testHelpers";
+import { asUser, ensureSeeds, seedAdmin, seedBairro, seedUser, storeTestImage } from "./testHelpers";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
-
-async function ensureSeeds(t: ReturnType<typeof convexTest>) {
-  await t.mutation(api.seeds.seedAll, {});
-}
 
 async function seedDog(t: ReturnType<typeof convexTest>, adminId: Id<"users">) {
   const storageId = await storeTestImage(t);

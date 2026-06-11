@@ -6,6 +6,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { internalMutation, query } from "./_generated/server";
 import { entityTypeValidator } from "./domainValidators";
 import { getCurrentUser, requirePermission } from "./lib/auth";
+import { normalizePaginationOpts } from "./lib/pagination";
 
 type AuditEntityType =
   | "user"
@@ -162,7 +163,7 @@ export const list = query({
       .query("audit_logs")
       .withIndex("by_created_at")
       .order("desc")
-      .paginate(args.paginationOpts);
+      .paginate(normalizePaginationOpts(args.paginationOpts));
 
     const page = await filterAuditPage(ctx, result.page, args);
 

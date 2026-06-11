@@ -5,20 +5,26 @@ import { expect, test } from "vitest";
 import { api } from "./_generated/api";
 import schema from "./schema";
 import { moduleMapToPermissions, SEED_PERMISSION_TEMPLATES } from "./permissions";
+import { asUser, ensureSeeds, seedAdmin } from "./testHelpers";
 
 const modules = import.meta.glob("./**/*.ts");
 
 test("seeds occurrence types, bairros and permission templates", async () => {
   const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
 
-  const firstRun = await t.mutation(api.seeds.seedAll, {});
+  const firstRun = await asUser(t, adminId, async (client) =>
+    client.mutation(api.seeds.seedAll, {}),
+  );
   expect(firstRun).toEqual({
     occurrenceTypes: 14,
     bairros: 3,
     permissionTemplates: 5,
   });
 
-  const secondRun = await t.mutation(api.seeds.seedAll, {});
+  const secondRun = await asUser(t, adminId, async (client) =>
+    client.mutation(api.seeds.seedAll, {}),
+  );
   expect(secondRun).toEqual({
     occurrenceTypes: 0,
     bairros: 0,
@@ -34,9 +40,15 @@ test("seeds occurrence types, bairros and permission templates", async () => {
   });
 });
 
+test("seedAll exige templates.manage", async () => {
+  const t = convexTest(schema, modules);
+
+  await expect(t.mutation(api.seeds.seedAll, {})).rejects.toThrow();
+});
+
 test("permission templates round-trip through module maps", async () => {
   const t = convexTest(schema, modules);
-  await t.mutation(api.seeds.seedAll, {});
+  await ensureSeeds(t);
 
   const templateMaps = await t.query(api.seeds.getPermissionTemplateMaps, {});
   const admin = templateMaps.find((template) => template.nome === "Administrador ONG");
@@ -58,7 +70,7 @@ test("permission templates round-trip through module maps", async () => {
 
 test("schema indexes support lookups used by the domain", async () => {
   const t = convexTest(schema, modules);
-  await t.mutation(api.seeds.seedAll, {});
+  await ensureSeeds(t);
 
   const now = Date.now();
   const bairroId = await t.run(async (ctx) => {
@@ -76,9 +88,7 @@ test("schema indexes support lookups used by the domain", async () => {
       email: "seed-admin@ong.local",
       organizacao: "ONG OOPA",
       ativo: true,
-      permissions: moduleMapToPermissions(
-        SEED_PERMISSION_TEMPLATES[0].moduleMap,
-      ),
+      permissions: moduleMapToPermissions(SEED_PERMISSION_TEMPLATES[0].moduleMap),
       criado_em: now,
     });
 

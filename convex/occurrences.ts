@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
@@ -23,6 +24,8 @@ import {
   type OccurrenceCategory,
 } from "./lib/occurrences";
 import { notifyLegalOccurrence } from "./lib/notifications";
+import { normalizePaginationOpts } from "./lib/pagination";
+import { filterTutorSnapshotForViewer } from "./lib/tutors";
 import { applyHistoryForOccurrence } from "./lib/tutorDogHistory";
 import { validateImageStorage } from "./lib/storage";
 import { mutation, query } from "./_generated/server";
@@ -359,7 +362,10 @@ export const get = query({
       bairro_nome: bairro?.nome ?? null,
       local_descricao: loaded.local_descricao,
       tutor_id: loaded.tutor_id,
-      tutor_snapshot: loaded.tutor_snapshot,
+      tutor_snapshot: filterTutorSnapshotForViewer(
+        loaded.tutor_snapshot,
+        actor.permissions,
+      ),
       original_id: loaded.original_id,
       original_summary,
       registrado_por: loaded.registrado_por,
@@ -373,13 +379,18 @@ export const get = query({
 export const listByDog = query({
   args: {
     dogId: v.id("dogs"),
+    paginationOpts: paginationOptsValidator,
     gravidade: v.optional(severityValidator),
     categoria: v.optional(occurrenceCategoryValidator),
     bairro_id: v.optional(v.id("bairros")),
     from: v.optional(v.number()),
     to: v.optional(v.number()),
   },
-  returns: v.array(occurrenceSummaryValidator),
+  returns: v.object({
+    page: v.array(occurrenceSummaryValidator),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
 
@@ -388,15 +399,16 @@ export const listByDog = query({
       throw notFound("Cao");
     }
 
-    const occurrences = await ctx.db
+    const paginationOpts = normalizePaginationOpts(args.paginationOpts);
+    const result = await ctx.db
       .query("occurrences")
       .withIndex("by_dog", (q) => q.eq("dog_id", args.dogId))
       .order("desc")
-      .collect();
+      .paginate(paginationOpts);
 
     const summaries = (
       await Promise.all(
-        occurrences.map(async (occurrence) => {
+        result.page.map(async (occurrence) => {
           const type = await ctx.db.get("occurrence_types", occurrence.occurrence_type_id);
           if (!type) {
             return null;
@@ -444,7 +456,11 @@ export const listByDog = query({
       )
     ).filter((item): item is NonNullable<typeof item> => item !== null);
 
-    return summaries;
+    return {
+      page: summaries,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 
