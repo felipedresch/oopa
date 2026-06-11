@@ -1,12 +1,15 @@
 import { render, screen } from "@testing-library/react";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
-import App from "@/App";
+import { appRoutes } from "@/app/routes";
 
 describe("App", () => {
-  it("renderiza o roteamento da aplicacao", async () => {
-    render(<App />);
+  it("renderiza a tela de login nas rotas publicas", async () => {
+    const router = createMemoryRouter(appRoutes, { initialEntries: ["/login"] });
+    render(<RouterProvider router={router} />);
 
-    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
-    expect(screen.getByText("OOPA")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /entrar no oopa/i }),
+    ).toBeInTheDocument();
   });
 });

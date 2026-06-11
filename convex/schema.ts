@@ -1,3 +1,4 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -32,10 +33,21 @@ const timestampFields = {
   atualizado_por: v.optional(v.id("users")),
 };
 
+const { users: _authUsersTable, ...otherAuthTables } = authTables;
+void _authUsersTable;
+
 export default defineSchema({
+  ...otherAuthTables,
+
   users: defineTable({
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
     nome: v.string(),
-    email: v.string(),
     telefone: v.optional(v.string()),
     organizacao: v.string(),
     ativo: v.boolean(),
@@ -43,8 +55,29 @@ export default defineSchema({
     ultimo_acesso_em: v.optional(v.number()),
     ...timestampFields,
   })
-    .index("by_email", ["email"])
+    .index("email", ["email"])
     .index("by_active", ["ativo"]),
+
+  user_invites: defineTable({
+    user_id: v.id("users"),
+    email: v.string(),
+    token_hash: v.string(),
+    expires_at: v.number(),
+    used_at: v.optional(v.number()),
+    criado_em: v.number(),
+    criado_por: v.id("users"),
+  })
+    .index("by_token_hash", ["token_hash"])
+    .index("by_email", ["email"]),
+
+  password_reset_tokens: defineTable({
+    user_id: v.id("users"),
+    email: v.string(),
+    token_hash: v.string(),
+    expires_at: v.number(),
+    used_at: v.optional(v.number()),
+    criado_em: v.number(),
+  }).index("by_token_hash", ["token_hash"]),
 
   permission_templates: defineTable({
     nome: v.string(),

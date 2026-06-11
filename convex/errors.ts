@@ -49,3 +49,11 @@ export function unauthenticated(message = "Faca login para continuar.") {
 export function userInactive(message = "Sua conta esta inativa.") {
   return new DomainError(ERROR_CODES.USER_INACTIVE, message);
 }
+
+export function tokenExpired(message = "Este link expirou. Solicite um novo.") {
+  return new DomainError(ERROR_CODES.TOKEN_EXPIRED, message);
+}
+
+export function tokenUsed(message = "Este link ja foi utilizado.") {
+  return new DomainError(ERROR_CODES.TOKEN_USED, message);
+}

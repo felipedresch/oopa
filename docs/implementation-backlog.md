@@ -228,50 +228,53 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Implementar auth com email e senha usando `@convex-dev/auth` e hash
+- [x] Implementar auth com email e senha usando `@convex-dev/auth` e hash
       seguro provido pela biblioteca.
-- [ ] Implementar convite com token aleatorio, hash do token no banco, uso
+- [x] Implementar convite com token aleatorio, hash do token no banco, uso
       unico e expiracao de 7 dias.
-- [ ] Implementar aceite de convite criando senha, ativando usuario e gravando
+- [x] Implementar aceite de convite criando senha, ativando usuario e gravando
       `ultimo_acesso_em`.
-- [ ] Implementar reset de senha com token aleatorio, hash do token no banco,
+- [x] Implementar reset de senha com token aleatorio, hash do token no banco,
       uso unico e expiracao de 60 minutos.
-- [ ] Enviar email de convite e reset por Resend em Convex actions.
-- [ ] Implementar guard `requireActiveUser`.
-- [ ] Implementar guard `requirePermission`.
-- [ ] Implementar query `users.list` protegida por `users.invite` ou
+- [x] Enviar email de convite e reset por Resend em Convex actions.
+- [x] Implementar guard `requireActiveUser`.
+- [x] Implementar guard `requirePermission`.
+- [x] Implementar query `users.list` protegida por `users.invite` ou
       `users.manage_permissions`.
-- [ ] Implementar mutation `users.invite` protegida por `users.invite`.
-- [ ] Implementar mutation `users.updatePermissions` protegida por
+- [x] Implementar mutation `users.invite` protegida por `users.invite`.
+- [x] Implementar mutation `users.updatePermissions` protegida por
       `users.manage_permissions`.
-- [ ] Implementar mutation `users.deactivate` protegida por `users.deactivate`.
-- [ ] Bloquear remocao da ultima conta ativa com permissoes de Equipe.
-- [ ] Bloquear usuario de desativar a propria conta.
-- [ ] Implementar CRUD de templates protegido por `templates.manage`.
-- [ ] Auditar convite, aceite, reset, mudanca de permissao, desativacao e CRUD
+- [x] Implementar mutation `users.deactivate` protegida por `users.deactivate`.
+- [x] Bloquear remocao da ultima conta ativa com permissoes de Equipe.
+- [x] Bloquear usuario de desativar a propria conta.
+- [x] Implementar CRUD de templates protegido por `templates.manage`.
+- [x] Auditar convite, aceite, reset, mudanca de permissao, desativacao e CRUD
       de templates.
-- [ ] Testar convite valido, token expirado, token reutilizado, usuario inativo,
+- [x] Testar convite valido, token expirado, token reutilizado, usuario inativo,
       permissoes insuficientes, ultima conta admin e reset de senha.
+
+**Bootstrap dev:** `npx convex run bootstrap:ensureDevAdmin` com
+`BOOTSTRAP_ADMIN_PASSWORD` configurado no deployment Convex.
 
 ### Frontend
 
-- [ ] Criar `/login` com email, senha, loading, erro e link para reset.
-- [ ] Criar `/accept-invite/:token` com nome bloqueado, email bloqueado,
+- [x] Criar `/login` com email, senha, loading, erro e link para reset.
+- [x] Criar `/accept-invite/:token` com nome bloqueado, email bloqueado,
       organizacao visivel, senha, confirmacao e estados de token invalido,
       expirado e usado.
-- [ ] Criar `/reset-password` para solicitar email de reset.
-- [ ] Criar `/reset-password/:token` para criar nova senha.
-- [ ] Criar layout autenticado com header, menu de conta, badge de notificacoes
+- [x] Criar `/reset-password` para solicitar email de reset.
+- [x] Criar `/reset-password/:token` para criar nova senha.
+- [x] Criar layout autenticado com header, menu de conta, badge de notificacoes
       e navegacao filtrada por permissao.
-- [ ] Criar `/team` com busca por nome/email, filtros ativo/inativo e
+- [x] Criar `/team` com busca por nome/email, filtros ativo/inativo e
       organizacao.
-- [ ] Criar `/team/invite` com template de permissao, 7 linhas de modulos e
+- [x] Criar `/team/invite` com template de permissao, 7 linhas de modulos e
       resumo antes de enviar.
-- [ ] Criar `/team/:userId` para ver usuario, editar permissoes e desativar.
-- [ ] Criar `/settings/permission-templates` com criar, editar, duplicar,
+- [x] Criar `/team/:userId` para ver usuario, editar permissoes e desativar.
+- [x] Criar `/settings/permission-templates` com criar, editar, duplicar,
       ativar e desativar.
-- [ ] Criar estado de permissao negada em todas as rotas administrativas.
-- [ ] Testar login, convite, reset, lista de equipe, convite com template e
+- [x] Criar estado de permissao negada em todas as rotas administrativas.
+- [x] Testar login, convite, reset, lista de equipe, convite com template e
       permissao negada.
 
 ## Fase 3 - Caes, fotos e busca por microchip

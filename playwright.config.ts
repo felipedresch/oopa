@@ -37,7 +37,10 @@ export default defineConfig({
     {
       name: "mobile-390",
       use: {
-        ...devices["iPhone 12"],
+        browserName: "chromium",
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
       },
     },
   ],

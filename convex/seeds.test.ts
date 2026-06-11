@@ -72,6 +72,7 @@ test("schema indexes support lookups used by the domain", async () => {
 
     const adminId = await ctx.db.insert("users", {
       nome: "Admin Seed",
+      name: "Admin Seed",
       email: "seed-admin@ong.local",
       organizacao: "ONG OOPA",
       ativo: true,

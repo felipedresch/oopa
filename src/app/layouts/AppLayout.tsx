@@ -1,36 +1,85 @@
+import { useAuthActions } from "@convex-dev/auth/react";
 import {
   BellIcon,
   ClipboardListIcon,
   DogIcon,
   HomeIcon,
-  MenuIcon,
   ScanLineIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
+import { usePermissions } from "@/hooks/usePermissions";
 import { cn } from "@/lib/utils";
 
-const desktopNavItems = [
-  { to: "/", label: "Inicio", icon: HomeIcon },
-  { to: "/identify", label: "Identificar", icon: ScanLineIcon },
-  { to: "/dogs", label: "Caes", icon: DogIcon },
-  { to: "/tutors", label: "Tutores", icon: UsersIcon },
-  { to: "/team", label: "Equipe", icon: UsersIcon },
-  { to: "/notifications", label: "Notificacoes", icon: BellIcon },
-  { to: "/audit", label: "Auditoria", icon: ClipboardListIcon },
-  { to: "/settings", label: "Configuracoes", icon: SettingsIcon },
-] as const;
+type NavItemConfig = {
+  to: string;
+  label: string;
+  icon: typeof HomeIcon;
+  canAccess: (permissions: {
+    can: (permission: string) => boolean;
+    canAny: (permissions: readonly string[]) => boolean;
+  }) => boolean;
+};
 
-const mobileNavItems = [
-  { to: "/", label: "Inicio", icon: HomeIcon },
-  { to: "/identify", label: "Identificar", icon: ScanLineIcon },
-  { to: "/dogs", label: "Caes", icon: DogIcon },
-  { to: "/tutors", label: "Tutores", icon: UsersIcon },
-  { to: "/settings", label: "Mais", icon: MenuIcon },
-] as const;
+const desktopNavItems: NavItemConfig[] = [
+  {
+    to: "/",
+    label: "Inicio",
+    icon: HomeIcon,
+    canAccess: () => true,
+  },
+  {
+    to: "/identify",
+    label: "Identificar",
+    icon: ScanLineIcon,
+    canAccess: ({ can }) => can("dogs.read"),
+  },
+  {
+    to: "/dogs",
+    label: "Caes",
+    icon: DogIcon,
+    canAccess: ({ can }) => can("dogs.read"),
+  },
+  {
+    to: "/tutors",
+    label: "Tutores",
+    icon: UsersIcon,
+    canAccess: ({ can }) => can("tutors.read"),
+  },
+  {
+    to: "/team",
+    label: "Equipe",
+    icon: UsersIcon,
+    canAccess: ({ canAny }) => canAny(["users.invite", "users.manage_permissions"]),
+  },
+  {
+    to: "/notifications",
+    label: "Notificacoes",
+    icon: BellIcon,
+    canAccess: () => true,
+  },
+  {
+    to: "/audit",
+    label: "Auditoria",
+    icon: ClipboardListIcon,
+    canAccess: ({ can }) => can("system.audit_log"),
+  },
+  {
+    to: "/settings",
+    label: "Configuracoes",
+    icon: SettingsIcon,
+    canAccess: ({ canAny }) =>
+      canAny(["templates.manage", "occurrence_types.manage", "bairros.manage"]),
+  },
+];
+
+const mobileNavItems = desktopNavItems.filter((item) =>
+  ["/", "/identify", "/dogs", "/tutors", "/settings"].includes(item.to),
+);
 
 function NavItem({
   to,
@@ -64,54 +113,73 @@ function NavItem({
 }
 
 export function AppLayout() {
+  const { can, canAny, user } = usePermissions();
+  const { signOut } = useAuthActions();
+  const access = { can, canAny };
+  const visibleDesktop = desktopNavItems.filter((item) => item.canAccess(access));
+  const visibleMobile = mobileNavItems.filter((item) => item.canAccess(access));
+
   return (
-    <div className="min-h-svh bg-background text-foreground">
-      <header className="fixed inset-x-0 top-0 z-40 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <DogIcon aria-hidden="true" className="size-5" />
-            <div>
-              <p className="text-sm font-semibold">OOPA</p>
-              <p className="text-xs text-muted-foreground">Gestao da ONG</p>
+    <ProtectedRoute>
+      <div className="min-h-svh bg-background text-foreground">
+        <header className="fixed inset-x-0 top-0 z-40 border-b bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+            <div className="flex items-center gap-3">
+              <DogIcon aria-hidden="true" className="size-5" />
+              <div>
+                <p className="text-sm font-semibold">OOPA</p>
+                <p className="text-xs text-muted-foreground">
+                  {user?.nome ?? "Gestao da ONG"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button asChild className="min-h-11 min-w-11" size="icon" variant="ghost">
+                <NavLink aria-label="Notificacoes" to="/notifications">
+                  <BellIcon aria-hidden="true" />
+                </NavLink>
+              </Button>
+              <Button asChild className="min-h-11" size="sm" variant="outline">
+                <NavLink to="/profile">Conta</NavLink>
+              </Button>
+              <Button
+                className="min-h-11 hidden sm:inline-flex"
+                onClick={() => void signOut()}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                Sair
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button asChild className="min-h-11 min-w-11" size="icon" variant="ghost">
-              <NavLink aria-label="Notificacoes" to="/notifications">
-                <BellIcon aria-hidden="true" />
-              </NavLink>
-            </Button>
-            <Button asChild className="min-h-11" size="sm" variant="outline">
-              <NavLink to="/profile">Conta</NavLink>
-            </Button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="mx-auto flex w-full max-w-7xl pt-14">
-        <aside className="sticky top-14 hidden h-[calc(100svh-3.5rem)] w-60 shrink-0 border-r p-4 lg:block">
-          <nav aria-label="Navegacao principal" className="flex flex-col gap-1">
-            {desktopNavItems.map((item) => (
-              <NavItem key={item.to} {...item} />
+        <div className="mx-auto flex w-full max-w-7xl pt-14">
+          <aside className="sticky top-14 hidden h-[calc(100svh-3.5rem)] w-60 shrink-0 border-r p-4 lg:block">
+            <nav aria-label="Navegacao principal" className="flex flex-col gap-1">
+              {visibleDesktop.map((item) => (
+                <NavItem key={item.to} {...item} />
+              ))}
+            </nav>
+          </aside>
+
+          <main className="min-h-[calc(100svh-3.5rem)] flex-1 px-4 py-6 pb-24 lg:pb-6">
+            <Outlet />
+          </main>
+        </div>
+
+        <nav
+          aria-label="Navegacao inferior"
+          className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur lg:hidden"
+        >
+          <div className="mx-auto grid max-w-lg grid-cols-5 gap-1 px-2 py-2">
+            {visibleMobile.map((item) => (
+              <NavItem compact key={item.to} {...item} />
             ))}
-          </nav>
-        </aside>
-
-        <main className="min-h-[calc(100svh-3.5rem)] flex-1 px-4 py-6 pb-24 lg:pb-6">
-          <Outlet />
-        </main>
+          </div>
+        </nav>
       </div>
-
-      <nav
-        aria-label="Navegacao inferior"
-        className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur lg:hidden"
-      >
-        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1 px-2 py-2">
-          {mobileNavItems.map((item) => (
-            <NavItem compact key={item.to} {...item} />
-          ))}
-        </div>
-      </nav>
-    </div>
+    </ProtectedRoute>
   );
 }

@@ -1,3 +1,31 @@
+export const PERMISSION_CATALOG = [
+  "dogs.read",
+  "dogs.create",
+  "dogs.edit",
+  "dogs.change_status",
+  "tutors.read",
+  "tutors.read_sensitive",
+  "tutors.create",
+  "tutors.edit",
+  "occurrences.read",
+  "occurrences.read_legal",
+  "occurrences.create_rotina",
+  "occurrences.create_clinica",
+  "occurrences.create_risco",
+  "occurrences.create_legal",
+  "occurrences.create_adocao",
+  "occurrences.create_outro",
+  "users.invite",
+  "users.manage_permissions",
+  "users.deactivate",
+  "templates.manage",
+  "occurrence_types.manage",
+  "bairros.manage",
+  "system.audit_log",
+] as const;
+
+export type Permission = (typeof PERMISSION_CATALOG)[number];
+
 export const UI_MODULES = [
   "dogs",
   "tutors",
@@ -50,6 +78,20 @@ export function createEmptyModuleMap(): ModulePermissionMap {
     settings: "none",
     system: "none",
   };
+}
+
+export function hasPermission(
+  userPermissions: readonly string[],
+  required: string,
+): boolean {
+  return userPermissions.includes(required);
+}
+
+export function hasAnyPermission(
+  userPermissions: readonly string[],
+  required: readonly string[],
+): boolean {
+  return required.some((permission) => userPermissions.includes(permission));
 }
 
 export function summarizeModuleMap(map: ModulePermissionMap): string {

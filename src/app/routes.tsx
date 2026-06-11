@@ -2,22 +2,26 @@ import { createBrowserRouter, Navigate, type RouteObject } from "react-router-do
 
 import { AppLayout } from "@/app/layouts/AppLayout";
 import { AuthLayout } from "@/app/layouts/AuthLayout";
+import { AcceptInvitePage } from "@/app/pages/AcceptInvitePage";
+import { LoginPage } from "@/app/pages/LoginPage";
+import { PermissionTemplatesPage } from "@/app/pages/PermissionTemplatesPage";
+import { AdminPlaceholderPage } from "@/app/pages/AdminPlaceholderPage";
 import { PlaceholderPage } from "@/app/pages/PlaceholderPage";
+import { SettingsPage } from "@/app/pages/SettingsPage";
+import { RequestResetPage } from "@/app/pages/RequestResetPage";
+import { ResetPasswordPage } from "@/app/pages/ResetPasswordPage";
+import { TeamInvitePage } from "@/app/pages/TeamInvitePage";
+import { TeamPage } from "@/app/pages/TeamPage";
+import { TeamUserPage } from "@/app/pages/TeamUserPage";
 
 export const appRoutes: RouteObject[] = [
   {
     element: <AuthLayout />,
     children: [
-      { path: "/login", element: <PlaceholderPage title="Login" /> },
-      { path: "/reset-password", element: <PlaceholderPage title="Solicitar reset de senha" /> },
-      {
-        path: "/reset-password/:token",
-        element: <PlaceholderPage title="Criar nova senha" />,
-      },
-      {
-        path: "/accept-invite/:token",
-        element: <PlaceholderPage title="Aceitar convite" />,
-      },
+      { path: "/login", element: <LoginPage /> },
+      { path: "/reset-password", element: <RequestResetPage /> },
+      { path: "/reset-password/:token", element: <ResetPasswordPage /> },
+      { path: "/accept-invite/:token", element: <AcceptInvitePage /> },
     ],
   },
   {
@@ -39,20 +43,31 @@ export const appRoutes: RouteObject[] = [
       { path: "tutors/:tutorId/edit", element: <PlaceholderPage title="Editar tutor" /> },
       { path: "adoptions/new", element: <PlaceholderPage title="Nova adocao" /> },
       { path: "returns/new", element: <PlaceholderPage title="Nova devolucao" /> },
-      { path: "team", element: <PlaceholderPage title="Equipe" /> },
-      { path: "team/invite", element: <PlaceholderPage title="Convidar usuario" /> },
-      { path: "team/:userId", element: <PlaceholderPage title="Usuario da equipe" /> },
-      { path: "settings", element: <PlaceholderPage title="Configuracoes" /> },
+      { path: "team", element: <TeamPage /> },
+      { path: "team/invite", element: <TeamInvitePage /> },
+      { path: "team/:userId", element: <TeamUserPage /> },
+      { path: "settings", element: <SettingsPage /> },
       {
         path: "settings/permission-templates",
-        element: <PlaceholderPage title="Templates de permissao" />,
+        element: <PermissionTemplatesPage />,
       },
       {
         path: "settings/occurrence-types",
-        element: <PlaceholderPage title="Tipos de ocorrencia" />,
+        element: (
+          <AdminPlaceholderPage
+            permission="occurrence_types.manage"
+            title="Tipos de ocorrencia"
+          />
+        ),
       },
-      { path: "settings/bairros", element: <PlaceholderPage title="Bairros" /> },
-      { path: "audit", element: <PlaceholderPage title="Auditoria" /> },
+      {
+        path: "settings/bairros",
+        element: <AdminPlaceholderPage permission="bairros.manage" title="Bairros" />,
+      },
+      {
+        path: "audit",
+        element: <AdminPlaceholderPage permission="system.audit_log" title="Auditoria" />,
+      },
       { path: "notifications", element: <PlaceholderPage title="Notificacoes" /> },
       { path: "profile", element: <PlaceholderPage title="Perfil" /> },
     ],
