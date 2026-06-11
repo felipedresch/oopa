@@ -2,6 +2,11 @@ export function maskMicrochip(value: string): string {
   return value.replace(/\D/g, "").slice(0, 15);
 }
 
+export function maskMicrochipInput(value: string): string {
+  const digits = maskMicrochip(value);
+  return digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+}
+
 export function maskCpf(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 3) return digits;

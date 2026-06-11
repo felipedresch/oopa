@@ -8,6 +8,7 @@ type EmptyStateProps = {
   actionLabel?: string;
   onAction?: () => void;
   icon?: ReactNode;
+  children?: ReactNode;
 };
 
 export function EmptyState({
@@ -16,6 +17,7 @@ export function EmptyState({
   actionLabel,
   onAction,
   icon,
+  children,
 }: EmptyStateProps) {
   return (
     <section className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-xl border border-dashed bg-card px-6 py-10 text-center">
@@ -24,6 +26,7 @@ export function EmptyState({
         <h2 className="text-lg font-medium">{title}</h2>
         <p className="text-sm leading-6 text-muted-foreground">{description}</p>
       </div>
+      {children}
       {actionLabel && onAction ? (
         <Button className="min-h-11 min-w-44" onClick={onAction} type="button">
           {actionLabel}

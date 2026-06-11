@@ -281,45 +281,46 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Implementar mutation `dogs.create` protegida por `dogs.create`.
-- [ ] Exigir microchip de 15 digitos numericos, unico e indexado.
-- [ ] Exigir foto de perfil no cadastro.
-- [ ] Implementar mutation `dogs.update` protegida por `dogs.edit`.
-- [ ] Implementar mutation `dogs.changeStatus` protegida por
+- [x] Implementar mutation `dogs.create` protegida por `dogs.create`.
+- [x] Exigir microchip de 15 digitos numericos, unico e indexado.
+- [x] Exigir foto de perfil no cadastro.
+- [x] Implementar mutation `dogs.update` protegida por `dogs.edit`.
+- [x] Implementar mutation `dogs.changeStatus` protegida por
       `dogs.change_status`.
-- [ ] Implementar query `dogs.get` com campos filtrados por permissoes do
+- [x] Implementar query `dogs.get` com campos filtrados por permissoes do
       usuario.
-- [ ] Implementar query `dogs.list` paginada com filtros por status, porte,
+- [x] Implementar query `dogs.list` paginada com filtros por status, porte,
       texto e ocorrencia grave nos ultimos 90 dias.
-- [ ] Implementar query `dogs.findByMicrochip` com busca exata por indice.
-- [ ] Implementar action `storage.createSignedUploadUrl` para R2.
-- [ ] Implementar mutation `dogPhotos.add` protegida por `dogs.edit`.
-- [ ] Aceitar fotos JPEG, PNG e WebP ate 8 MB.
-- [ ] Limitar galeria adicional a 20 fotos por cao.
-- [ ] Auditar criacao, edicao, mudanca de status e upload de foto.
-- [ ] Testar microchip duplicado, foto obrigatoria, filtros, permissao e limite
+- [x] Implementar query `dogs.findByMicrochip` com busca exata por indice.
+- [x] Implementar `storage.createSignedUploadUrl` via Convex File Storage
+      (ids `_storage` do schema).
+- [x] Implementar mutation `dogPhotos.add` protegida por `dogs.edit`.
+- [x] Aceitar fotos JPEG, PNG e WebP ate 8 MB.
+- [x] Limitar galeria adicional a 20 fotos por cao.
+- [x] Auditar criacao, edicao, mudanca de status e upload de foto.
+- [x] Testar microchip duplicado, foto obrigatoria, filtros, permissao e limite
       de fotos.
 
 ### Frontend
 
-- [ ] Criar Dashboard `/` com busca rapida por microchip, botao grande de camera
+- [x] Criar Dashboard `/` com busca rapida por microchip, botao grande de camera
       e atalhos permitidos.
-- [ ] Criar `/dogs` com filtros compactos de status, porte e alerta recente.
-- [ ] Criar card de cao com foto quadrada, nome, microchip, status e alerta.
-- [ ] Criar `/dogs/:dogId` com abas Dados, Historico de tutores, Ocorrencias e
+- [x] Criar `/dogs` com filtros compactos de status, porte e alerta recente.
+- [x] Criar card de cao com foto quadrada, nome, microchip, status e alerta.
+- [x] Criar `/dogs/:dogId` com abas Dados, Historico de tutores, Ocorrencias e
       Fotos.
-- [ ] Criar `/dogs/new` em etapas: Identificacao, Caracteristicas, Saude, Foto,
+- [x] Criar `/dogs/new` em etapas: Identificacao, Caracteristicas, Saude, Foto,
       Revisao.
-- [ ] Criar `/dogs/:dogId/edit` reaproveitando o formulario em modo edicao.
-- [ ] Criar upload de foto com preview, progresso, erro, remover e substituir.
-- [ ] Criar galeria de fotos adicionais com descricao, limite visivel e estado
+- [x] Criar `/dogs/:dogId/edit` reaproveitando o formulario em modo edicao.
+- [x] Criar upload de foto com preview, progresso, erro, remover e substituir.
+- [x] Criar galeria de fotos adicionais com descricao, limite visivel e estado
       vazio.
-- [ ] Criar mudanca de status com confirmacao obrigatoria para falecido,
+- [x] Criar mudanca de status com confirmacao obrigatoria para falecido,
       desaparecido e transferido.
-- [ ] Criar resultado "microchip nao encontrado" com CTA Cadastrar novo cao para
+- [x] Criar resultado "microchip nao encontrado" com CTA Cadastrar novo cao para
       quem tem `dogs.create` e CTA Avisar a ONG para quem nao tem.
-- [ ] Garantir foto de perfil com area minima de 160px no detalhe mobile.
-- [ ] Testar lista, detalhe, cadastro, edicao, upload, status e busca por
+- [x] Garantir foto de perfil com area minima de 160px no detalhe mobile.
+- [x] Testar lista, detalhe, cadastro, edicao, upload, status e busca por
       microchip.
 
 ## Fase 4 - Tutores, bairros e alertas derivados

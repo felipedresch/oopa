@@ -57,3 +57,7 @@ export function tokenExpired(message = "Este link expirou. Solicite um novo.") {
 export function tokenUsed(message = "Este link ja foi utilizado.") {
   return new DomainError(ERROR_CODES.TOKEN_USED, message);
 }
+
+export function uploadRejected(message: string) {
+  return new DomainError(ERROR_CODES.UPLOAD_REJECTED, message);
+}

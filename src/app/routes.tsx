@@ -13,6 +13,11 @@ import { ResetPasswordPage } from "@/app/pages/ResetPasswordPage";
 import { TeamInvitePage } from "@/app/pages/TeamInvitePage";
 import { TeamPage } from "@/app/pages/TeamPage";
 import { TeamUserPage } from "@/app/pages/TeamUserPage";
+import { DashboardPage } from "@/app/pages/DashboardPage";
+import { DogDetailPage } from "@/app/pages/DogDetailPage";
+import { DogFormPage } from "@/app/pages/DogFormPage";
+import { DogsListPage } from "@/app/pages/DogsListPage";
+import { IdentifyPage } from "@/app/pages/IdentifyPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -27,12 +32,12 @@ export const appRoutes: RouteObject[] = [
   {
     element: <AppLayout />,
     children: [
-      { index: true, element: <PlaceholderPage title="Dashboard" /> },
-      { path: "identify", element: <PlaceholderPage title="Identificar cao" /> },
-      { path: "dogs", element: <PlaceholderPage title="Caes" /> },
-      { path: "dogs/new", element: <PlaceholderPage title="Novo cao" /> },
-      { path: "dogs/:dogId", element: <PlaceholderPage title="Ficha do cao" /> },
-      { path: "dogs/:dogId/edit", element: <PlaceholderPage title="Editar cao" /> },
+      { index: true, element: <DashboardPage /> },
+      { path: "identify", element: <IdentifyPage /> },
+      { path: "dogs", element: <DogsListPage /> },
+      { path: "dogs/new", element: <DogFormPage /> },
+      { path: "dogs/:dogId", element: <DogDetailPage /> },
+      { path: "dogs/:dogId/edit", element: <DogFormPage /> },
       {
         path: "dogs/:dogId/occurrences/new",
         element: <PlaceholderPage title="Nova ocorrencia" />,
