@@ -132,7 +132,7 @@ export function PhotoUpload({
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {!storageId && required && state === "idle" && !localPreview ? (
-        <p className="text-sm text-muted-foreground">Foto obrigatoria para concluir o cadastro.</p>
+        <p className="text-sm text-muted-foreground">Foto obrigatória para concluir o cadastro.</p>
       ) : null}
     </div>
   );

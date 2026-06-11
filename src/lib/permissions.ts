@@ -45,12 +45,12 @@ export type PermissionLevel = (typeof PERMISSION_LEVELS)[number];
 export type ModulePermissionMap = Record<UiModule, PermissionLevel>;
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
-  dogs: "Caes",
+  dogs: "Cães",
   tutors: "Tutores",
-  occurrences: "Ocorrencias",
-  adoptions: "Adocoes e devolucoes",
+  occurrences: "Ocorrências",
+  adoptions: "Adocoes e devoluções",
   team: "Equipe",
-  settings: "Configuracoes",
+  settings: "Configurações",
   system: "Sistema",
 };
 
@@ -58,14 +58,14 @@ export const PERMISSION_LEVEL_LABELS: Record<PermissionLevel, string> = {
   none: "Sem acesso",
   read: "Leitura",
   write: "Escrita",
-  manage: "Gestao",
+  manage: "Gestão",
 };
 
 export const PERMISSION_LEVEL_DESCRIPTIONS: Record<PermissionLevel, string> = {
-  none: "Nao pode acessar este modulo.",
-  read: "Pode consultar informacoes permitidas.",
-  write: "Pode criar e editar registros do modulo.",
-  manage: "Pode executar acoes administrativas do modulo.",
+  none: "Não pode acessar este módulo.",
+  read: "Pode consultar informações permitidas.",
+  write: "Pode criar e editar registros do módulo.",
+  manage: "Pode executar ações administrativas do módulo.",
 };
 
 export function createEmptyModuleMap(): ModulePermissionMap {
@@ -97,7 +97,7 @@ export function hasAnyPermission(
 export function summarizeModuleMap(map: ModulePermissionMap): string {
   const activeModules = UI_MODULES.filter((module) => map[module] !== "none");
   if (activeModules.length === 0) {
-    return "Sem acesso a modulos.";
+    return "Sem acesso a módulos.";
   }
 
   return activeModules

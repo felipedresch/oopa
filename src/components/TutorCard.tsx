@@ -19,13 +19,21 @@ export function TutorCard({
   selectable = false,
 }: TutorCardProps) {
   const className =
-    "flex items-center justify-between gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/40";
+    "flex items-center gap-3.5 rounded-xl border bg-card p-3.5 shadow-xs transition-colors hover:border-ring/40 hover:bg-accent/30";
 
   const content = (
     <>
-      <div className="min-w-0">
-        <p className="truncate font-medium">{nome}</p>
-        <p className="text-sm text-muted-foreground">{bairroNome ?? "Bairro nao informado"}</p>
+      <span
+        aria-hidden="true"
+        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary font-heading text-base font-bold text-secondary-foreground"
+      >
+        {nome.charAt(0).toUpperCase()}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-semibold">{nome}</p>
+        <p className="truncate text-sm text-muted-foreground">
+          {bairroNome ?? "Bairro não informado"}
+        </p>
       </div>
       {alertLevel && alertLevel !== "none" ? <TutorAlertBadge level={alertLevel} /> : null}
     </>

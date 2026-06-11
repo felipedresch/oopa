@@ -5,7 +5,7 @@ import { PermissionLevelSelector } from "@/components/PermissionLevelSelector";
 import { createEmptyModuleMap } from "@/lib/permissions";
 
 describe("PermissionLevelSelector", () => {
-  it("permite alterar nivel de um modulo", async () => {
+  it("permite alterar nivel de um módulo", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     const value = createEmptyModuleMap();

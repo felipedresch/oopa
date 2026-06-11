@@ -48,10 +48,10 @@ export function TeamPage() {
       <PageHeader
         actions={
           <Button asChild className="min-h-11">
-            <Link to="/team/invite">Convidar usuario</Link>
+            <Link to="/team/invite">Convidar usuário</Link>
           </Button>
         }
-        description="Gerencie convites, permissoes e status da equipe."
+        description="Gerencie convites, permissões e status da equipe."
         title="Equipe"
       />
 
@@ -68,7 +68,7 @@ export function TeamPage() {
         <div className="flex min-w-40 flex-col gap-2">
           <Label htmlFor="ativo">Status</Label>
           <select
-            className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="ativo"
             onChange={(event) => setAtivo(event.target.value as typeof ativo)}
             value={ativo}
@@ -79,9 +79,9 @@ export function TeamPage() {
           </select>
         </div>
         <div className="flex min-w-48 flex-col gap-2">
-          <Label htmlFor="organizacao">Organizacao</Label>
+          <Label htmlFor="organizacao">Organização</Label>
           <select
-            className="min-h-11 rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="organizacao"
             onChange={(event) => setOrganizacao(event.target.value)}
             value={organizacao}
@@ -101,26 +101,37 @@ export function TeamPage() {
       ) : results.length === 0 ? (
         <EmptyState
           description="Ajuste os filtros ou convide o primeiro membro da equipe."
-          title="Nenhum usuario encontrado"
+          title="Nenhum usuário encontrado"
         />
       ) : (
         <div className="grid gap-3">
           {results.map((user) => (
             <Link
-              className="rounded-xl border bg-card p-4 transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="flex items-start gap-3.5 rounded-xl border bg-card p-4 shadow-xs transition-colors hover:border-ring/40 hover:bg-accent/30"
               key={user._id}
               to={`/team/${user._id}`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium">{user.nome}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                  <p className="text-sm text-muted-foreground">{user.organizacao}</p>
-                </div>
-                <Badge variant={user.ativo ? "default" : "outline"}>
-                  {user.ativo ? "Ativo" : "Inativo"}
-                </Badge>
-              </div>
+              <span
+                aria-hidden="true"
+                className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary font-heading text-base font-bold text-secondary-foreground"
+              >
+                {user.nome.charAt(0).toUpperCase()}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold">{user.nome}</span>
+                <span className="block truncate text-sm text-muted-foreground">{user.email}</span>
+                <span className="block truncate text-sm text-muted-foreground">
+                  {user.organizacao}
+                </span>
+              </span>
+              <Badge
+                className={
+                  user.ativo ? "bg-success/12 text-success" : "bg-muted text-muted-foreground"
+                }
+                variant="secondary"
+              >
+                {user.ativo ? "Ativo" : "Inativo"}
+              </Badge>
             </Link>
           ))}
           {status === "CanLoadMore" ? (

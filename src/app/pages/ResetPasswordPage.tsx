@@ -21,7 +21,7 @@ export function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
 
   if (!token) {
-    return <p className="text-sm text-destructive">Link invalido.</p>;
+    return <p className="text-sm text-destructive">Link inválido.</p>;
   }
 
   if (preview === undefined) {
@@ -31,8 +31,8 @@ export function ResetPasswordPage() {
   if (preview.status !== "valid") {
     const messages = {
       expired: "Este link expirou. Solicite um novo reset.",
-      used: "Este link ja foi utilizado.",
-      invalid: "Link invalido.",
+      used: "Este link já foi utilizado.",
+      invalid: "Link inválido.",
     };
     return (
       <Card>
@@ -52,7 +52,7 @@ export function ResetPasswordPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem.");
+      setError("As senhas não coincidem.");
       return;
     }
 
@@ -63,7 +63,7 @@ export function ResetPasswordPage() {
       await resetPassword({ token, password });
       void navigate("/login");
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel redefinir a senha."));
+      setError(getErrorMessage(submitError, "Não foi possível redefinir a senha."));
     } finally {
       setLoading(false);
     }

@@ -29,7 +29,7 @@ export function LoginPage() {
       });
       void navigate("/");
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel entrar. Verifique email e senha."));
+      setError(getErrorMessage(submitError, "Não foi possível entrar. Verifique email e senha."));
     } finally {
       setLoading(false);
     }

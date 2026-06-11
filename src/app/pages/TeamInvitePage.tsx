@@ -57,7 +57,7 @@ export function TeamInvitePage() {
       });
       void navigate("/team");
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel enviar o convite."));
+      setError(getErrorMessage(submitError, "Não foi possível enviar o convite."));
     } finally {
       setLoading(false);
     }
@@ -66,8 +66,8 @@ export function TeamInvitePage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Escolha um template, ajuste os 7 modulos e revise antes de enviar."
-        title="Convidar usuario"
+        description="Escolha um template, ajuste os 7 módulos e revise antes de enviar."
+        title="Convidar usuário"
       />
 
       <form className="flex flex-col gap-6" onSubmit={(event) => void handleSubmit(event)}>
@@ -87,7 +87,7 @@ export function TeamInvitePage() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="organizacao">Organizacao</Label>
+            <Label htmlFor="organizacao">Organização</Label>
             <Input
               id="organizacao"
               onChange={(e) => setOrganizacao(e.target.value)}
@@ -103,9 +103,9 @@ export function TeamInvitePage() {
 
         {templates && templates.length > 0 ? (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="template">Template de permissao</Label>
+            <Label htmlFor="template">Template de permissão</Label>
             <select
-              className="h-11 rounded-lg border border-input bg-background px-3 text-sm"
+              className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="template"
               onChange={(event) => handleTemplateChange(event.target.value)}
               defaultValue=""
@@ -124,10 +124,10 @@ export function TeamInvitePage() {
 
         <PermissionLevelSelector onChange={setModuleMap} value={moduleMap} />
 
-        <div className="rounded-xl border bg-card p-4">
-          <h2 className="mb-3 text-sm font-medium">Resumo antes de enviar</h2>
+        <section className="border-t pt-5">
+          <h2 className="mb-3 font-semibold">Resumo antes de enviar</h2>
           <PermissionSummary moduleMap={moduleMap} />
-        </div>
+        </section>
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 

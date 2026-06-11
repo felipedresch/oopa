@@ -33,18 +33,18 @@ export function MicrochipCameraCapture({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4">
+    <div className="flex flex-col gap-3 rounded-xl bg-accent/50 p-4 sm:p-5">
       <Label>Foto do leitor RFID</Label>
       <p className="text-sm text-muted-foreground">
-        Enquadre os 15 digitos na moldura central e capture com boa iluminacao.
+        Enquadre os 15 dígitos na moldura central e capture com boa iluminação.
       </p>
 
       <div
         aria-hidden="true"
-        className="relative mx-auto flex aspect-[4/3] w-full max-w-md items-center justify-center overflow-hidden rounded-xl border-2 border-primary/60 bg-black/90"
+        className="relative mx-auto flex aspect-[4/3] w-full max-w-md items-center justify-center overflow-hidden rounded-xl bg-sidebar"
       >
-        <div className="absolute inset-8 rounded-lg border-2 border-white/80" />
-        <span className="relative z-10 px-4 text-center text-sm font-medium text-white">
+        <div className="absolute inset-8 rounded-lg border-2 border-sidebar-primary/80" />
+        <span className="relative z-10 px-4 text-center text-sm font-medium tracking-widest text-sidebar-foreground tabular-nums">
           000 000 000 000 000
         </span>
       </div>

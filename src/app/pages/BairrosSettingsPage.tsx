@@ -47,7 +47,7 @@ export function BairrosSettingsPage() {
       await createBairro({ nome: nome.trim() });
       setNome("");
     } catch (createError) {
-      setError(getErrorMessage(createError, "Nao foi possivel criar o bairro."));
+      setError(getErrorMessage(createError, "Não foi possível criar o bairro."));
     } finally {
       setSubmitting(false);
     }
@@ -58,19 +58,19 @@ export function BairrosSettingsPage() {
     try {
       await setActive({ bairroId, ativo: !ativo });
     } catch (toggleError) {
-      setError(getErrorMessage(toggleError, "Nao foi possivel atualizar o bairro."));
+      setError(getErrorMessage(toggleError, "Não foi possível atualizar o bairro."));
     }
   };
 
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Cadastre bairros para tutores e ocorrencias. Desative em vez de excluir."
+        description="Cadastre bairros para tutores e ocorrências. Desative em vez de excluir."
         title="Bairros"
       />
 
-      <form className="flex max-w-xl flex-col gap-3 rounded-xl border p-4" onSubmit={handleCreate}>
-        <h3 className="font-medium">Novo bairro</h3>
+      <form className="flex max-w-xl flex-col gap-3" onSubmit={handleCreate}>
+        <h3 className="font-semibold">Novo bairro</h3>
         <div className="flex flex-col gap-2">
           <Label htmlFor="bairro-nome">Nome</Label>
           <Input
@@ -85,7 +85,7 @@ export function BairrosSettingsPage() {
         </Button>
       </form>
 
-      <FilterBar>
+      <FilterBar className="border-t pt-5">
         <div className="flex min-w-48 flex-1 flex-col gap-2">
           <Label htmlFor="bairro-search">Buscar</Label>
           <Input
@@ -97,7 +97,7 @@ export function BairrosSettingsPage() {
         </div>
       </FilterBar>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {bairros === undefined ? <LoadingSkeleton rows={4} /> : null}
 
@@ -109,19 +109,26 @@ export function BairrosSettingsPage() {
       ) : null}
 
       {bairros && bairros.length > 0 ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="divide-y divide-border">
           {bairros.map((bairro) => (
             <li
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
+              className="flex flex-wrap items-center justify-between gap-3 py-2.5"
               key={bairro._id}
             >
               <div className="flex items-center gap-2">
                 <p className="font-medium">{bairro.nome}</p>
-                <Badge variant="outline">{bairro.ativo ? "Ativo" : "Inativo"}</Badge>
+                <Badge
+                  className={
+                    bairro.ativo ? "bg-success/12 text-success" : "bg-muted text-muted-foreground"
+                  }
+                  variant="secondary"
+                >
+                  {bairro.ativo ? "Ativo" : "Inativo"}
+                </Badge>
               </div>
               <Button
-                className="min-h-11"
                 onClick={() => toggleActive(bairro._id, bairro.ativo)}
+                size="sm"
                 type="button"
                 variant="outline"
               >

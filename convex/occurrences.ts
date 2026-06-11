@@ -105,7 +105,7 @@ async function insertOccurrencePhotos(
       action: "occurrence_photos.add",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: "Foto adicionada a ocorrencia",
+      summary: "Foto adicionada a ocorrência",
     });
   }
 }
@@ -129,16 +129,16 @@ export const create = mutation({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     const type = await ctx.db.get("occurrence_types", args.occurrenceTypeId);
     if (!type || !type.ativo) {
-      throw notFound("Tipo de ocorrencia");
+      throw notFound("Tipo de ocorrência");
     }
 
-    if (type.nome === "Correcao/Retificacao") {
-      throw validationError("Use a acao de retificacao para corrigir ocorrencias.");
+    if (type.nome === "Correção/Retificação") {
+      throw validationError("Use a ação de retificação para corrigir ocorrências.");
     }
 
     const category = type.categoria;
@@ -148,7 +148,7 @@ export const create = mutation({
 
     const descricao = args.descricao.trim();
     if (!descricao) {
-      throw validationError("Descricao obrigatoria.");
+      throw validationError("Descrição obrigatória.");
     }
 
     if (type.requer_foto && args.photo_storage_ids.length === 0) {
@@ -162,7 +162,7 @@ export const create = mutation({
     let tutorId = dog.tutor_atual_id;
     let tutorSnapshot: Awaited<ReturnType<typeof buildTutorSnapshot>> | undefined;
 
-    if (type.nome === "Adocao" || type.nome === "Transferencia de Tutor") {
+    if (type.nome === "Adoção" || type.nome === "Transferencia de Tutor") {
       if (!args.new_tutor_id) {
         throw validationError("Informe o tutor de destino.");
       }
@@ -175,7 +175,7 @@ export const create = mutation({
     if (args.bairro_id) {
       const bairro = await ctx.db.get("bairros", args.bairro_id);
       if (!bairro?.ativo) {
-        throw validationError("Bairro invalido ou inativo.");
+        throw validationError("Bairro inválido ou inativo.");
       }
     }
 
@@ -214,7 +214,7 @@ export const create = mutation({
       action: "occurrences.create",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: `Ocorrencia criada: ${type.nome} para ${dog.nome}`,
+      summary: `Ocorrência criada: ${type.nome} para ${dog.nome}`,
       metadata: { categoria: category, gravidade, atribuivel },
     });
 
@@ -249,24 +249,24 @@ export const rectify = mutation({
 
     const original = await loadOccurrenceWithType(ctx, args.originalId);
     if (!original) {
-      throw notFound("Ocorrencia");
+      throw notFound("Ocorrência");
     }
 
     assertCanReadOccurrence(original.type.categoria, actor.permissions);
 
-    const rectificationType = await getOccurrenceTypeByName(ctx, "Correcao/Retificacao");
+    const rectificationType = await getOccurrenceTypeByName(ctx, "Correção/Retificação");
     if (!rectificationType?.ativo) {
-      throw notFound("Tipo de ocorrencia");
+      throw notFound("Tipo de ocorrência");
     }
 
     const descricao = args.descricao.trim();
     if (!descricao) {
-      throw validationError("Descricao da retificacao obrigatoria.");
+      throw validationError("Descrição da retificação obrigatória.");
     }
 
     const dog = await ctx.db.get("dogs", original.dog_id);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     const now = Date.now();
@@ -296,7 +296,7 @@ export const rectify = mutation({
       action: "occurrences.rectify",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: `Retificacao registrada para ocorrencia ${args.originalId}`,
+      summary: `Retificação registrada para ocorrência ${args.originalId}`,
       metadata: { original_id: args.originalId },
     });
 
@@ -344,13 +344,13 @@ export const get = query({
     }
 
     const can_rectify =
-      loaded.type.nome !== "Correcao/Retificacao" &&
+      loaded.type.nome !== "Correção/Retificação" &&
       canCreateOccurrenceCategory(actor.permissions, "outro");
 
     return {
       _id: loaded._id,
       dog_id: loaded.dog_id,
-      dog_nome: dog?.nome ?? "Cao removido",
+      dog_nome: dog?.nome ?? "Cão removido",
       occurrence_type_id: loaded.occurrence_type_id,
       type_nome: loaded.type.nome,
       categoria: loaded.type.categoria,
@@ -396,7 +396,7 @@ export const listByDog = query({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     const paginationOpts = normalizePaginationOpts(args.paginationOpts);

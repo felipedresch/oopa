@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { getDateGroupLabel, groupByDate } from "@/lib/group-notifications";
 
 describe("group-notifications", () => {
-  it("agrupa notificacoes por dia", () => {
+  it("agrupa notificações por dia", () => {
     const now = new Date("2026-06-10T12:00:00").getTime();
     const groups = groupByDate(
       [

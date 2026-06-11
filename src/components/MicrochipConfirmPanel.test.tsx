@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MicrochipConfirmPanel } from "@/components/MicrochipConfirmPanel";
 
 describe("MicrochipConfirmPanel", () => {
-  it("exige 15 digitos para confirmar", async () => {
+  it("exige 15 dígitos para confirmar", async () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
 
@@ -13,11 +13,11 @@ describe("MicrochipConfirmPanel", () => {
         onChange={() => undefined}
         onConfirm={onConfirm}
         value="123"
-        warning="Nao consegui ler com seguranca"
+        warning="Não consegui ler com segurança"
       />,
     );
 
-    expect(screen.getByText(/nao consegui ler com seguranca/i)).toBeInTheDocument();
+    expect(screen.getByText(/não consegui ler com segurança/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /confirmar e buscar/i }));
     expect(onConfirm).not.toHaveBeenCalled();
   });

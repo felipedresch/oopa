@@ -17,9 +17,9 @@ import {
 } from "./tutors";
 
 export const BAIRRO_WARNING_MESSAGE =
-  "Este cao ja teve devolucao ou abandono suspeito associado a tutor deste bairro. Revise antes de concluir.";
+  "Este cão já teve devolução ou abandono suspeito associado a tutor deste bairro. Revise antes de concluir.";
 
-const RISK_TYPE_NAMES = new Set(["Devolucao a ONG", "Abandono Suspeito"]);
+const RISK_TYPE_NAMES = new Set(["Devolução a ONG", "Abandono Suspeito"]);
 
 export type AdoptionPayloadInput = {
   data_adocao: number;
@@ -33,10 +33,10 @@ export type AdoptionPayloadInput = {
 
 export function validateAdoptionPayload(payload: AdoptionPayloadInput): void {
   if (!payload.numero_termo_adocao.trim()) {
-    throw validationError("Numero do termo de adocao obrigatorio.");
+    throw validationError("Número do termo de adoção obrigatório.");
   }
   if (!payload.condicoes_adocao.trim()) {
-    throw validationError("Condicoes de adocao obrigatorias.");
+    throw validationError("Condições de adoção obrigatórias.");
   }
   if (!payload.confirmou_documentos) {
     throw validationError("Confirme a entrega dos documentos.");
@@ -106,7 +106,7 @@ export async function buildTutorAssessment(
 ) {
   const tutor = await ctx.db.get("tutors", tutorId);
   if (!tutor) {
-    throw validationError("Tutor nao encontrado.");
+    throw validationError("Tutor não encontrado.");
   }
 
   const bairro = tutor.bairro_id ? await ctx.db.get("bairros", tutor.bairro_id) : null;
@@ -134,7 +134,7 @@ export async function buildTutorAssessment(
         gravidade: occurrence.gravidade,
         data_ocorrencia: occurrence.data_ocorrencia,
         descricao: occurrence.descricao,
-        dog_nome: dog?.nome ?? "Cao removido",
+        dog_nome: dog?.nome ?? "Cão removido",
       };
     }),
   );
@@ -171,7 +171,7 @@ async function insertOccurrencePhotos(
       action: "occurrence_photos.add",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: "Foto adicionada a ocorrencia",
+      summary: "Foto adicionada a ocorrência",
     });
   }
 }
@@ -193,7 +193,7 @@ export async function createOccurrenceWithHistory(
 ): Promise<Id<"occurrences">> {
   const type = await getOccurrenceTypeByName(ctx, args.typeName);
   if (!type?.ativo) {
-    throw validationError(`Tipo de ocorrencia indisponivel: ${args.typeName}`);
+    throw validationError(`Tipo de ocorrência indisponível: ${args.typeName}`);
   }
 
   if (type.requer_foto && args.photo_storage_ids.length === 0) {
@@ -206,7 +206,7 @@ export async function createOccurrenceWithHistory(
   let tutorId = args.dog.tutor_atual_id;
   let tutorSnapshot: Awaited<ReturnType<typeof buildTutorSnapshot>> | undefined;
 
-  if (args.typeName === "Adocao" || args.typeName === "Transferencia de Tutor") {
+  if (args.typeName === "Adoção" || args.typeName === "Transferência de Tutor") {
     if (!args.new_tutor_id) {
       throw validationError("Informe o tutor de destino.");
     }

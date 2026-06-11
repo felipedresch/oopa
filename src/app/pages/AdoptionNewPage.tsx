@@ -1,3 +1,4 @@
+import { PawPrintIcon } from "lucide-react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -23,7 +24,7 @@ import { maskCpf } from "@/lib/masks";
 import { validateCpf, validateRequired } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["Cao", "Tutor", "Avaliacao", "Dados", "Revisao"] as const;
+const STEPS = ["Cão", "Tutor", "Avaliação", "Dados", "Revisão"] as const;
 
 export function AdoptionNewPage() {
   const { can, user } = usePermissions();
@@ -105,23 +106,26 @@ export function AdoptionNewPage() {
     return (
       <section className="flex flex-col gap-6">
         <PageHeader
-          description="A adocao foi registrada e o historico do cao foi atualizado."
-          title="Adocao concluida"
+          description="A adoção foi registrada e o histórico do cão foi atualizado."
+          title="Adoção concluida"
         />
-        <div className="flex flex-col gap-3 rounded-xl border bg-card p-6">
+        <div className="flex flex-col gap-4 rounded-2xl bg-success/10 p-6">
+          <span className="flex size-12 items-center justify-center rounded-full bg-success/15 text-success">
+            <PawPrintIcon aria-hidden="true" className="size-6" />
+          </span>
           <p className="text-sm text-muted-foreground">
             Ocorrencia #{success.occurrenceId}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button asChild className="min-h-11">
-              <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cao</Link>
+              <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cão</Link>
             </Button>
             <Button asChild className="min-h-11" variant="outline">
               <Link to={`/tutors/${selectedTutorId}`}>Ver ficha do tutor</Link>
             </Button>
             <Button asChild className="min-h-11" variant="outline">
               <Link to={`/dogs/${selectedDogId}/occurrences/${success.occurrenceId}`}>
-                Ver ocorrencia
+                Ver ocorrência
               </Link>
             </Button>
           </div>
@@ -164,7 +168,7 @@ export function AdoptionNewPage() {
       setShowMiniTutorForm(false);
       setStep(2);
     } catch (cause) {
-      setError(getErrorMessage(cause, "Nao foi possivel cadastrar o tutor."));
+      setError(getErrorMessage(cause, "Não foi possível cadastrar o tutor."));
     } finally {
       setSubmitting(false);
     }
@@ -193,7 +197,7 @@ export function AdoptionNewPage() {
       });
       setSuccess({ occurrenceId });
     } catch (cause) {
-      setError(getErrorMessage(cause, "Nao foi possivel registrar a adocao."));
+      setError(getErrorMessage(cause, "Não foi possível registrar a adoção."));
     } finally {
       setSubmitting(false);
     }
@@ -202,8 +206,8 @@ export function AdoptionNewPage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Registre uma adocao com avaliacao do tutor e confirmacoes obrigatorias."
-        title="Nova adocao"
+        description="Registre uma adoção com avaliação do tutor e confirmações obrigatórias."
+        title="Nova adoção"
       />
 
       <StepperForm
@@ -226,7 +230,7 @@ export function AdoptionNewPage() {
             : step === 4
               ? submitting
                 ? "Registrando..."
-                : "Concluir adocao"
+                : "Concluir adoção"
               : undefined
         }
         currentStep={step}
@@ -258,7 +262,7 @@ export function AdoptionNewPage() {
         steps={[...STEPS]}
       >
         {error ? (
-          <p className="mb-4 text-sm text-red-600 dark:text-red-400" role="alert">
+          <p className="mb-4 text-sm text-destructive" role="alert">
             {error}
           </p>
         ) : null}
@@ -266,7 +270,7 @@ export function AdoptionNewPage() {
         {step === 0 ? (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="dog-search-adoption">Buscar cao</Label>
+              <Label htmlFor="dog-search-adoption">Buscar cão</Label>
               <Input
                 id="dog-search-adoption"
                 onChange={(event) => setDogSearch(event.target.value)}
@@ -369,7 +373,7 @@ export function AdoptionNewPage() {
             ) : (
               <div className="flex flex-col gap-4">
                 <p className="text-sm text-muted-foreground">
-                  Cadastro rapido sem sair do fluxo de adocao.
+                  Cadastro rápido sem sair do fluxo de adoção.
                 </p>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="mini-tutor-nome">Nome completo</Label>
@@ -417,7 +421,7 @@ export function AdoptionNewPage() {
                   <BairroWarningBanner message={evaluation.bairro_warning.message} />
                 ) : null}
                 <p className="text-sm text-muted-foreground">
-                  Voce pode continuar mesmo com alertas ou warnings de bairro.
+                  Você pode continuar mesmo com alertas ou avisos de bairro.
                 </p>
               </>
             )}
@@ -446,7 +450,7 @@ export function AdoptionNewPage() {
             <div className="flex flex-col gap-2">
               <Label htmlFor="responsavel-ong">Responsavel ONG</Label>
               <select
-                className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="flex h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="responsavel-ong"
                 onChange={(event) => setResponsavelId(event.target.value as Id<"users">)}
                 value={responsavelId || responsavelDefault || ""}
@@ -462,16 +466,16 @@ export function AdoptionNewPage() {
             <div className="flex flex-col gap-2 md:col-span-2">
               <Label htmlFor="condicoes-adocao">Condicoes de adocao</Label>
               <textarea
-                className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="min-h-24 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="condicoes-adocao"
                 onChange={(event) => setCondicoes(event.target.value)}
                 value={condicoes}
               />
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
-              <Label htmlFor="observacoes-adocao">Observacoes (opcional)</Label>
+              <Label htmlFor="observacoes-adocao">Observações (opcional)</Label>
               <textarea
-                className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="min-h-20 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="observacoes-adocao"
                 onChange={(event) => setObservacoes(event.target.value)}
                 value={observacoes}
@@ -480,7 +484,7 @@ export function AdoptionNewPage() {
             <label className="flex items-start gap-3 md:col-span-2">
               <input
                 checked={confirmouDocumentos}
-                className="mt-1 size-4"
+                className="mt-1 size-4 accent-primary"
                 onChange={(event) => setConfirmouDocumentos(event.target.checked)}
                 type="checkbox"
               />
@@ -489,7 +493,7 @@ export function AdoptionNewPage() {
             <label className="flex items-start gap-3 md:col-span-2">
               <input
                 checked={confirmouOrientacoes}
-                className="mt-1 size-4"
+                className="mt-1 size-4 accent-primary"
                 onChange={(event) => setConfirmouOrientacoes(event.target.checked)}
                 type="checkbox"
               />
@@ -500,15 +504,15 @@ export function AdoptionNewPage() {
 
         {step === 4 ? (
           <div className="flex flex-col gap-4 text-sm">
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-2 font-medium">Cao</h3>
+            <div className="rounded-xl border bg-card p-4 shadow-xs">
+              <h3 className="mb-2 font-semibold">Cao</h3>
               <p>{selectedDog?.nome}</p>
               <p className="text-muted-foreground">
                 {selectedDog ? formatMicrochip(selectedDog.microchip) : ""}
               </p>
             </div>
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-2 font-medium">Tutor</h3>
+            <div className="rounded-xl border bg-card p-4 shadow-xs">
+              <h3 className="mb-2 font-semibold">Tutor</h3>
               <p>{evaluation?.tutor.tutor_nome}</p>
               {evaluation?.tutor.bairro_nome ? (
                 <p className="text-muted-foreground">{evaluation.tutor.bairro_nome}</p>
@@ -524,12 +528,12 @@ export function AdoptionNewPage() {
                 tutorNome={evaluation.tutor.tutor_nome}
               />
             ) : null}
-            <div className="rounded-lg border p-4">
-              <h3 className="mb-2 font-medium">Dados da adocao</h3>
+            <div className="rounded-xl border bg-card p-4 shadow-xs">
+              <h3 className="mb-2 font-semibold">Dados da adocao</h3>
               <p>Termo: {numeroTermo}</p>
               <p>Data: {formatDate(new Date(dataAdocao).getTime())}</p>
               <p>Condicoes: {condicoes}</p>
-              {observacoes ? <p>Observacoes: {observacoes}</p> : null}
+              {observacoes ? <p>Observações: {observacoes}</p> : null}
             </div>
           </div>
         ) : null}

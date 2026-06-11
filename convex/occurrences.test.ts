@@ -103,7 +103,7 @@ test("usuario sem read_legal nao le ocorrencia legal", async () => {
     permissions: ["dogs.read", "occurrences.read", "occurrences.create_rotina"],
   });
   const dogId = await seedDog(t, adminId);
-  const legalTypeId = await getTypeId(t, adminId, "Denuncia de Maus-Tratos");
+  const legalTypeId = await getTypeId(t, adminId, "Denúncia de Maus-Tratos");
   const storageId = await storeTestImage(t);
 
   const occurrenceId = await asUser(t, adminId, async (client) =>
@@ -128,7 +128,7 @@ test("retificacao cria ocorrencia com original_id", async () => {
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const dogId = await seedDog(t, adminId);
-  const rotinaTypeId = await getTypeId(t, adminId, "Consulta/Visualizacao");
+  const rotinaTypeId = await getTypeId(t, adminId, "Consulta/Visualização");
 
   const originalId = await asUser(t, adminId, async (client) =>
     client.mutation(api.occurrences.create, {
@@ -152,7 +152,7 @@ test("retificacao cria ocorrencia com original_id", async () => {
   );
 
   expect(rectification?.original_id).toBe(originalId);
-  expect(rectification?.type_nome).toBe("Correcao/Retificacao");
+  expect(rectification?.type_nome).toBe("Correção/Retificação");
 });
 
 test("adocao atualiza historico vigente e tutor atual", async () => {
@@ -167,7 +167,7 @@ test("adocao atualiza historico vigente e tutor atual", async () => {
       cpf: "52998224725",
     }),
   );
-  const adocaoTypeId = await getTypeId(t, adminId, "Adocao");
+  const adocaoTypeId = await getTypeId(t, adminId, "Adoção");
 
   await t.run(async (ctx) => {
     await ctx.db.patch(dogId, { tutor_atual_id: oldTutorId, status_atual: "na_ong" });
@@ -212,7 +212,7 @@ test("get oculta snapshot sensivel do tutor sem tutors.read_sensitive", async ()
   });
   const dogId = await seedDog(t, adminId);
   const tutorId = await seedTutor(t, adminId);
-  const typeId = await getTypeId(t, adminId, "Consulta/Visualizacao");
+  const typeId = await getTypeId(t, adminId, "Consulta/Visualização");
 
   await t.run(async (ctx) => {
     await ctx.db.patch(dogId, { tutor_atual_id: tutorId });

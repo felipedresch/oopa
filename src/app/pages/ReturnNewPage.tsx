@@ -16,6 +16,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { formatMicrochip } from "@/lib/formatters";
 import { validateRequired } from "@/lib/validations";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
 
 type UploadedPhoto = {
@@ -65,16 +66,16 @@ export function ReturnNewPage() {
     return (
       <section className="flex flex-col gap-6">
         <PageHeader
-          description="O cao voltou para a ONG e o historico de tutoria foi encerrado."
-          title="Devolucao registrada"
+          description="O cão voltou para a ONG e o histórico de tutoria foi encerrado."
+          title="Devolução registrada"
         />
         <div className="flex flex-wrap gap-2">
           <Button asChild className="min-h-11">
-            <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cao</Link>
+            <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cão</Link>
           </Button>
           <Button asChild className="min-h-11" variant="outline">
             <Link to={`/dogs/${selectedDogId}/occurrences/${successOccurrenceId}`}>
-              Ver ocorrencia
+              Ver ocorrência
             </Link>
           </Button>
         </div>
@@ -98,7 +99,7 @@ export function ReturnNewPage() {
     }
 
     if (photos.length === 0) {
-      setError("Adicione pelo menos uma foto da devolucao.");
+      setError("Adicione pelo menos uma foto da devolução.");
       return;
     }
 
@@ -114,7 +115,7 @@ export function ReturnNewPage() {
       setSuccessOccurrenceId(occurrenceId);
       setConfirmOpen(false);
     } catch (cause) {
-      setError(getErrorMessage(cause, "Nao foi possivel registrar a devolucao."));
+      setError(getErrorMessage(cause, "Não foi possível registrar a devolução."));
     } finally {
       setSubmitting(false);
     }
@@ -123,19 +124,19 @@ export function ReturnNewPage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Registre a devolucao de um cao adotado. Fotos sao obrigatorias."
-        title="Nova devolucao"
+        description="Registre a devolução de um cão adotado. Fotos sao obrigatórias."
+        title="Nova devolução"
       />
 
-      <div className="flex flex-col gap-6 rounded-xl border bg-card p-4 sm:p-6">
+      <div className="flex flex-col gap-6">
         {error ? (
-          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {error}
           </p>
         ) : null}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="return-dog-search">Buscar cao</Label>
+          <Label htmlFor="return-dog-search">Buscar cão</Label>
           <Input
             id="return-dog-search"
             onChange={(event) => setSearch(event.target.value)}
@@ -174,14 +175,14 @@ export function ReturnNewPage() {
         )}
 
         {selectedDog ? (
-          <div className="rounded-lg border p-4">
-            <p className="font-medium">{selectedDog.nome}</p>
+          <div className="rounded-xl bg-accent/50 p-4">
+            <p className="font-semibold">{selectedDog.nome}</p>
             <p className="text-sm text-muted-foreground">
               {formatMicrochip(selectedDog.microchip)}
             </p>
             {!selectedDog.tutor_atual_id ? (
-              <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">
-                Este cao nao possui tutor atual. Selecione outro cao para devolucao.
+              <p className="mt-2 text-sm text-warning">
+                Este cão não possui tutor atual. Selecione outro cão para devolução.
               </p>
             ) : currentTutor === undefined ? (
               <LoadingSkeleton rows={1} />
@@ -191,7 +192,7 @@ export function ReturnNewPage() {
                 <Input
                   disabled
                   readOnly
-                  value={currentTutor?.nome_completo ?? "Tutor nao encontrado"}
+                  value={currentTutor?.nome_completo ?? "Tutor não encontrado"}
                 />
                 {currentTutor?.bairro?.nome ? (
                   <p className="text-sm text-muted-foreground">{currentTutor.bairro.nome}</p>
@@ -202,9 +203,9 @@ export function ReturnNewPage() {
         ) : null}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="return-motivo">Motivo da devolucao</Label>
+          <Label htmlFor="return-motivo">Motivo da devolução</Label>
           <textarea
-            className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="min-h-24 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="return-motivo"
             onChange={(event) => setMotivo(event.target.value)}
             value={motivo}
@@ -212,7 +213,7 @@ export function ReturnNewPage() {
         </div>
 
         <MultiPhotoUpload
-          label="Fotos da devolucao"
+          label="Fotos da devolução"
           onChange={setPhotos}
           photos={photos}
           required
@@ -225,41 +226,20 @@ export function ReturnNewPage() {
             onClick={() => setConfirmOpen(true)}
             type="button"
           >
-            Registrar devolucao
+            Registrar devolução
           </Button>
         </div>
       </div>
 
-      {confirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border bg-card p-6 shadow-lg">
-            <h2 className="text-lg font-medium">Confirmar devolucao</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              O tutor atual sera removido e o cao voltara para a ONG. Esta acao gera uma
-              ocorrencia de devolucao.
-            </p>
-            <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button
-                className="min-h-11"
-                disabled={submitting}
-                onClick={() => setConfirmOpen(false)}
-                type="button"
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-              <Button
-                className="min-h-11"
-                disabled={submitting}
-                onClick={() => void handleSubmit()}
-                type="button"
-              >
-                {submitting ? "Registrando..." : "Confirmar"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ConfirmDialog
+        confirmLabel={submitting ? "Registrando..." : "Confirmar devolução"}
+        confirmVariant="destructive"
+        description="O tutor atual será removido e o cão voltará para a ONG. Esta ação gera uma ocorrência de devolução."
+        onConfirm={() => void handleSubmit()}
+        onOpenChange={setConfirmOpen}
+        open={confirmOpen}
+        title="Confirmar devolução"
+      />
     </section>
   );
 }

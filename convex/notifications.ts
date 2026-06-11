@@ -166,12 +166,12 @@ export const reportDogNotFound = mutation({
     }
 
     if (hasPermission(actor.permissions, "dogs.create")) {
-      throw validationError("Use o cadastro de novo cao para este microchip.");
+      throw validationError("Use o cadastro de novo cão para este microchip.");
     }
 
     const microchip = normalizeMicrochip(args.microchip);
     if (!isValidMicrochip(microchip)) {
-      throw validationError("Informe um microchip valido com 15 digitos.");
+      throw validationError("Informe um microchip válido com 15 dígitos.");
     }
 
     const formatted = formatMicrochipForMessage(microchip);
@@ -181,8 +181,8 @@ export const reportDogNotFound = mutation({
         hasPermission(user.permissions, "dogs.create") &&
         hasPermission(user.permissions, "dogs.read"),
       tipo: "dog_not_found",
-      titulo: "Microchip nao encontrado",
-      mensagem: `${actor.nome} nao encontrou o cao com microchip ${formatted} na identificacao.`,
+      titulo: "Microchip não encontrado",
+      mensagem: `${actor.nome} não encontrou o cão com microchip ${formatted} na identificação.`,
       entidade_id: microchip,
     });
 
@@ -191,7 +191,7 @@ export const reportDogNotFound = mutation({
       action: "notifications.reportDogNotFound",
       entityType: "dog",
       entityId: microchip,
-      summary: `Aviso de microchip nao encontrado: ${formatted}`,
+      summary: `Aviso de microchip não encontrado: ${formatted}`,
       metadata: { recipients },
     });
 

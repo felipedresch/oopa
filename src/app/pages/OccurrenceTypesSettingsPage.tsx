@@ -68,7 +68,7 @@ export function OccurrenceTypesSettingsPage() {
       });
       setNome("");
     } catch (createError) {
-      setError(getErrorMessage(createError, "Nao foi possivel criar o tipo."));
+      setError(getErrorMessage(createError, "Não foi possível criar o tipo."));
     } finally {
       setSubmitting(false);
     }
@@ -79,19 +79,19 @@ export function OccurrenceTypesSettingsPage() {
     try {
       await setActive({ occurrenceTypeId: typeId, ativo: !ativo });
     } catch (toggleError) {
-      setError(getErrorMessage(toggleError, "Nao foi possivel atualizar o tipo."));
+      setError(getErrorMessage(toggleError, "Não foi possível atualizar o tipo."));
     }
   };
 
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Catalogo de eventos do prontuario com permissao necessaria para criacao."
-        title="Tipos de ocorrencia"
+        description="Catálogo de eventos do prontuário com permissão necessaria para criação."
+        title="Tipos de ocorrência"
       />
 
-      <form className="flex max-w-xl flex-col gap-3 rounded-xl border p-4" onSubmit={handleCreate}>
-        <h3 className="font-medium">Novo tipo</h3>
+      <form className="flex max-w-xl flex-col gap-3" onSubmit={handleCreate}>
+        <h3 className="font-semibold">Novo tipo</h3>
         <div className="flex flex-col gap-2">
           <Label htmlFor="type-nome">Nome</Label>
           <Input id="type-nome" onChange={(event) => setNome(event.target.value)} value={nome} />
@@ -100,7 +100,7 @@ export function OccurrenceTypesSettingsPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="type-category">Categoria</Label>
             <select
-              className="min-h-11 rounded-md border bg-background px-3 text-sm"
+              className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="type-category"
               onChange={(event) =>
                 setCategoria(event.target.value as (typeof CATEGORY_OPTIONS)[number])
@@ -117,7 +117,7 @@ export function OccurrenceTypesSettingsPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="type-severity">Gravidade padrao</Label>
             <select
-              className="min-h-11 rounded-md border bg-background px-3 text-sm"
+              className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="type-severity"
               onChange={(event) =>
                 setGravidadePadrao(event.target.value as (typeof SEVERITY_OPTIONS)[number])
@@ -132,9 +132,10 @@ export function OccurrenceTypesSettingsPage() {
             </select>
           </div>
         </div>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex w-fit cursor-pointer items-center gap-2.5 text-sm font-medium">
           <input
             checked={requerFoto}
+            className="accent-primary"
             onChange={(event) => setRequerFoto(event.target.checked)}
             type="checkbox"
           />
@@ -145,7 +146,7 @@ export function OccurrenceTypesSettingsPage() {
         </Button>
       </form>
 
-      <FilterBar>
+      <FilterBar className="border-t pt-5">
         <div className="flex min-w-48 flex-1 flex-col gap-2">
           <Label htmlFor="type-search">Buscar</Label>
           <Input
@@ -156,37 +157,44 @@ export function OccurrenceTypesSettingsPage() {
         </div>
       </FilterBar>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {types === undefined ? <LoadingSkeleton rows={4} /> : null}
 
       {types && types.length === 0 ? (
-        <EmptyState description="Cadastre o primeiro tipo de ocorrencia." title="Sem tipos" />
+        <EmptyState description="Cadastre o primeiro tipo de ocorrência." title="Sem tipos" />
       ) : null}
 
       {types && types.length > 0 ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="divide-y divide-border">
           {types.map((type) => (
             <li
-              className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 py-3.5 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
               key={type._id}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{type.nome}</p>
-                  <Badge variant="outline">{type.categoria}</Badge>
-                  <Badge variant="outline">
+                  <Badge variant="secondary">{type.categoria}</Badge>
+                  <Badge variant="secondary">
                     {SEVERITY_LABELS[type.gravidade_padrao]}
                   </Badge>
-                  <Badge variant="outline">{type.ativo ? "Ativo" : "Inativo"}</Badge>
-                  {type.requer_foto ? <Badge variant="outline">Exige foto</Badge> : null}
+                  <Badge
+                    className={
+                      type.ativo ? "bg-success/12 text-success" : "bg-muted text-muted-foreground"
+                    }
+                    variant="secondary"
+                  >
+                    {type.ativo ? "Ativo" : "Inativo"}
+                  </Badge>
+                  {type.requer_foto ? <Badge variant="secondary">Exige foto</Badge> : null}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Permissao de criacao: {type.required_permission}
+                  Permissão de criação: {type.required_permission}
                 </p>
               </div>
               <Button
-                className="min-h-11"
                 onClick={() => toggleActive(type._id, type.ativo)}
+                size="sm"
                 type="button"
                 variant="outline"
               >

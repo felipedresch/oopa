@@ -46,7 +46,7 @@ export function DogPhotoGallery({ dogId, canEdit }: DogPhotoGalleryProps) {
       setStorageId(undefined);
       setDescricao("");
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel adicionar a foto."));
+      setError(getErrorMessage(submitError, "Não foi possível adicionar a foto."));
     } finally {
       setLoading(false);
     }
@@ -60,26 +60,28 @@ export function DogPhotoGallery({ dogId, canEdit }: DogPhotoGalleryProps) {
 
       {gallery.photos.length === 0 ? (
         <EmptyState
-          description="Adicione fotos complementares para enriquecer a ficha do cao."
+          description="Adicione fotos complementares para enriquecer a ficha do cão."
           title="Galeria vazia"
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {gallery.photos.map((photo) => (
-            <figure className="rounded-lg border bg-card p-3" key={photo._id}>
+            <figure className="flex flex-col gap-1.5" key={photo._id}>
               {photo.url ? (
                 <img
-                  alt={photo.descricao ?? "Foto adicional do cao"}
-                  className="mb-2 aspect-square w-full rounded-md object-cover"
+                  alt={photo.descricao ?? "Foto adicional do cão"}
+                  className="aspect-square w-full rounded-xl border object-cover"
                   src={photo.url}
                 />
               ) : (
-                <div className="mb-2 flex aspect-square items-center justify-center rounded-md bg-muted text-sm text-muted-foreground">
+                <div className="flex aspect-square items-center justify-center rounded-xl bg-muted text-sm text-muted-foreground">
                   Foto indisponivel
                 </div>
               )}
               {photo.descricao ? (
-                <figcaption className="text-sm text-muted-foreground">{photo.descricao}</figcaption>
+                <figcaption className="truncate text-xs text-muted-foreground">
+                  {photo.descricao}
+                </figcaption>
               ) : null}
             </figure>
           ))}
@@ -87,8 +89,8 @@ export function DogPhotoGallery({ dogId, canEdit }: DogPhotoGalleryProps) {
       )}
 
       {canEdit && !atLimit ? (
-        <div className="rounded-xl border bg-card p-4">
-          <h3 className="mb-4 font-medium">Adicionar foto</h3>
+        <div className="border-t pt-5">
+          <h3 className="mb-4 font-semibold">Adicionar foto</h3>
           <div className="flex flex-col gap-4">
             <PhotoUpload
               label="Nova foto"
@@ -96,7 +98,7 @@ export function DogPhotoGallery({ dogId, canEdit }: DogPhotoGalleryProps) {
               storageId={storageId}
             />
             <div className="flex flex-col gap-2">
-              <Label htmlFor="descricao-foto">Descricao (opcional)</Label>
+              <Label htmlFor="descricao-foto">Descrição (opcional)</Label>
               <Input
                 id="descricao-foto"
                 onChange={(event) => setDescricao(event.target.value)}

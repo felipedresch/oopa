@@ -17,6 +17,7 @@ type ConfirmDialogProps = {
   description: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  confirmVariant?: "default" | "destructive";
   onConfirm: () => void;
   onOpenChange: (open: boolean) => void;
   children?: ReactNode;
@@ -28,6 +29,7 @@ export function ConfirmDialog({
   description,
   confirmLabel = ACTION_COPY.confirm,
   cancelLabel = ACTION_COPY.cancel,
+  confirmVariant = "default",
   onConfirm,
   onOpenChange,
   children,
@@ -49,7 +51,12 @@ export function ConfirmDialog({
           >
             {cancelLabel}
           </Button>
-          <Button className="min-h-11" onClick={onConfirm} type="button">
+          <Button
+            className="min-h-11"
+            onClick={onConfirm}
+            type="button"
+            variant={confirmVariant === "destructive" ? "destructive" : "default"}
+          >
             {confirmLabel}
           </Button>
         </DialogFooter>

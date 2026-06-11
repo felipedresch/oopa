@@ -25,7 +25,7 @@ export function RequestResetPage() {
       await requestReset({ email: email.trim().toLowerCase() });
       setSent(true);
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel solicitar o reset."));
+      setError(getErrorMessage(submitError, "Não foi possível solicitar o reset."));
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ export function RequestResetPage() {
       <CardContent>
         {sent ? (
           <p className="text-sm text-muted-foreground">
-            Se o email estiver cadastrado, voce recebera um link valido por 60 minutos.
+            Se o email estiver cadastrado, você receberá um link válido por 60 minutos.
           </p>
         ) : (
           <form className="flex flex-col gap-4" onSubmit={(event) => void handleSubmit(event)}>

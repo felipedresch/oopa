@@ -19,7 +19,7 @@ async function sendEmail(args: {
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn("RESEND_API_KEY ausente; email nao enviado.", {
+    console.warn("RESEND_API_KEY ausente; email não enviado.", {
       to: args.to,
       subject: args.subject,
     });
@@ -52,8 +52,8 @@ export const sendInviteEmail = internalAction({
       to: args.email,
       subject: "Convite para acessar o OOPA",
       html: `
-        <p>Ola, ${args.nome}.</p>
-        <p>Voce foi convidado para acessar o sistema OOPA.</p>
+        <p>Olá, ${args.nome}.</p>
+        <p>Você foi convidado para acessar o sistema OOPA.</p>
         <p><a href="${link}">Aceitar convite e criar senha</a></p>
         <p>Este link expira em 7 dias.</p>
       `,

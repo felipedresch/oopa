@@ -14,7 +14,7 @@ describe("routes", () => {
     expect(await screen.findByRole("heading", { name: /entrar no oopa/i })).toBeInTheDocument();
   });
 
-  it("redireciona dashboard nao autenticado para login", async () => {
+  it("redireciona dashboard não autenticado para login", async () => {
     const router = createMemoryRouter(appRoutes, { initialEntries: ["/"] });
     render(<RouterProvider router={router} />);
 

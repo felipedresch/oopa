@@ -57,20 +57,25 @@ export function NotificationsPage() {
           </Button>
         }
         description="Acompanhe alertas legais e avisos operacionais da ONG."
-        title="Notificacoes"
+        title="Notificações"
       />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex w-fit gap-1 rounded-xl bg-muted p-1">
         {(["all", "unread", "read"] as const).map((filter) => (
-          <Button
-            className="min-h-11"
+          <button
+            aria-pressed={readFilter === filter}
+            className={cn(
+              "min-h-10 rounded-lg px-4 text-sm font-medium transition-colors",
+              readFilter === filter
+                ? "bg-card text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground",
+            )}
             key={filter}
             onClick={() => setReadFilter(filter)}
             type="button"
-            variant={readFilter === filter ? "default" : "outline"}
           >
-            {filter === "all" ? "Todas" : filter === "unread" ? "Nao lidas" : "Lidas"}
-          </Button>
+            {filter === "all" ? "Todas" : filter === "unread" ? "Não lidas" : "Lidas"}
+          </button>
         ))}
       </div>
 
@@ -78,8 +83,8 @@ export function NotificationsPage() {
 
       {status !== "LoadingFirstPage" && results.length === 0 ? (
         <EmptyState
-          description="Quando houver alertas legais ou avisos de identificacao, eles aparecerao aqui."
-          title="Nenhuma notificacao"
+          description="Quando houver alertas legais ou avisos de identificação, eles aparecerão aqui."
+          title="Nenhuma notificação"
         />
       ) : null}
 
@@ -92,28 +97,35 @@ export function NotificationsPage() {
                 <li key={notification._id}>
                   <button
                     className={cn(
-                      "w-full rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted/40",
-                      !notification.lida && "border-primary/40 bg-primary/5",
+                      "flex w-full items-start gap-3 rounded-xl border bg-card p-4 text-left shadow-xs transition-colors hover:border-ring/40 hover:bg-accent/30",
+                      !notification.lida && "border-primary/50 bg-accent/40",
                     )}
                     onClick={() => handleOpen(notification)}
                     type="button"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium">{notification.titulo}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {notification.mensagem}
-                        </p>
-                      </div>
-                      {!notification.lida ? (
-                        <span className="rounded-full bg-primary px-2 py-1 text-xs font-medium text-primary-foreground">
-                          Nova
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {formatDateTime(notification.criado_em)}
-                    </p>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "mt-1.5 size-2 shrink-0 rounded-full",
+                        notification.lida ? "bg-border" : "bg-primary",
+                      )}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className={cn(
+                          "block",
+                          notification.lida ? "font-medium" : "font-semibold",
+                        )}
+                      >
+                        {notification.titulo}
+                      </span>
+                      <span className="mt-0.5 block text-sm leading-6 text-muted-foreground">
+                        {notification.mensagem}
+                      </span>
+                      <span className="mt-1.5 block text-xs text-muted-foreground">
+                        {formatDateTime(notification.criado_em)}
+                      </span>
+                    </span>
                   </button>
                 </li>
               ))}

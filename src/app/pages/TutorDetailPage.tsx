@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { formatCep, formatCpf, formatDate, formatPhone } from "@/lib/formatters";
 
-const TABS = ["Dados", "Caes atuais", "Historico", "Ocorrencias"] as const;
+const TABS = ["Dados", "Cães atuais", "Histórico", "Ocorrências"] as const;
 
 export function TutorDetailPage() {
   const { tutorId } = useParams();
@@ -37,7 +37,7 @@ export function TutorDetailPage() {
 
   if (!tutor) {
     return (
-      <PlaceholderPage description="O tutor solicitado nao existe." title="Tutor nao encontrado" />
+      <PlaceholderPage description="O tutor solicitado não existe." title="Tutor não encontrado" />
     );
   }
 
@@ -51,46 +51,51 @@ export function TutorDetailPage() {
             </Button>
           ) : null
         }
-        description={tutor.bairro?.nome ?? "Bairro nao informado"}
+        description={tutor.bairro?.nome ?? "Bairro não informado"}
         title={tutor.nome_completo}
       />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-1 overflow-x-auto border-b" role="tablist">
         {TABS.map((tab) => (
-          <Button
-            className="min-h-11"
+          <button
+            aria-selected={activeTab === tab}
+            className={`min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors ${
+              activeTab === tab
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
             key={tab}
             onClick={() => setActiveTab(tab)}
+            role="tab"
             type="button"
-            variant={activeTab === tab ? "default" : "outline"}
           >
             {tab}
-          </Button>
+          </button>
         ))}
       </div>
 
       {activeTab === "Dados" ? (
-        <div className="flex flex-col gap-4">
-          <div className="rounded-xl border p-4">
-            <h3 className="mb-3 font-medium">Informacoes basicas</h3>
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <div className="flex flex-col gap-8">
+          <section>
+            <h3 className="mb-3 font-semibold">Informacoes basicas</h3>
+            <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
               <div>
                 <dt className="text-muted-foreground">Nome</dt>
                 <dd>{tutor.nome_completo}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Bairro</dt>
-                <dd>{tutor.bairro?.nome ?? "Nao informado"}</dd>
+                <dd>{tutor.bairro?.nome ?? "Não informado"}</dd>
               </div>
             </dl>
-          </div>
+          </section>
 
           {tutor.sensitive_hidden ? (
             <SensitiveDataHidden />
           ) : tutor.sensitive ? (
-            <div className="rounded-xl border p-4">
-              <h3 className="mb-3 font-medium">Dados sensiveis</h3>
-              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <section className="border-t pt-6">
+              <h3 className="mb-3 font-semibold">Dados sensiveis</h3>
+              <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
                 <div>
                   <dt className="text-muted-foreground">CPF</dt>
                   <dd>{tutor.sensitive.cpf ? formatCpf(tutor.sensitive.cpf) : "-"}</dd>
@@ -136,27 +141,29 @@ export function TutorDetailPage() {
                   </dd>
                 </div>
                 <div className="sm:col-span-2">
-                  <dt className="text-muted-foreground">Observacoes</dt>
+                  <dt className="text-muted-foreground">Observações</dt>
                   <dd>{tutor.sensitive.observacoes ?? "-"}</dd>
                 </div>
               </dl>
-            </div>
+            </section>
           ) : null}
 
           {tutor.alert ? (
-            <TutorAlertPanel
+            <div className="border-t pt-6">
+              <TutorAlertPanel
               altaCount={tutor.alert.alta_count}
               level={tutor.alert.level}
               mediaCount={tutor.alert.media_count}
               occurrences={tutor.alert.occurrences}
             />
+            </div>
           ) : null}
         </div>
       ) : null}
 
-      {activeTab === "Caes atuais" ? (
+      {activeTab === "Cães atuais" ? (
         tutor.current_dogs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum cao vinculado atualmente.</p>
+          <p className="text-sm text-muted-foreground">Nenhum cão vinculado atualmente.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {tutor.current_dogs.map((dog) => (
@@ -172,19 +179,26 @@ export function TutorDetailPage() {
         )
       ) : null}
 
-      {activeTab === "Historico" ? (
+      {activeTab === "Histórico" ? (
         tutor.history.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sem historico tutor-cao registrado.</p>
+          <p className="text-sm text-muted-foreground">Sem histórico tutor-cão registrado.</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="divide-y divide-border">
             {tutor.history.map((entry) => (
-              <li className="rounded-xl border p-4" key={entry._id}>
-                <p className="font-medium">{entry.dog_nome}</p>
+              <li className="flex flex-col gap-0.5 py-3 first:pt-0 last:pb-0" key={entry._id}>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                  <p className="font-medium">{entry.dog_nome}</p>
+                  {entry.fim ? null : (
+                    <span className="rounded-full bg-success/12 px-2.5 py-0.5 text-xs font-medium text-success">
+                      Atual
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
                   {formatDate(entry.inicio)}
-                  {entry.fim ? ` ate ${formatDate(entry.fim)}` : " (atual)"}
+                  {entry.fim ? ` ate ${formatDate(entry.fim)}` : ""}
                 </p>
-                <p className="text-sm">
+                <p className="text-sm text-muted-foreground">
                   {entry.tipo_inicio}
                   {entry.tipo_fim ? ` / ${entry.tipo_fim}` : ""}
                 </p>
@@ -194,7 +208,7 @@ export function TutorDetailPage() {
         )
       ) : null}
 
-      {activeTab === "Ocorrencias" ? (
+      {activeTab === "Ocorrências" ? (
         tutor.sensitive_hidden ? (
           <SensitiveDataHidden />
         ) : tutor.alert && tutor.alert.occurrences.length > 0 ? (
@@ -206,7 +220,7 @@ export function TutorDetailPage() {
           />
         ) : (
           <p className="text-sm text-muted-foreground">
-            Nenhuma ocorrencia atribuivel registrada para este tutor.
+            Nenhuma ocorrência atribuível registrada para este tutor.
           </p>
         )
       ) : null}

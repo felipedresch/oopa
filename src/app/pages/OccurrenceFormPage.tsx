@@ -21,12 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { SEVERITY_LABELS } from "@/lib/domain-colors";
 import { validateRequired } from "@/lib/validations";
 
 const ADJUSTABLE_SEVERITIES = ["baixa", "media", "alta"] as const;
-const TYPES_REQUIRING_NEW_TUTOR = new Set(["Adocao", "Transferencia de Tutor"]);
+const TYPES_REQUIRING_NEW_TUTOR = new Set(["Adoção", "Transferência de Tutor"]);
 
 type UploadedPhoto = {
   storageId: Id<"_storage">;
@@ -61,7 +62,7 @@ export function OccurrenceFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
 
-  useDirtyFormGuard(isDirty);
+  const blocker = useDirtyFormGuard(isDirty);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -93,7 +94,7 @@ export function OccurrenceFormPage() {
     (!requiresNewTutor || Boolean(newTutorId));
 
   if (!dogId) {
-    return <PermissionDenied message="Cao nao informado." />;
+    return <PermissionDenied message="Cão não informado." />;
   }
 
   if (dog === undefined || types === undefined) {
@@ -101,11 +102,11 @@ export function OccurrenceFormPage() {
   }
 
   if (!dog) {
-    return <PermissionDenied message="Cao nao encontrado." />;
+    return <PermissionDenied message="Cão não encontrado." />;
   }
 
   if (!types || types.length === 0) {
-    return <PermissionDenied message="Voce nao tem permissao para criar ocorrencias." />;
+    return <PermissionDenied message="Você não tem permissão para criar ocorrências." />;
   }
 
   const handleTypeChange = (nextTypeId: string) => {
@@ -137,7 +138,7 @@ export function OccurrenceFormPage() {
     setError(null);
     const descricaoError = validateRequired(descricao);
     if (descricaoError || !typeId) {
-      setError(descricaoError ?? "Selecione o tipo de ocorrencia.");
+      setError(descricaoError ?? "Selecione o tipo de ocorrência.");
       return;
     }
 
@@ -146,7 +147,7 @@ export function OccurrenceFormPage() {
       const occurrenceId = await createOccurrence(buildPayload(typeId));
       void navigate(`/dogs/${dog._id}/occurrences/${occurrenceId}`);
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel registrar a ocorrencia."));
+      setError(getErrorMessage(submitError, "Não foi possível registrar a ocorrência."));
     } finally {
       setSubmitting(false);
       setConfirmOpen(false);
@@ -169,7 +170,7 @@ export function OccurrenceFormPage() {
     <section className="flex flex-col gap-6">
       <PageHeader
         description={`Registrar evento para ${dog.nome}`}
-        title="Nova ocorrencia"
+        title="Nova ocorrência"
       />
 
       <form
@@ -180,7 +181,7 @@ export function OccurrenceFormPage() {
         <div className="flex flex-col gap-2">
           <Label htmlFor="occ-type">Tipo</Label>
           <select
-            className="min-h-11 rounded-md border bg-background px-3 text-sm"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="occ-type"
             onChange={(event) => handleTypeChange(event.target.value)}
             required
@@ -196,7 +197,7 @@ export function OccurrenceFormPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="occ-date">Data da ocorrencia</Label>
+          <Label htmlFor="occ-date">Data da ocorrência</Label>
           <Input
             id="occ-date"
             onChange={(event) => setDataOcorrencia(event.target.value)}
@@ -227,9 +228,9 @@ export function OccurrenceFormPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="occ-desc">Descricao</Label>
+          <Label htmlFor="occ-desc">Descrição</Label>
           <textarea
-            className="min-h-24 rounded-md border bg-background px-3 py-2 text-sm"
+            className="min-h-24 rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="occ-desc"
             onChange={(event) => setDescricao(event.target.value)}
             required
@@ -241,7 +242,7 @@ export function OccurrenceFormPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="occ-severity">Gravidade</Label>
             <select
-              className="min-h-11 rounded-md border bg-background px-3 text-sm"
+              className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="occ-severity"
               onChange={(event) =>
                 setGravidade(event.target.value as (typeof ADJUSTABLE_SEVERITIES)[number] | "")
@@ -260,9 +261,10 @@ export function OccurrenceFormPage() {
           </div>
         ) : null}
 
-        <label className="flex min-h-11 items-center gap-3 rounded-md border px-3 text-sm">
+        <label className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-card px-3 text-sm font-medium transition-colors has-checked:border-primary has-checked:bg-accent has-checked:text-accent-foreground">
           <input
             checked={atribuivel}
+            className="accent-primary"
             onChange={(event) => setAtribuivel(event.target.checked)}
             type="checkbox"
           />
@@ -279,12 +281,12 @@ export function OccurrenceFormPage() {
               value={tutorSearch}
             />
             {tutorOptions?.page && tutorOptions.page.length > 0 ? (
-              <ul className="rounded-md border">
+              <ul className="divide-y divide-border overflow-hidden rounded-lg border border-input bg-card">
                 {tutorOptions.page.map((tutor) => (
                   <li key={tutor._id}>
                     <button
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-muted ${
-                        newTutorId === tutor._id ? "bg-muted font-medium" : ""
+                      className={`w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/40 ${
+                        newTutorId === tutor._id ? "bg-accent font-medium text-accent-foreground" : ""
                       }`}
                       onClick={() => setNewTutorId(tutor._id)}
                       type="button"
@@ -299,17 +301,17 @@ export function OccurrenceFormPage() {
         ) : null}
 
         <MultiPhotoUpload
-          label="Fotos da ocorrencia"
+          label="Fotos da ocorrência"
           onChange={setPhotos}
           photos={photos}
           required={requiresPhoto}
         />
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
           <Button className="min-h-11" disabled={!canSubmit || submitting} type="submit">
-            {submitting ? "Salvando..." : "Registrar ocorrencia"}
+            {submitting ? "Salvando..." : "Registrar ocorrência"}
           </Button>
           <Button asChild className="min-h-11" type="button" variant="outline">
             <Link to={`/dogs/${dog._id}`}>Cancelar</Link>
@@ -320,15 +322,15 @@ export function OccurrenceFormPage() {
       <Dialog onOpenChange={setConfirmOpen} open={confirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar ocorrencia sensivel</DialogTitle>
+            <DialogTitle>Confirmar ocorrência sensível</DialogTitle>
             <DialogDescription>
-              Revise os dados antes de registrar uma ocorrencia de risco ou legal.
+              Revise os dados antes de registrar uma ocorrência de risco ou legal.
             </DialogDescription>
           </DialogHeader>
 
           <dl className="grid gap-2 text-sm">
             <div>
-              <dt className="text-muted-foreground">Cao</dt>
+              <dt className="text-muted-foreground">Cão</dt>
               <dd>{dog.nome}</dd>
             </div>
             <div>
@@ -347,7 +349,7 @@ export function OccurrenceFormPage() {
             </div>
             <div>
               <dt className="text-muted-foreground">Atribuicao ao tutor</dt>
-              <dd>{atribuivel ? "Sim" : "Nao"}</dd>
+              <dd>{atribuivel ? "Sim" : "Não"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Fotos</dt>
@@ -365,6 +367,7 @@ export function OccurrenceFormPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <UnsavedChangesDialog blocker={blocker} />
     </section>
   );
 }

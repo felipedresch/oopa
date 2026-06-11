@@ -8,7 +8,7 @@ type SeverityBadgeProps = {
 
 export function SeverityBadge({ severity }: SeverityBadgeProps) {
   return (
-    <Badge className={severityBadgeClass[severity]} variant="outline">
+    <Badge className={severityBadgeClass[severity]} variant="secondary">
       {SEVERITY_LABELS[severity]}
     </Badge>
   );

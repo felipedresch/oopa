@@ -5,7 +5,7 @@ import { ocrFailed } from "./errors";
 async function recognizeWithOpenAi(bytes: Buffer, contentType: string): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw ocrFailed("OCR nao configurado. Informe o microchip manualmente.");
+    throw ocrFailed("OCR não configurado. Informe o microchip manualmente.");
   }
 
   const base64 = bytes.toString("base64");
@@ -24,7 +24,7 @@ async function recognizeWithOpenAi(bytes: Buffer, contentType: string): Promise<
           content: [
             {
               type: "text",
-              text: "Leia apenas o numero de 15 digitos do microchip exibido na tela do leitor RFID. Responda somente com os 15 digitos, sem espacos ou texto extra.",
+              text: "Leia apenas o número de 15 dígitos do microchip exibido na tela do leitor RFID. Responda somente com os 15 dígitos, sem espacos ou texto extra.",
             },
             {
               type: "image_url",
@@ -39,7 +39,7 @@ async function recognizeWithOpenAi(bytes: Buffer, contentType: string): Promise<
   });
 
   if (!response.ok) {
-    throw ocrFailed("Nao foi possivel processar a foto do leitor.");
+    throw ocrFailed("Não foi possível processar a foto do leitor.");
   }
 
   const payload = (await response.json()) as {
@@ -47,7 +47,7 @@ async function recognizeWithOpenAi(bytes: Buffer, contentType: string): Promise<
   };
   const text = payload.choices?.[0]?.message?.content?.trim() ?? "";
   if (!text) {
-    throw ocrFailed("Nao consegui ler o microchip na foto.");
+    throw ocrFailed("Não consegui ler o microchip na foto.");
   }
 
   return text;
@@ -71,5 +71,5 @@ export async function recognizeTextFromImage(
     return await recognizeWithOpenAi(bytes, contentType);
   }
 
-  throw ocrFailed("Provedor OCR invalido.");
+  throw ocrFailed("Provedor OCR inválido.");
 }

@@ -60,16 +60,16 @@ export function DogsListPage() {
         actions={
           can("dogs.create") ? (
             <Button asChild className="min-h-11">
-              <Link to="/dogs/new">Novo cao</Link>
+              <Link to="/dogs/new">Novo cão</Link>
             </Button>
           ) : undefined
         }
-        description="Filtre por status, porte e alertas recentes de ocorrencias graves."
-        title="Caes"
+        description="Filtre por status, porte e alertas recentes de ocorrências graves."
+        title="Cães"
       />
 
       <FilterBar>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="dog-search">Busca</Label>
             <Input
@@ -82,7 +82,7 @@ export function DogsListPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="dog-status-filter">Status</Label>
             <select
-              className="min-h-11 rounded-md border bg-background px-3 text-sm"
+              className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="dog-status-filter"
               onChange={(event) => setStatus(event.target.value as DogStatus | "")}
               value={status}
@@ -97,7 +97,7 @@ export function DogsListPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="dog-porte-filter">Porte</Label>
             <select
-              className="min-h-11 rounded-md border bg-background px-3 text-sm"
+              className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="dog-porte-filter"
               onChange={(event) =>
                 setPorte(event.target.value as "" | "pequeno" | "medio" | "grande")
@@ -111,9 +111,10 @@ export function DogsListPage() {
               ))}
             </select>
           </div>
-          <label className="flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 self-end rounded-lg border border-input bg-card px-3 text-sm font-medium transition-colors has-checked:border-primary has-checked:bg-accent has-checked:text-accent-foreground">
             <input
               checked={graveRecent}
+              className="accent-primary"
               onChange={(event) => setGraveRecent(event.target.checked)}
               type="checkbox"
             />
@@ -126,8 +127,8 @@ export function DogsListPage() {
 
       {results?.length === 0 ? (
         <EmptyState
-          description="Ajuste os filtros ou cadastre um novo cao."
-          title="Nenhum cao encontrado"
+          description="Ajuste os filtros ou cadastre um novo cão."
+          title="Nenhum cão encontrado"
         />
       ) : null}
 

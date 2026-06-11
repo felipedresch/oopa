@@ -2,8 +2,8 @@ export const ACTION_COPY = {
   confirm: "Confirmar",
   cancel: "Cancelar",
   save: "Salvar",
-  registerOccurrence: "Registrar ocorrencia",
+  registerOccurrence: "Registrar ocorrência",
   continue: "Continuar",
   back: "Voltar",
-  permissionDenied: "Nao tenho permissao para isso",
+  permissionDenied: "Não tenho permissão para isso",
 } as const;

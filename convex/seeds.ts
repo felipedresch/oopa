@@ -11,25 +11,25 @@ import {
 
 const SEED_OCCURRENCE_TYPES = [
   {
-    nome: "Consulta/Visualizacao",
+    nome: "Consulta/Visualização",
     categoria: "rotina" as const,
     requer_foto: false,
     gravidade_padrao: "info" as const,
   },
   {
-    nome: "Castracao",
+    nome: "Castração",
     categoria: "clinica" as const,
     requer_foto: false,
     gravidade_padrao: "baixa" as const,
   },
   {
-    nome: "Vacinacao",
+    nome: "Vacinação",
     categoria: "clinica" as const,
     requer_foto: false,
     gravidade_padrao: "baixa" as const,
   },
   {
-    nome: "Atendimento Veterinario",
+    nome: "Atendimento Veterinário",
     categoria: "clinica" as const,
     requer_foto: false,
     gravidade_padrao: "media" as const,
@@ -41,19 +41,19 @@ const SEED_OCCURRENCE_TYPES = [
     gravidade_padrao: "media" as const,
   },
   {
-    nome: "Devolucao a ONG",
+    nome: "Devolução a ONG",
     categoria: "adocao" as const,
     requer_foto: true,
     gravidade_padrao: "media" as const,
   },
   {
-    nome: "Adocao",
+    nome: "Adoção",
     categoria: "adocao" as const,
     requer_foto: false,
     gravidade_padrao: "baixa" as const,
   },
   {
-    nome: "Transferencia de Tutor",
+    nome: "Transferência de Tutor",
     categoria: "adocao" as const,
     requer_foto: false,
     gravidade_padrao: "baixa" as const,
@@ -71,19 +71,19 @@ const SEED_OCCURRENCE_TYPES = [
     gravidade_padrao: "alta" as const,
   },
   {
-    nome: "Denuncia de Maus-Tratos",
+    nome: "Denúncia de Maus-Tratos",
     categoria: "legal" as const,
     requer_foto: true,
     gravidade_padrao: "alta" as const,
   },
   {
-    nome: "Obito",
+    nome: "Óbito",
     categoria: "outro" as const,
     requer_foto: false,
     gravidade_padrao: "alta" as const,
   },
   {
-    nome: "Correcao/Retificacao",
+    nome: "Correção/Retificação",
     categoria: "outro" as const,
     requer_foto: false,
     gravidade_padrao: "info" as const,
@@ -96,7 +96,7 @@ const SEED_OCCURRENCE_TYPES = [
   },
 ] as const;
 
-const SEED_BAIRROS = ["Centro", "Zona Rural", "Nao informado"] as const;
+const SEED_BAIRROS = ["Centro", "Zona Rural", "Não informado"] as const;
 
 const now = () => Date.now();
 

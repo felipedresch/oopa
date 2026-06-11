@@ -39,7 +39,7 @@ export function usePhotoUpload() {
       } catch (uploadError) {
         setState("error");
         setError(
-          uploadError instanceof Error ? uploadError.message : "Nao foi possivel enviar a foto.",
+          uploadError instanceof Error ? uploadError.message : "Não foi possível enviar a foto.",
         );
         return null;
       }

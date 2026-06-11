@@ -12,5 +12,5 @@ export function normalizeOcrContentType(file: File): "image/jpeg" | "image/png" 
   if (file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp") {
     return file.type;
   }
-  throw new Error("Formato invalido. Use JPEG, PNG ou WebP.");
+  throw new Error("Formato inválido. Use JPEG, PNG ou WebP.");
 }

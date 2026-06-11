@@ -15,10 +15,10 @@ import { SEVERITY_LABELS } from "@/lib/domain-colors";
 const CATEGORY_OPTIONS = [
   { value: "", label: "Todas as categorias" },
   { value: "rotina", label: "Rotina" },
-  { value: "clinica", label: "Clinica" },
+  { value: "clinica", label: "Clínica" },
   { value: "risco", label: "Risco" },
   { value: "legal", label: "Legal" },
-  { value: "adocao", label: "Adocao" },
+  { value: "adocao", label: "Adoção" },
   { value: "outro", label: "Outro" },
 ] as const;
 
@@ -62,7 +62,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-severity">Gravidade</Label>
           <select
-            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="occ-severity"
             onChange={(event) => setGravidade(event.target.value as Severity | "")}
             value={gravidade}
@@ -78,7 +78,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-category">Categoria</Label>
           <select
-            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="occ-category"
             onChange={(event) =>
               setCategoria(event.target.value as (typeof CATEGORY_OPTIONS)[number]["value"])
@@ -96,7 +96,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-from">De</Label>
           <input
-            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="occ-from"
             onChange={(event) => setFromDate(event.target.value)}
             type="date"
@@ -105,9 +105,9 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         </div>
 
         <div className="flex min-w-40 flex-1 flex-col gap-2">
-          <Label htmlFor="occ-to">Ate</Label>
+          <Label htmlFor="occ-to">Até</Label>
           <input
-            className="min-h-11 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="occ-to"
             onChange={(event) => setToDate(event.target.value)}
             type="date"
@@ -118,8 +118,8 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
 
       {results.length === 0 ? (
         <EmptyState
-          description="Nenhuma ocorrencia visivel com os filtros atuais."
-          title="Sem ocorrencias"
+          description="Nenhuma ocorrência visivel com os filtros atuais."
+          title="Sem ocorrências"
         />
       ) : (
         <div className="flex flex-col gap-3">

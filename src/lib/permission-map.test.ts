@@ -2,7 +2,7 @@ import { moduleMapToPermissions } from "@/lib/permission-map";
 import { createEmptyModuleMap } from "@/lib/permissions";
 
 describe("permission-map", () => {
-  it("converte mapa de modulos em permissoes granulares", () => {
+  it("converte mapa de módulos em permissões granulares", () => {
     const permissions = moduleMapToPermissions({
       ...createEmptyModuleMap(),
       dogs: "read",

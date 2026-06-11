@@ -109,7 +109,7 @@ test("evaluateTutor retorna alerta e warning de bairro", async () => {
   const storageId = await storeTestImage(t);
   await asUser(t, adminId, async (client) => {
     const types = await client.query(api.occurrenceTypes.list, {});
-    const devolucaoType = types.find((type) => type.nome === "Devolucao a ONG");
+    const devolucaoType = types.find((type) => type.nome === "Devolução a ONG");
     await client.mutation(api.occurrences.create, {
       dogId,
       occurrenceTypeId: devolucaoType!._id,

@@ -23,7 +23,7 @@ export function AcceptInvitePage() {
   const [loading, setLoading] = useState(false);
 
   if (!token) {
-    return <p className="text-sm text-destructive">Link de convite invalido.</p>;
+    return <p className="text-sm text-destructive">Link de convite inválido.</p>;
   }
 
   if (preview === undefined) {
@@ -33,8 +33,8 @@ export function AcceptInvitePage() {
   if (preview.status !== "valid") {
     const messages = {
       expired: "Este convite expirou. Solicite um novo convite a ONG.",
-      used: "Este convite ja foi utilizado.",
-      invalid: "Convite invalido.",
+      used: "Este convite já foi utilizado.",
+      invalid: "Convite inválido.",
     };
     return (
       <Card>
@@ -54,7 +54,7 @@ export function AcceptInvitePage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem.");
+      setError("As senhas não coincidem.");
       return;
     }
 
@@ -70,7 +70,7 @@ export function AcceptInvitePage() {
       });
       void navigate("/");
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel aceitar o convite."));
+      setError(getErrorMessage(submitError, "Não foi possível aceitar o convite."));
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export function AcceptInvitePage() {
             <Input disabled id="email" readOnly type="email" value={preview.email} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="organizacao">Organizacao</Label>
+            <Label htmlFor="organizacao">Organização</Label>
             <Input disabled id="organizacao" readOnly value={preview.organizacao} />
           </div>
           <div className="flex flex-col gap-2">

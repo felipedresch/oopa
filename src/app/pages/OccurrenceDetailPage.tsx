@@ -24,7 +24,7 @@ export function OccurrenceDetailPage() {
   );
 
   if (!occurrenceId || !dogId) {
-    return <PermissionDenied message="Ocorrencia nao informada." />;
+    return <PermissionDenied message="Ocorrência não informada." />;
   }
 
   if (occurrence === undefined) {
@@ -34,8 +34,8 @@ export function OccurrenceDetailPage() {
   if (!occurrence) {
     return (
       <PlaceholderPage
-        description="A ocorrencia solicitada nao existe ou voce nao tem permissao."
-        title="Ocorrencia nao encontrada"
+        description="A ocorrência solicitada não existe ou você não tem permissão."
+        title="Ocorrência não encontrada"
       />
     );
   }
@@ -48,12 +48,12 @@ export function OccurrenceDetailPage() {
             {occurrence.can_rectify ? (
               <Button asChild className="min-h-11" variant="outline">
                 <Link to={`/dogs/${dogId}/occurrences/${occurrenceId}/rectify`}>
-                  Registrar retificacao
+                  Registrar retificação
                 </Link>
               </Button>
             ) : null}
             <Button asChild className="min-h-11" variant="outline">
-              <Link to={`/dogs/${dogId}`}>Voltar ao cao</Link>
+              <Link to={`/dogs/${dogId}`}>Voltar ao cão</Link>
             </Button>
           </div>
         }
@@ -65,52 +65,52 @@ export function OccurrenceDetailPage() {
         <SeverityBadge severity={occurrence.gravidade} />
         <span className="text-sm text-muted-foreground">{occurrence.categoria}</span>
         {occurrence.atribuivel_ao_tutor ? (
-          <span className="text-sm text-amber-700 dark:text-amber-300">
+          <span className="text-sm text-warning">
             Conta para alerta do tutor
           </span>
         ) : null}
       </div>
 
-      <div className="rounded-xl border p-4">
-        <h3 className="mb-3 font-medium">Registro</h3>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+      <section>
+        <h3 className="mb-3 font-semibold">Registro</h3>
+        <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
           <div>
-            <dt className="text-muted-foreground">Cao</dt>
+            <dt className="text-muted-foreground">Cão</dt>
             <dd>{occurrence.dog_nome}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Bairro</dt>
-            <dd>{occurrence.bairro_nome ?? "Nao informado"}</dd>
+            <dd>{occurrence.bairro_nome ?? "Não informado"}</dd>
           </div>
           <div className="sm:col-span-2">
             <dt className="text-muted-foreground">Local</dt>
             <dd>{occurrence.local_descricao ?? "—"}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-muted-foreground">Descricao</dt>
+            <dt className="text-muted-foreground">Descrição</dt>
             <dd>{occurrence.descricao}</dd>
           </div>
         </dl>
-      </div>
+      </section>
 
       {occurrence.original_id ? (
-        <div className="rounded-xl border border-dashed p-4 text-sm">
-          <p className="font-medium">Retificacao de ocorrencia anterior</p>
-          <p className="text-muted-foreground">{occurrence.original_summary ?? occurrence.original_id}</p>
+        <div className="rounded-xl bg-info/10 p-4 text-sm">
+          <p className="font-medium text-info">Retificação de ocorrência anterior</p>
+          <p className="mt-0.5 text-muted-foreground">{occurrence.original_summary ?? occurrence.original_id}</p>
         </div>
       ) : null}
 
       {occurrence.tutor_snapshot ? (
-        <div className="rounded-xl border p-4">
-          <h3 className="mb-3 font-medium">Snapshot do tutor no momento do registro</h3>
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <section className="border-t pt-6">
+          <h3 className="mb-3 font-semibold">Snapshot do tutor no momento do registro</h3>
+          <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
             <div>
               <dt className="text-muted-foreground">Nome</dt>
               <dd>{occurrence.tutor_snapshot.nome_completo}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Bairro</dt>
-              <dd>{occurrence.tutor_snapshot.bairro_nome ?? "Nao informado"}</dd>
+              <dd>{occurrence.tutor_snapshot.bairro_nome ?? "Não informado"}</dd>
             </div>
             {canReadSensitive && occurrence.tutor_snapshot.cpf ? (
               <div>
@@ -145,26 +145,30 @@ export function OccurrenceDetailPage() {
               </div>
             ) : null}
           </dl>
-          {!canReadSensitive ? <SensitiveDataHidden /> : null}
-        </div>
+          {!canReadSensitive ? (
+            <div className="mt-4">
+              <SensitiveDataHidden />
+            </div>
+          ) : null}
+        </section>
       ) : null}
 
       {occurrence.photos.length > 0 ? (
-        <div className="flex flex-col gap-3">
-          <h3 className="font-medium">Fotos</h3>
+        <section className="flex flex-col gap-3 border-t pt-6">
+          <h3 className="font-semibold">Fotos</h3>
           <div className="flex flex-wrap gap-3">
             {occurrence.photos.map((photo) =>
               photo.url ? (
                 <img
-                  alt="Foto da ocorrencia"
-                  className="size-32 rounded-lg border object-cover"
+                  alt="Foto da ocorrência"
+                  className="size-32 rounded-xl border object-cover"
                   key={photo._id}
                   src={photo.url}
                 />
               ) : null,
             )}
           </div>
-        </div>
+        </section>
       ) : null}
     </section>
   );

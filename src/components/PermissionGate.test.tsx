@@ -5,7 +5,7 @@ import { PermissionGate } from "@/components/PermissionGate";
 import * as permissionsHook from "@/hooks/usePermissions";
 
 describe("PermissionGate", () => {
-  it("mostra conteudo quando a permissao e concedida", () => {
+  it("mostra conteudo quando a permissão e concedida", () => {
     vi.spyOn(permissionsHook, "usePermissions").mockReturnValue({
       user: null,
       can: () => true,
@@ -17,14 +17,14 @@ describe("PermissionGate", () => {
 
     render(
       <PermissionGate permission="templates.manage">
-        <p>Area administrativa</p>
+        <p>Área administrativa</p>
       </PermissionGate>,
     );
 
-    expect(screen.getByText("Area administrativa")).toBeInTheDocument();
+    expect(screen.getByText("Área administrativa")).toBeInTheDocument();
   });
 
-  it("mostra permissao negada quando a permissao falta", () => {
+  it("mostra permissão negada quando a permissão falta", () => {
     vi.spyOn(permissionsHook, "usePermissions").mockReturnValue({
       user: null,
       can: () => false,
@@ -36,11 +36,11 @@ describe("PermissionGate", () => {
 
     render(
       <PermissionGate permission="templates.manage">
-        <p>Area administrativa</p>
+        <p>Área administrativa</p>
       </PermissionGate>,
     );
 
-    expect(screen.getByRole("heading", { name: /permissao negada/i })).toBeInTheDocument();
-    expect(screen.queryByText("Area administrativa")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /permissão negada/i })).toBeInTheDocument();
+    expect(screen.queryByText("Área administrativa")).not.toBeInTheDocument();
   });
 });

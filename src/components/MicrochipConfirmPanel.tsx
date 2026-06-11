@@ -24,24 +24,24 @@ export function MicrochipConfirmPanel({
   const canConfirm = digits.length === 15;
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border-2 border-amber-400 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950">
+    <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-xs sm:p-5">
       <div>
-        <h2 className="text-lg font-semibold">Confira o numero antes de buscar</h2>
+        <h2 className="text-lg font-semibold">Confira o número antes de buscar</h2>
         <p className="text-sm text-muted-foreground">
           Edite se necessario. A busca so acontece apos sua confirmacao.
         </p>
       </div>
 
       {warning ? (
-        <p className="rounded-lg border border-amber-300 bg-white/70 p-3 text-sm font-medium text-amber-950 dark:bg-black/20 dark:text-amber-100">
+        <p className="rounded-lg bg-warning/12 p-3 text-sm font-medium text-warning">
           {warning}
         </p>
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="microchip-confirm">Microchip (15 digitos)</Label>
+        <Label htmlFor="microchip-confirm">Microchip (15 dígitos)</Label>
         <Input
-          className="min-h-14 text-center text-2xl font-semibold tracking-[0.2em] sm:text-3xl"
+          className="min-h-14 text-center text-2xl font-semibold tracking-[0.2em] tabular-nums sm:text-3xl"
           id="microchip-confirm"
           inputMode="numeric"
           onChange={(event) => onChange(maskMicrochipInput(event.target.value))}

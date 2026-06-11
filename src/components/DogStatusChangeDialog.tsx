@@ -45,7 +45,7 @@ export function DogStatusChangeDialog({
       await changeStatus({ dogId, status: nextStatus });
       onOpenChange(false);
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel alterar o status."));
+      setError(getErrorMessage(submitError, "Não foi possível alterar o status."));
     } finally {
       setLoading(false);
     }
@@ -56,8 +56,8 @@ export function DogStatusChangeDialog({
       confirmLabel={loading ? "Salvando..." : "Confirmar status"}
       description={
         needsConfirmation
-          ? `Confirme a alteracao para "${DOG_STATUS_LABELS[nextStatus]}". Esta acao atualiza a ficha do cao.`
-          : "Selecione o novo status do cao."
+          ? `Confirme a alteracao para "${DOG_STATUS_LABELS[nextStatus]}". Está ação atualiza a ficha do cão.`
+          : "Selecione o novo status do cão."
       }
       onConfirm={() => void applyStatus()}
       onOpenChange={onOpenChange}
@@ -67,7 +67,7 @@ export function DogStatusChangeDialog({
       <div className="flex flex-col gap-2 py-2">
         <Label htmlFor="dog-status">Status</Label>
         <select
-          className="min-h-11 rounded-md border bg-background px-3 text-sm"
+          className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           id="dog-status"
           onChange={(event) => setNextStatus(event.target.value as DogStatus)}
           value={nextStatus}

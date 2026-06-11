@@ -25,36 +25,43 @@ export function DogCard({
   selectable = false,
 }: DogCardProps) {
   const className =
-    "flex gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40";
+    "flex gap-3.5 rounded-xl border bg-card p-3 shadow-xs transition-colors hover:border-ring/40 hover:bg-accent/30";
 
   const content = (
     <>
       {fotoUrl ? (
         <img
           alt={`Foto de ${nome}`}
-          className="size-20 min-h-20 min-w-20 rounded-lg border object-cover"
+          className="size-20 min-h-20 min-w-20 rounded-lg object-cover"
           src={fotoUrl}
         />
       ) : (
-        <div className="flex size-20 min-h-20 min-w-20 items-center justify-center rounded-lg border bg-muted text-xs text-muted-foreground">
-          Sem foto
+        <div
+          aria-hidden="true"
+          className="flex size-20 min-h-20 min-w-20 items-center justify-center rounded-lg bg-accent font-heading text-2xl font-bold text-accent-foreground"
+        >
+          {nome.charAt(0).toUpperCase()}
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate font-medium">{nome}</p>
-            <p className="text-sm text-muted-foreground">{formatMicrochip(microchip)}</p>
+            <p className="truncate font-semibold">{nome}</p>
+            <p className="text-sm tabular-nums text-muted-foreground">
+              {formatMicrochip(microchip)}
+            </p>
           </div>
           {graveAlert ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-900 dark:bg-red-950 dark:text-red-100">
+            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/12 px-2.5 py-0.5 text-xs font-medium text-destructive">
               <AlertTriangleIcon aria-hidden="true" className="size-3.5" />
               Alerta
             </span>
           ) : null}
         </div>
-        <DogStatusBadge status={status} />
+        <div>
+          <DogStatusBadge status={status} />
+        </div>
       </div>
     </>
   );

@@ -1,13 +1,10 @@
 import { useEffect } from "react";
-import { useBlocker } from "react-router-dom";
+import { useBlocker, type Blocker } from "react-router-dom";
 
-const DEFAULT_MESSAGE =
-  "Voce tem alteracoes nao salvas. Deseja sair mesmo assim?";
+export const UNSAVED_CHANGES_MESSAGE =
+  "Você tem alterações não salvas. Deseja sair mesmo assim?";
 
-export function useDirtyFormGuard(
-  isDirty: boolean,
-  message: string = DEFAULT_MESSAGE,
-): void {
+export function useDirtyFormGuard(isDirty: boolean): Blocker {
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (!isDirty) {
@@ -20,10 +17,10 @@ export function useDirtyFormGuard(
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
 
-  useBlocker(({ currentLocation, nextLocation }) => {
+  return useBlocker(({ currentLocation, nextLocation }) => {
     if (!isDirty || currentLocation.pathname === nextLocation.pathname) {
       return false;
     }
-    return !window.confirm(message);
+    return true;
   });
 }

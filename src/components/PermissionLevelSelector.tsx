@@ -1,6 +1,4 @@
-import { Badge } from "@/components/ui/badge";
 import type { ModulePermissionMap, PermissionLevel, UiModule } from "@/lib/permissions";
-import { permissionLevelBadgeClass } from "@/lib/domain-colors";
 import {
   PERMISSION_LEVEL_DESCRIPTIONS,
   PERMISSION_LEVEL_LABELS,
@@ -26,34 +24,27 @@ export function PermissionLevelSelector({
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="divide-y divide-border">
       {UI_MODULES.map((module) => (
-        <section className="rounded-xl border bg-card p-4" key={module}>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-medium">{UI_MODULE_LABELS[module]}</h3>
-              <p className="text-xs text-muted-foreground">
-                {PERMISSION_LEVEL_DESCRIPTIONS[value[module]]}
-              </p>
-            </div>
-            <Badge
-              className={permissionLevelBadgeClass[value[module]]}
-              variant="outline"
-            >
-              {PERMISSION_LEVEL_LABELS[value[module]]}
-            </Badge>
+        <section className="flex flex-col gap-2.5 py-4 first:pt-0 last:pb-0" key={module}>
+          <div>
+            <h3 className="text-sm font-semibold">{UI_MODULE_LABELS[module]}</h3>
+            <p className="text-xs text-muted-foreground">
+              {PERMISSION_LEVEL_DESCRIPTIONS[value[module]]}
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 sm:grid-cols-4">
             {PERMISSION_LEVELS.map((level) => {
               const isSelected = value[module] === level;
               return (
                 <button
+                  aria-pressed={isSelected}
                   className={cn(
-                    "min-h-11 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+                    "min-h-10 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                     isSelected
-                      ? "border-primary bg-primary/5"
-                      : "hover:bg-muted",
+                      ? "bg-card text-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground",
                     disabled && "pointer-events-none opacity-50",
                   )}
                   disabled={disabled}

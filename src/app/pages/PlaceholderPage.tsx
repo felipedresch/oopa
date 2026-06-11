@@ -15,11 +15,11 @@ export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
       <PageHeader
         description={
           description ??
-          "Esta rota ja esta registrada no roteamento. A implementacao funcional chega nas proximas fases."
+          "Está rota já está registrada no roteamento. A implementação funcional chega nas próximas fases."
         }
         title={title}
       />
-      <p className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+      <p className="rounded-lg bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
         Rota atual: <code>{location.pathname}</code>
       </p>
     </section>

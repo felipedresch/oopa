@@ -51,7 +51,7 @@ export function TeamUserPage() {
   }
 
   if (!user) {
-    return <PermissionDenied message="Usuario nao encontrado." />;
+    return <PermissionDenied message="Usuário não encontrado." />;
   }
 
   const handleSave = async () => {
@@ -65,7 +65,7 @@ export function TeamUserPage() {
       await updatePermissions({ userId: user._id, permissions });
       setModuleMap(null);
     } catch (saveError) {
-      setError(getErrorMessage(saveError, "Nao foi possivel salvar as permissoes."));
+      setError(getErrorMessage(saveError, "Não foi possível salvar as permissões."));
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export function TeamUserPage() {
       setConfirmDeactivate(false);
       void navigate("/team");
     } catch (deactivateError) {
-      setError(getErrorMessage(deactivateError, "Nao foi possivel desativar o usuario."));
+      setError(getErrorMessage(deactivateError, "Não foi possível desativar o usuário."));
     } finally {
       setLoading(false);
     }
@@ -91,24 +91,31 @@ export function TeamUserPage() {
         description={user.email}
         title={user.nome}
         actions={
-          <Badge variant={user.ativo ? "default" : "outline"}>
+          <Badge
+            className={
+              user.ativo ? "bg-success/12 text-success" : "bg-muted text-muted-foreground"
+            }
+            variant="secondary"
+          >
             {user.ativo ? "Ativo" : "Inativo"}
           </Badge>
         }
       />
 
-      <div className="rounded-xl border bg-card p-4 text-sm">
-        <p>
-          <span className="font-medium">Organizacao:</span> {user.organizacao}
-        </p>
-      </div>
+      <p className="text-sm">
+        <span className="text-muted-foreground">Organização:</span>{" "}
+        <span className="font-medium">{user.organizacao}</span>
+      </p>
 
       {can("users.manage_permissions") && effectiveMap ? (
         <>
           <PermissionLevelSelector onChange={setModuleMap} value={effectiveMap} />
-          <PermissionSummary moduleMap={effectiveMap} />
+          <section className="border-t pt-5">
+            <h2 className="mb-3 font-semibold">Resumo</h2>
+            <PermissionSummary moduleMap={effectiveMap} />
+          </section>
           <Button className="min-h-11" disabled={loading} onClick={() => void handleSave()} type="button">
-            {loading ? "Salvando..." : "Salvar permissoes"}
+            {loading ? "Salvando..." : "Salvar permissões"}
           </Button>
         </>
       ) : (
@@ -122,7 +129,7 @@ export function TeamUserPage() {
           type="button"
           variant="destructive"
         >
-          Desativar usuario
+          Desativar usuário
         </Button>
       ) : null}
 
@@ -133,11 +140,11 @@ export function TeamUserPage() {
       </Button>
 
       <ConfirmDialog
-        description="O usuario nao podera mais acessar o sistema."
+        description="O usuário não podera mais acessar o sistema."
         onConfirm={() => void handleDeactivate()}
         onOpenChange={setConfirmDeactivate}
         open={confirmDeactivate}
-        title="Desativar usuario"
+        title="Desativar usuário"
       />
     </section>
   );

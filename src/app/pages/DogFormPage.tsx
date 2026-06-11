@@ -13,13 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { formatMicrochip } from "@/lib/formatters";
 import { maskMicrochipInput } from "@/lib/masks";
 import { validateMicrochip, validateRequired } from "@/lib/validations";
 
-const STEPS = ["Identificacao", "Caracteristicas", "Saude", "Foto", "Revisao"];
+const STEPS = ["Identificação", "Características", "Saúde", "Foto", "Revisão"];
 
 type Sexo = "macho" | "femea";
 type Porte = "pequeno" | "medio" | "grande";
@@ -64,7 +65,7 @@ export function DogFormPage() {
   }
 
   if (isEdit && !existing) {
-    return <PermissionDenied message="Cao nao encontrado." />;
+    return <PermissionDenied message="Cão não encontrado." />;
   }
 
   const formKey = isEdit && existing ? existing._id : `new-${searchParams.get("microchip") ?? ""}`;
@@ -118,7 +119,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
   const [fotoPreview, setFotoPreview] = useState<string | null>(initial?.foto_perfil_url ?? null);
   const [isDirty, setIsDirty] = useState(false);
 
-  useDirtyFormGuard(isDirty);
+  const blocker = useDirtyFormGuard(isDirty);
   const markDirty = () => setIsDirty(true);
 
   const canContinue = (() => {
@@ -157,7 +158,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
       }
 
       if (!fotoStorageId) {
-        throw new Error("Foto de perfil obrigatoria.");
+        throw new Error("Foto de perfil obrigatória.");
       }
 
       const createdId = await createDog({
@@ -178,7 +179,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
 
       void navigate(`/dogs/${createdId}`);
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel salvar o cao."));
+      setError(getErrorMessage(submitError, "Não foi possível salvar o cão."));
     } finally {
       setLoading(false);
     }
@@ -189,10 +190,10 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
       <PageHeader
         description={
           isEdit
-            ? "Atualize os dados do cao mantendo o microchip original."
-            : "Cadastre o cao em etapas com foto de perfil obrigatoria."
+            ? "Atualize os dados do cão mantendo o microchip original."
+            : "Cadastre o cão em etapas com foto de perfil obrigatória."
         }
-        title={isEdit ? "Editar cao" : "Novo cao"}
+        title={isEdit ? "Editar cão" : "Novo cão"}
       />
 
       <div onChange={markDirty}>
@@ -230,7 +231,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
             <div className="flex flex-col gap-2">
               <Label htmlFor="sexo">Sexo</Label>
               <select
-                className="min-h-11 rounded-md border bg-background px-3 text-sm"
+                className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="sexo"
                 onChange={(event) => setSexo(event.target.value as Sexo)}
                 value={sexo}
@@ -242,7 +243,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
             <div className="flex flex-col gap-2">
               <Label htmlFor="porte">Porte</Label>
               <select
-                className="min-h-11 rounded-md border bg-background px-3 text-sm"
+                className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="porte"
                 onChange={(event) => setPorte(event.target.value as Porte)}
                 value={porte}
@@ -281,13 +282,19 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
 
         {step === 2 ? (
           <div className="grid gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input checked={castrado} onChange={(event) => setCastrado(event.target.checked)} type="checkbox" />
+            <label className="flex w-fit cursor-pointer items-center gap-2.5 text-sm font-medium">
+              <input
+                checked={castrado}
+                className="accent-primary"
+                onChange={(event) => setCastrado(event.target.checked)}
+                type="checkbox"
+              />
               Castrado
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex w-fit cursor-pointer items-center gap-2.5 text-sm font-medium">
               <input
                 checked={vacinasEmDia}
+                className="accent-primary"
                 onChange={(event) => setVacinasEmDia(event.target.checked)}
                 type="checkbox"
               />
@@ -302,7 +309,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="observacoes">Observacoes</Label>
+              <Label htmlFor="observacoes">Observações</Label>
               <Input
                 id="observacoes"
                 onChange={(event) => setObservacoes(event.target.value)}
@@ -337,13 +344,13 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               <strong>Sexo / Porte:</strong> {sexo} / {porte}
             </p>
             <p>
-              <strong>Saude:</strong> {castrado ? "Castrado" : "Nao castrado"} ·{" "}
+              <strong>Saude:</strong> {castrado ? "Castrado" : "Não castrado"} ·{" "}
               {vacinasEmDia ? "Vacinas em dia" : "Vacinas pendentes"}
             </p>
             {fotoPreview ? (
               <img
                 alt="Preview final"
-                className="size-40 min-h-40 min-w-40 rounded-lg border object-cover"
+                className="size-40 min-h-40 min-w-40 rounded-xl border object-cover"
                 src={fotoPreview}
               />
             ) : null}
@@ -357,6 +364,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
       <Button asChild className="min-h-11 self-start" variant="ghost">
         <Link to={isEdit && dogId ? `/dogs/${dogId}` : "/dogs"}>Cancelar</Link>
       </Button>
+      <UnsavedChangesDialog blocker={blocker} />
     </section>
   );
 }

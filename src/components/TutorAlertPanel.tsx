@@ -25,7 +25,7 @@ type TutorAlertPanelProps = {
 const FILTER_OPTIONS = [
   { value: "all", label: "Todas" },
   { value: "alta", label: "Alta" },
-  { value: "media", label: "Media" },
+  { value: "media", label: "Média" },
 ] as const;
 
 export function TutorAlertPanel({
@@ -44,22 +44,22 @@ export function TutorAlertPanel({
   }, [filter, occurrences]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border p-4">
+    <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h3 className="font-medium">Alertas do tutor</h3>
+          <h3 className="font-semibold">Alertas do tutor</h3>
           <TutorAlertBadge level={level} />
         </div>
         <div className="flex gap-4 text-sm text-muted-foreground">
           <span>Alta: {altaCount}</span>
-          <span>Media: {mediaCount}</span>
+          <span>Média: {mediaCount}</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="alert-filter">Filtrar por gravidade</Label>
         <select
-          className="min-h-11 rounded-md border bg-background px-3 text-sm"
+          className="min-h-11 rounded-lg border border-input bg-card px-3 text-sm"
           id="alert-filter"
           onChange={(event) =>
             setFilter(event.target.value as (typeof FILTER_OPTIONS)[number]["value"])
@@ -75,14 +75,14 @@ export function TutorAlertPanel({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhuma ocorrencia neste filtro.</p>
+        <p className="text-sm text-muted-foreground">Nenhuma ocorrência neste filtro.</p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="divide-y divide-border">
           {filtered.map((occurrence) => (
-            <li className="rounded-lg border p-3" key={occurrence._id}>
-              <div className="mb-2 flex flex-wrap items-center gap-2">
+            <li className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0" key={occurrence._id}>
+              <div className="flex flex-wrap items-center gap-2">
                 <SeverityBadge severity={occurrence.gravidade} />
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   {formatDate(occurrence.data_ocorrencia)}
                 </span>
               </div>
@@ -92,6 +92,6 @@ export function TutorAlertPanel({
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

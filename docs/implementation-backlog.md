@@ -563,3 +563,88 @@ mesmo conjunto de mudancas.
       ocorrencia, adocao, convite, permissao negada e exportacao de auditoria.
 - [x] Rodar verificacao visual com Playwright nos principais breakpoints.
 - [x] Rodar `npm run quality` antes de considerar a entrega completa pronta.
+
+## Fase 10 - Redesign visual "Caramelo"
+
+Direcao registrada em `PRODUCT.md` e `DESIGN.md` na raiz do repositorio.
+
+### Decisoes de design
+
+- [x] Identidade visual "Caramelo": neutros de papel quente (OKLCH hue 50-85)
+      e primario caramelo em referencia ao vira-lata caramelo; tema claro como
+      padrao (uso em campo sob luz ambiente), dark mode espelhado em tons de
+      cafe.
+- [x] Tokens semanticos de dominio em `src/index.css`: `--success`,
+      `--warning`, `--info`, `--alert`, `--destructive`. `src/lib/domain-colors.ts`
+      passou a usar esses tokens; proibido usar cores Tailwind cruas
+      (`red-600`, `amber-100`...) em componentes.
+- [x] Tipografia: Geist para UI e dados; Bricolage Grotesque Variable
+      (`font-heading`, aplicada por padrao a `h1`/`h2`) para titulos.
+      Dependencia nova: `@fontsource-variable/bricolage-grotesque`.
+- [x] Raio base aumentado para `0.85rem`; badges em pill (`rounded-full`).
+
+### Shell e navegacao
+
+- [x] AppLayout: sidebar desktop escura (espresso, tokens `--sidebar-*`) com
+      marca, navegacao com item ativo em caramelo, contador de notificacoes e
+      bloco de conta/sair no rodape; mobile mantem header + bottom nav com
+      indicador de aba ativa em pill e `safe-area-inset-bottom`.
+- [x] AuthLayout: marca (disco caramelo + wordmark "oopa") acima do card.
+
+### Componentes
+
+- [x] Fim do box-dentro-de-box: FilterBar, formularios de settings, paineis de
+      tutor, snapshots e listas internas viram secoes separadas por espaco,
+      headings e `border-t`; listas internas usam `divide-y` em vez de
+      card-por-item.
+- [x] Cards de lista (DogCard, TutorCard, OccurrenceCard, TeamPage, atalhos do
+      dashboard) com avatar/inicial em disco, hover com tinta `accent` e
+      `shadow-xs`; cao sem foto mostra inicial em disco accent em vez de
+      "Sem foto".
+- [x] StepperForm com progresso por circulos numerados e check, conteudo sem
+      card externo; selects e textareas nativos padronizados com o mesmo
+      estilo dos Inputs (`bg-card`, focus ring); checkboxes em chips com
+      `has-checked` ou `accent-primary`.
+- [x] Tabs de DogDetail/TutorDetail em sublinhado (`border-b-2` caramelo);
+      filtros de notificacoes e PermissionLevelSelector em segmented control.
+- [x] EmptyState/ErrorState/PermissionDenied com icone em disco e sem moldura
+      tracejada; banners de aviso/retificacao com tinta semantica sem borda.
+
+### Telas
+
+- [x] Dashboard como tela de boas-vindas: saudacao com nome, bloco escuro de
+      identificacao (CTA camera + busca por microchip) e atalhos descritivos.
+- [x] Todas as paginas revisadas (Identify, Dogs, Tutors, Team, Settings e
+      subpaginas, Audit, Notifications, Adoption, Return, Occurrences, auth).
+- [x] `npm run quality` verde (lint, typecheck, 89 testes, build).
+
+## Fase 10b - Copy PT-BR e confirmacoes nativas
+
+### Decisoes
+
+- [x] Textos de UI, mensagens de erro user-facing e catalogo seed de tipos de
+      ocorrencia passam a usar acentuacao correta (ex.: cão, ocorrência,
+      devolução, permissão, configurações).
+- [x] `window.confirm` removido do guard de formulario sujo; navegacao
+      bloqueada usa `UnsavedChangesDialog` (shadcn `Dialog` via `ConfirmDialog`)
+      com acao destrutiva "Sair sem salvar".
+- [x] Confirmacao de devolucao em `ReturnNewPage` unificada no mesmo
+      `ConfirmDialog` (antes era overlay HTML ad hoc).
+- [x] Script auxiliar `scripts/fix-pt-br-ui-strings.mjs` para strings literais
+      (nao altera identificadores, enums, paths nem classes Tailwind).
+
+### Frontend
+
+- [x] `src/lib/copy.ts`, validacoes, permissoes e labels de dominio revisados.
+- [x] Formularios sujos (`DogFormPage`, `TutorFormPage`, `OccurrenceFormPage`)
+      renderizam `UnsavedChangesDialog`.
+- [x] Testes de UI atualizados para copy acentuada (badges, identify,
+      microchip, permission gate, bairro warning).
+
+### Backend
+
+- [x] Mensagens em `convex/errors.ts`, emails, auth, OCR, notificacoes e
+      validacoes de dominio revisadas.
+- [x] Nomes de tipos seed (`convex/seeds.ts`) e switches de historico
+      (`convex/lib/tutorDogHistory.ts`) alinhados com a grafia acentuada.
+- [x] Testes Convex atualizados para buscar tipos pelo nome acentuado.

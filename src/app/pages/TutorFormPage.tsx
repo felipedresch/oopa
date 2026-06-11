@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
+import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { maskCep, maskCpf, maskPhone } from "@/lib/masks";
@@ -43,7 +44,7 @@ export function TutorFormPage() {
   }
 
   if (isEdit && !existing) {
-    return <PermissionDenied message="Tutor nao encontrado." />;
+    return <PermissionDenied message="Tutor não encontrado." />;
   }
 
   return (
@@ -107,7 +108,7 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
   const [submitting, setSubmitting] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  useDirtyFormGuard(isDirty);
+  const blocker = useDirtyFormGuard(isDirty);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -181,7 +182,7 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
         void navigate(`/tutors/${createdId}`);
       }
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel salvar o tutor."));
+      setError(getErrorMessage(submitError, "Não foi possível salvar o tutor."));
     } finally {
       setSubmitting(false);
     }
@@ -299,16 +300,16 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="observacoes">Observacoes</Label>
+          <Label htmlFor="observacoes">Observações</Label>
           <textarea
-            className="min-h-24 rounded-md border bg-background px-3 py-2 text-sm"
+            className="min-h-24 rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="observacoes"
             onChange={(event) => setObservacoes(event.target.value)}
             value={observacoes}
           />
         </div>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
           <Button className="min-h-11" disabled={submitting} type="submit">
@@ -319,6 +320,7 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
           </Button>
         </div>
       </form>
+      <UnsavedChangesDialog blocker={blocker} />
     </section>
   );
 }

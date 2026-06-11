@@ -4,7 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { OccurrenceCard } from "@/components/OccurrenceCard";
 
 describe("OccurrenceCard", () => {
-  it("renderiza tipo e descricao", () => {
+  it("renderiza tipo e descrição", () => {
     render(
       <MemoryRouter>
         <OccurrenceCard

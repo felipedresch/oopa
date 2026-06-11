@@ -8,7 +8,7 @@ type StatusBadgeProps = {
 
 export function StatusBadge({ status }: StatusBadgeProps) {
   return (
-    <Badge className={dogStatusBadgeClass[status]} variant="outline">
+    <Badge className={dogStatusBadgeClass[status]} variant="secondary">
       {DOG_STATUS_LABELS[status]}
     </Badge>
   );

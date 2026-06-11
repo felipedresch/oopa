@@ -13,16 +13,13 @@ type PermissionSummaryProps = {
 
 export function PermissionSummary({ moduleMap }: PermissionSummaryProps) {
   return (
-    <div className="grid gap-2">
+    <div className="divide-y divide-border">
       {UI_MODULES.map((module) => (
-        <div
-          className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
-          key={module}
-        >
+        <div className="flex items-center justify-between gap-3 py-2.5" key={module}>
           <span className="text-sm font-medium">{UI_MODULE_LABELS[module]}</span>
           <Badge
             className={permissionLevelBadgeClass[moduleMap[module]]}
-            variant="outline"
+            variant="secondary"
           >
             {PERMISSION_LEVEL_LABELS[moduleMap[module]]}
           </Badge>

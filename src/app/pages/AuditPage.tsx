@@ -16,13 +16,13 @@ import { formatDateTime } from "@/lib/formatters";
 
 const ENTITY_OPTIONS = [
   { value: "", label: "Todas as entidades" },
-  { value: "user", label: "Usuario" },
-  { value: "dog", label: "Cao" },
+  { value: "user", label: "Usuário" },
+  { value: "dog", label: "Cão" },
   { value: "tutor", label: "Tutor" },
-  { value: "occurrence", label: "Ocorrencia" },
+  { value: "occurrence", label: "Ocorrência" },
   { value: "permission_template", label: "Template" },
   { value: "bairro", label: "Bairro" },
-  { value: "occurrence_type", label: "Tipo de ocorrencia" },
+  { value: "occurrence_type", label: "Tipo de ocorrência" },
 ] as const;
 
 export function AuditPage() {
@@ -109,16 +109,16 @@ export function AuditPage() {
             {exporting ? "Exportando..." : "Exportar CSV"}
           </Button>
         }
-        description="Consulte acoes sensiveis com filtros e exportacao para analise."
+        description="Consulte ações sensiveis com filtros e exportação para análise."
         title="Auditoria"
       />
 
       <FilterBar>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="audit-actor">Usuario</Label>
+            <Label htmlFor="audit-actor">Usuário</Label>
             <select
-              className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="flex h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="audit-actor"
               onChange={(event) => setActorUserId(event.target.value as Id<"users"> | "")}
               value={actorUserId}
@@ -135,7 +135,7 @@ export function AuditPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="audit-entity">Entidade</Label>
             <select
-              className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="flex h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="audit-entity"
               onChange={(event) =>
                 setEntityType(event.target.value as (typeof ENTITY_OPTIONS)[number]["value"])
@@ -171,7 +171,7 @@ export function AuditPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="audit-to">Ate</Label>
+            <Label htmlFor="audit-to">Até</Label>
             <Input
               id="audit-to"
               onChange={(event) => setTo(event.target.value)}
@@ -182,17 +182,17 @@ export function AuditPage() {
         </div>
       </FilterBar>
 
-      <div className="rounded-xl border bg-card p-4">
-        <h2 className="mb-3 font-medium">Exportacoes operacionais</h2>
+      <section className="border-t pt-5">
+        <h2 className="mb-1 font-semibold">Exportacoes operacionais</h2>
         <p className="mb-4 text-sm text-muted-foreground">
-          Baixe snapshots de caes, tutores, ocorrencias e historico tutor-cao para analise
+          Baixe snapshots de cães, tutores, ocorrências e histórico tutor-cão para análise
           externa.
         </p>
         <div className="flex flex-wrap gap-2">
           {[
             {
               key: "dogs",
-              label: "Caes",
+              label: "Cães",
               query: () => convex.query(api.exports.exportDogsCsv, { limit: 2000 }),
               file: "caes",
             },
@@ -204,13 +204,13 @@ export function AuditPage() {
             },
             {
               key: "occurrences",
-              label: "Ocorrencias",
+              label: "Ocorrências",
               query: () => convex.query(api.exports.exportOccurrencesCsv, { limit: 2000 }),
               file: "ocorrencias",
             },
             {
               key: "history",
-              label: "Historico tutor-cao",
+              label: "Histórico tutor-cão",
               query: () => convex.query(api.exports.exportTutorDogHistoryCsv, { limit: 2000 }),
               file: "historico-tutor-cao",
             },
@@ -233,7 +233,7 @@ export function AuditPage() {
             </Button>
           ))}
         </div>
-      </div>
+      </section>
 
       {status === "LoadingFirstPage" ? <LoadingSkeleton rows={5} /> : null}
 
@@ -244,16 +244,16 @@ export function AuditPage() {
         />
       ) : null}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="divide-y divide-border">
         {results.map((entry) => (
-          <li className="rounded-xl border bg-card p-4" key={entry._id}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
+          <li className="flex flex-col gap-1 py-3.5 first:pt-0" key={entry._id}>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <p className="font-medium">{entry.summary}</p>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs whitespace-nowrap text-muted-foreground">
                 {formatDateTime(entry.created_at)}
               </span>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {entry.actor_nome ?? "Sistema"} · {entry.action} · {entry.entity_type}
               {entry.entity_id ? ` · ${entry.entity_id}` : ""}
             </p>

@@ -21,11 +21,11 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           .trim()
           .toLowerCase();
         if (!email.includes("@")) {
-          throw validationError("Email invalido.");
+          throw validationError("Email inválido.");
         }
 
         const displayName =
-          typeof params.name === "string" ? params.name : email.split("@")[0] ?? "Usuario";
+          typeof params.name === "string" ? params.name : email.split("@")[0] ?? "Usuário";
 
         return {
           email,
@@ -47,12 +47,12 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   callbacks: {
     async createOrUpdateUser(ctx, { existingUserId, type, profile }) {
       if (type !== "credentials") {
-        throw new Error("Metodo de autenticacao nao suportado.");
+        throw new Error("Metodo de autenticacao não suportado.");
       }
 
       const email = profile.email?.trim().toLowerCase();
       if (!email) {
-        throw validationError("Email obrigatorio.");
+        throw validationError("Email obrigatório.");
       }
 
       const db = (ctx as GenericMutationCtx<DataModel>).db;
@@ -78,7 +78,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         return existingUserId;
       }
 
-      throw validationError("Conta nao encontrada. Use o link de convite.");
+      throw validationError("Conta não encontrada. Use o link de convite.");
     },
     async beforeSessionCreation(ctx, { userId }) {
       const db = (ctx as GenericMutationCtx<DataModel>).db;

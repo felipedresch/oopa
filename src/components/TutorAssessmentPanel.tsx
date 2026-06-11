@@ -28,9 +28,9 @@ export function TutorAssessmentPanel({
   alert,
 }: TutorAssessmentPanelProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border p-4">
+    <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-xs">
       <div>
-        <h3 className="font-medium">Avaliacao do tutor</h3>
+        <h3 className="font-semibold">Avaliação do tutor</h3>
         <p className="text-sm text-muted-foreground">
           {tutorNome}
           {bairroNome ? ` — ${bairroNome}` : ""}
@@ -39,32 +39,32 @@ export function TutorAssessmentPanel({
 
       {!alert ? (
         <p className="text-sm text-muted-foreground">
-          Alertas detalhados disponiveis apenas com permissao sensivel de tutores.
+          Alertas detalhados disponiveis apenas com permissão sensível de tutores.
         </p>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-3">
             <TutorAlertBadge level={alert.level} />
             <span className="text-sm text-muted-foreground">Alta: {alert.alta_count}</span>
-            <span className="text-sm text-muted-foreground">Media: {alert.media_count}</span>
+            <span className="text-sm text-muted-foreground">Média: {alert.media_count}</span>
           </div>
 
           {alert.level === "red" ? (
-            <p className="text-sm font-medium text-red-700 dark:text-red-300">
-              Alerta vermelho: ocorrencias altas atribuidas ao tutor.
+            <p className="text-sm font-medium text-destructive">
+              Alerta vermelho: ocorrências altas atribuidas ao tutor.
             </p>
           ) : null}
           {alert.level === "yellow" ? (
-            <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-              Alerta amarelo: ocorrencias medias atribuidas ao tutor.
+            <p className="text-sm font-medium text-warning">
+              Alerta amarelo: ocorrências medias atribuidas ao tutor.
             </p>
           ) : null}
 
           {alert.occurrences.length > 0 ? (
-            <ul className="flex flex-col gap-2">
+            <ul className="divide-y divide-border">
               {alert.occurrences.map((occurrence) => (
-                <li className="rounded-lg border p-3 text-sm" key={occurrence._id}>
-                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                <li className="flex flex-col gap-1 py-3 text-sm first:pt-0 last:pb-0" key={occurrence._id}>
+                  <div className="flex flex-wrap items-center gap-2">
                     <SeverityBadge severity={occurrence.gravidade} />
                     <span className="text-muted-foreground">
                       {formatDate(occurrence.data_ocorrencia)}
@@ -76,7 +76,7 @@ export function TutorAssessmentPanel({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">Nenhuma ocorrencia media ou alta atribuida.</p>
+            <p className="text-sm text-muted-foreground">Nenhuma ocorrência media ou alta atribuida.</p>
           )}
         </>
       )}

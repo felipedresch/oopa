@@ -115,7 +115,7 @@ function validatePermissions(permissions: string[]): Permission[] {
   const allowed = new Set<string>(PERMISSION_CATALOG);
   for (const permission of permissions) {
     if (!allowed.has(permission)) {
-      throw validationError(`Permissao invalida: ${permission}`);
+      throw validationError(`Permissão inválida: ${permission}`);
     }
   }
   return permissions as Permission[];
@@ -210,7 +210,7 @@ export const get = query({
 
     const user = await ctx.db.get("users", args.userId);
     if (!user) {
-      throw notFound("Usuario");
+      throw notFound("Usuário");
     }
 
     return toUserSummary(user);
@@ -232,7 +232,7 @@ export const invite = mutation({
 
     const email = normalizeEmail(args.email);
     if (!isValidEmail(email)) {
-      throw validationError("Email invalido.");
+      throw validationError("Email inválido.");
     }
 
     const existing = await ctx.db
@@ -240,7 +240,7 @@ export const invite = mutation({
       .withIndex("email", (q) => q.eq("email", email))
       .unique();
     if (existing) {
-      throw conflict("Ja existe um usuario com este email.");
+      throw conflict("Já existe um usuário com este email.");
     }
 
     const now = Date.now();
@@ -298,7 +298,7 @@ export const updatePermissions = mutation({
 
     const user = await ctx.db.get("users", args.userId);
     if (!user) {
-      throw notFound("Usuario");
+      throw notFound("Usuário");
     }
 
     const permissions = validatePermissions(args.permissions);
@@ -306,7 +306,7 @@ export const updatePermissions = mutation({
     if (user.ativo && hasTeamAccess(user) && !hasTeamAccess({ ...user, permissions })) {
       const managers = await countActiveTeamManagers(ctx);
       if (managers <= 1) {
-        throw conflict("Nao e possivel remover a ultima conta ativa com acesso a Equipe.");
+        throw conflict("Não e possível remover a ultima conta ativa com acesso a Equipe.");
       }
     }
 
@@ -337,18 +337,18 @@ export const deactivate = mutation({
     requirePermission(actor, "users.deactivate");
 
     if (args.userId === actor._id) {
-      throw forbidden("Voce nao pode desativar a propria conta.");
+      throw forbidden("Você não pode desativar a propria conta.");
     }
 
     const user = await ctx.db.get("users", args.userId);
     if (!user) {
-      throw notFound("Usuario");
+      throw notFound("Usuário");
     }
 
     if (user.ativo && hasTeamAccess(user)) {
       const managers = await countActiveTeamManagers(ctx);
       if (managers <= 1) {
-        throw conflict("Nao e possivel desativar a ultima conta ativa com acesso a Equipe.");
+        throw conflict("Não e possível desativar a ultima conta ativa com acesso a Equipe.");
       }
     }
 
@@ -363,7 +363,7 @@ export const deactivate = mutation({
       action: "users.deactivate",
       entityType: "user",
       entityId: args.userId,
-      summary: `Usuario desativado: ${user.email ?? user.nome}`,
+      summary: `Usuário desativado: ${user.email ?? user.nome}`,
     });
 
     return null;
@@ -431,7 +431,7 @@ export const consumeInviteToken = internalMutation({
       .unique();
 
     if (!invite) {
-      throw validationError("Convite invalido.");
+      throw validationError("Convite inválido.");
     }
     if (invite.used_at) {
       throw tokenUsed();
@@ -442,7 +442,7 @@ export const consumeInviteToken = internalMutation({
 
     const user = await ctx.db.get("users", invite.user_id);
     if (!user) {
-      throw notFound("Usuario");
+      throw notFound("Usuário");
     }
 
     await ctx.db.patch(invite._id, { used_at: Date.now() });
@@ -540,7 +540,7 @@ export const requestPasswordReset = mutation({
   handler: async (ctx, args) => {
     const email = normalizeEmail(args.email);
     if (!isValidEmail(email)) {
-      throw validationError("Email invalido.");
+      throw validationError("Email inválido.");
     }
 
     const user = await ctx.db
@@ -585,7 +585,7 @@ export const consumePasswordResetToken = internalMutation({
       .unique();
 
     if (!reset) {
-      throw validationError("Link de reset invalido.");
+      throw validationError("Link de reset inválido.");
     }
     if (reset.used_at) {
       throw tokenUsed();

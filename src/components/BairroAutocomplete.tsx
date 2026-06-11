@@ -52,16 +52,16 @@ export function BairroAutocomplete({
           }
         }}
         onFocus={() => setOpen(true)}
-        placeholder='Buscar bairro ou selecione "Nao informado"'
+        placeholder='Buscar bairro ou selecione "Não informado"'
         value={query || selectedLabel}
       />
 
       {open && options && options.length > 0 ? (
-        <ul className="absolute top-full z-20 mt-1 max-h-48 w-full overflow-auto rounded-md border bg-popover p-1 shadow-md">
+        <ul className="absolute top-full z-20 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-popover p-1 shadow-md">
           {options.map((option) => (
             <li key={option._id}>
               <button
-                className="w-full rounded-sm px-3 py-2 text-left text-sm hover:bg-muted"
+                className="w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent/50"
                 onMouseDown={(event) => {
                   event.preventDefault();
                   setQuery(option.nome);

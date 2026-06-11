@@ -27,9 +27,9 @@ export const CREATE_PERMISSION_BY_CATEGORY: Record<OccurrenceCategory, Permissio
 };
 
 export const HISTORY_AFFECTING_TYPE_NAMES = new Set([
-  "Adocao",
-  "Devolucao a ONG",
-  "Transferencia de Tutor",
+  "Adoção",
+  "Devolução a ONG",
+  "Transferência de Tutor",
   "Abandono Suspeito",
   "Obito",
   "Fuga Confirmada",
@@ -72,11 +72,11 @@ export function resolveSeverity(
   }
 
   if (requested === "info") {
-    throw validationError("Gravidade informativa vem do tipo de ocorrencia.");
+    throw validationError("Gravidade informativa vem do tipo de ocorrência.");
   }
 
   if (requested !== "baixa" && requested !== "media" && requested !== "alta") {
-    throw validationError("Gravidade invalida.");
+    throw validationError("Gravidade inválida.");
   }
 
   return requested;
@@ -92,7 +92,7 @@ export async function buildTutorSnapshot(
 ): Promise<NonNullable<Doc<"occurrences">["tutor_snapshot"]>> {
   const tutor = await ctx.db.get("tutors", tutorId);
   if (!tutor) {
-    throw validationError("Tutor nao encontrado para snapshot.");
+    throw validationError("Tutor não encontrado para snapshot.");
   }
 
   const bairro = tutor.bairro_id ? await ctx.db.get("bairros", tutor.bairro_id) : null;

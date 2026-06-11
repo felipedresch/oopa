@@ -61,7 +61,7 @@ export function PermissionTemplatesPage() {
       }
       resetForm();
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Nao foi possivel salvar o template."));
+      setError(getErrorMessage(submitError, "Não foi possível salvar o template."));
     } finally {
       setLoading(false);
     }
@@ -78,17 +78,18 @@ export function PermissionTemplatesPage() {
     <section className="flex flex-col gap-6">
       <PageHeader
         description="Crie, edite, duplique e ative templates reutilizaveis nos convites."
-        title="Templates de permissao"
+        title="Templates de permissão"
       />
 
-      <form className="flex flex-col gap-4 rounded-xl border bg-card p-4" onSubmit={(event) => void handleSubmit(event)}>
+      <form className="flex flex-col gap-4" onSubmit={(event) => void handleSubmit(event)}>
+        <h2 className="font-semibold">{editingId ? "Editar template" : "Novo template"}</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Label htmlFor="nome">Nome</Label>
             <Input id="nome" onChange={(e) => setNome(e.target.value)} required value={nome} />
           </div>
           <div className="flex flex-col gap-2 md:col-span-2">
-            <Label htmlFor="descricao">Descricao</Label>
+            <Label htmlFor="descricao">Descrição</Label>
             <Input
               id="descricao"
               onChange={(e) => setDescricao(e.target.value)}
@@ -111,6 +112,8 @@ export function PermissionTemplatesPage() {
         </div>
       </form>
 
+      <h2 className="border-t pt-5 font-semibold">Templates existentes</h2>
+
       {templates === undefined ? (
         <LoadingSkeleton rows={4} />
       ) : templates.length === 0 ? (
@@ -121,14 +124,22 @@ export function PermissionTemplatesPage() {
       ) : (
         <div className="grid gap-3">
           {templates.map((template) => (
-            <article className="rounded-xl border bg-card p-4" key={template._id}>
+            <article className="rounded-xl border bg-card p-4 shadow-xs" key={template._id}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="font-medium">{template.nome}</h2>
-                  <p className="text-sm text-muted-foreground">{template.descricao}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Status: {template.ativo ? "Ativo" : "Inativo"}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold">{template.nome}</h3>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        template.ativo
+                          ? "bg-success/12 text-success"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {template.ativo ? "Ativo" : "Inativo"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{template.descricao}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button onClick={() => startEdit(template)} size="sm" type="button" variant="outline">

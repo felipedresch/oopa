@@ -88,7 +88,7 @@ export const evaluateTutor = query({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     const tutor = await ctx.db.get("tutors", args.tutorId);
@@ -127,7 +127,7 @@ export const create = mutation({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     const tutor = await ctx.db.get("tutors", args.tutorId);
@@ -137,7 +137,7 @@ export const create = mutation({
 
     const responsavel = await ctx.db.get("users", args.responsavel_ong_user_id);
     if (!responsavel?.ativo) {
-      throw validationError("Responsavel ONG invalido.");
+      throw validationError("Responsavel ONG inválido.");
     }
 
     const payload: AdoptionPayloadInput = {
@@ -160,8 +160,8 @@ export const create = mutation({
 
     const occurrenceId = await createOccurrenceWithHistory(ctx, actor, {
       dog,
-      typeName: "Adocao",
-      descricao: args.descricao?.trim() || `Adocao: termo ${adoptionPayload.numero_termo_adocao}`,
+      typeName: "Adoção",
+      descricao: args.descricao?.trim() || `Adoção: termo ${adoptionPayload.numero_termo_adocao}`,
       data_ocorrencia: args.data_adocao,
       new_tutor_id: args.tutorId,
       adoption_payload: adoptionPayload,
@@ -174,7 +174,7 @@ export const create = mutation({
       action: "adoptions.create",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: `Adocao registrada: ${dog.nome} para ${tutor.nome_completo}`,
+      summary: `Adoção registrada: ${dog.nome} para ${tutor.nome_completo}`,
       metadata: { dog_id: args.dogId, tutor_id: args.tutorId },
     });
 
@@ -196,22 +196,22 @@ export const returnToOng = mutation({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     if (!dog.tutor_atual_id) {
-      throw validationError("Cao nao possui tutor atual para devolucao.");
+      throw validationError("Cão não possui tutor atual para devolução.");
     }
 
     const descricao = args.descricao.trim();
     if (!descricao) {
-      throw validationError("Motivo da devolucao obrigatorio.");
+      throw validationError("Motivo da devolução obrigatório.");
     }
 
     const occurredAt = args.data_ocorrencia ?? Date.now();
     const occurrenceId = await createOccurrenceWithHistory(ctx, actor, {
       dog,
-      typeName: "Devolucao a ONG",
+      typeName: "Devolução a ONG",
       descricao,
       data_ocorrencia: occurredAt,
       photo_storage_ids: args.photo_storage_ids,
@@ -222,7 +222,7 @@ export const returnToOng = mutation({
       action: "adoptions.returnToOng",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: `Devolucao a ONG: ${dog.nome}`,
+      summary: `Devolução a ONG: ${dog.nome}`,
       metadata: { dog_id: args.dogId },
     });
 
@@ -245,11 +245,11 @@ export const transferTutor = mutation({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Cão");
     }
 
     if (!dog.tutor_atual_id) {
-      throw validationError("Cao nao possui tutor atual para transferencia.");
+      throw validationError("Cão não possui tutor atual para transferencia.");
     }
 
     const newTutor = await ctx.db.get("tutors", args.newTutorId);
@@ -263,13 +263,13 @@ export const transferTutor = mutation({
 
     const descricao = args.descricao.trim();
     if (!descricao) {
-      throw validationError("Descricao da transferencia obrigatoria.");
+      throw validationError("Descrição da transferencia obrigatória.");
     }
 
     const occurredAt = args.data_ocorrencia ?? Date.now();
     const occurrenceId = await createOccurrenceWithHistory(ctx, actor, {
       dog,
-      typeName: "Transferencia de Tutor",
+      typeName: "Transferência de Tutor",
       descricao,
       data_ocorrencia: occurredAt,
       new_tutor_id: args.newTutorId,

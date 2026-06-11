@@ -89,7 +89,7 @@ export const availableForCreate = query({
       .filter(
         (type) =>
           type.ativo &&
-          type.nome !== "Correcao/Retificacao" &&
+          type.nome !== "Correção/Retificação" &&
           canCreateOccurrenceCategory(actor.permissions, type.categoria),
       )
       .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR"))
@@ -117,14 +117,14 @@ export const create = mutation({
 
     const nome = normalizeNome(args.nome);
     if (!nome) {
-      throw validationError("Nome do tipo obrigatorio.");
+      throw validationError("Nome do tipo obrigatório.");
     }
 
     const existing = (await ctx.db.query("occurrence_types").collect()).find(
       (type) => type.nome.toLowerCase() === nome.toLowerCase(),
     );
     if (existing) {
-      throw conflict("Ja existe um tipo com este nome.");
+      throw conflict("Já existe um tipo com este nome.");
     }
 
     const now = Date.now();
@@ -143,7 +143,7 @@ export const create = mutation({
       action: "occurrence_types.create",
       entityType: "occurrence_type",
       entityId: typeId,
-      summary: `Tipo de ocorrencia criado: ${nome}`,
+      summary: `Tipo de ocorrência criado: ${nome}`,
     });
 
     return typeId;
@@ -165,12 +165,12 @@ export const update = mutation({
 
     const type = await ctx.db.get("occurrence_types", args.occurrenceTypeId);
     if (!type) {
-      throw notFound("Tipo de ocorrencia");
+      throw notFound("Tipo de ocorrência");
     }
 
     const nome = normalizeNome(args.nome);
     if (!nome) {
-      throw validationError("Nome do tipo obrigatorio.");
+      throw validationError("Nome do tipo obrigatório.");
     }
 
     const duplicate = (await ctx.db.query("occurrence_types").collect()).find(
@@ -178,7 +178,7 @@ export const update = mutation({
         item._id !== args.occurrenceTypeId && item.nome.toLowerCase() === nome.toLowerCase(),
     );
     if (duplicate) {
-      throw conflict("Ja existe um tipo com este nome.");
+      throw conflict("Já existe um tipo com este nome.");
     }
 
     const now = Date.now();
@@ -196,7 +196,7 @@ export const update = mutation({
       action: "occurrence_types.update",
       entityType: "occurrence_type",
       entityId: args.occurrenceTypeId,
-      summary: `Tipo de ocorrencia atualizado: ${nome}`,
+      summary: `Tipo de ocorrência atualizado: ${nome}`,
     });
 
     return null;
@@ -215,7 +215,7 @@ export const setActive = mutation({
 
     const type = await ctx.db.get("occurrence_types", args.occurrenceTypeId);
     if (!type) {
-      throw notFound("Tipo de ocorrencia");
+      throw notFound("Tipo de ocorrência");
     }
 
     if (type.ativo === args.ativo) {

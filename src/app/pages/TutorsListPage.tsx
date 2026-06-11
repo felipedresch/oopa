@@ -47,7 +47,7 @@ export function TutorsListPage() {
             </Button>
           ) : null
         }
-        description="Consulte tutores, bairros e alertas derivados de ocorrencias."
+        description="Consulte tutores, bairros e alertas derivados de ocorrências."
         title="Tutores"
       />
 
@@ -65,7 +65,7 @@ export function TutorsListPage() {
         <div className="flex min-w-48 flex-1 flex-col gap-2">
           <Label htmlFor="tutor-bairro">Bairro</Label>
           <select
-            className="min-h-11 rounded-md border bg-background px-3 text-sm"
+            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             id="tutor-bairro"
             onChange={(event) => setBairroId(event.target.value as Id<"bairros"> | "")}
             value={bairroId}

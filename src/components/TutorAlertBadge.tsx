@@ -17,7 +17,7 @@ export function TutorAlertBadge({ level }: TutorAlertBadgeProps) {
   }
 
   return (
-    <Badge className={tutorAlertBadgeClass[level]} variant="outline">
+    <Badge className={tutorAlertBadgeClass[level]} variant="secondary">
       {ALERT_LABELS[level]}
     </Badge>
   );

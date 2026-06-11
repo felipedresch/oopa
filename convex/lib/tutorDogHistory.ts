@@ -87,9 +87,9 @@ export async function applyHistoryForOccurrence(
   const { dog, occurrenceId, typeName, occurredAt, newTutorId } = args;
 
   switch (typeName) {
-    case "Adocao": {
+    case "Adoção": {
       if (!newTutorId) {
-        throw validationError("Adocao exige tutor de destino.");
+        throw validationError("Adoção exige tutor de destino.");
       }
       await closeVigenteHistory(ctx, dog._id, {
         fim: occurredAt,
@@ -109,9 +109,9 @@ export async function applyHistoryForOccurrence(
       });
       return;
     }
-    case "Transferencia de Tutor": {
+    case "Transferência de Tutor": {
       if (!newTutorId) {
-        throw validationError("Transferencia exige tutor de destino.");
+        throw validationError("Transferência exige tutor de destino.");
       }
       await closeVigenteHistory(ctx, dog._id, {
         fim: occurredAt,
@@ -130,7 +130,7 @@ export async function applyHistoryForOccurrence(
       });
       return;
     }
-    case "Devolucao a ONG": {
+    case "Devolução a ONG": {
       await closeVigenteHistory(ctx, dog._id, {
         fim: occurredAt,
         tipo_fim: typeName,
@@ -153,7 +153,7 @@ export async function applyHistoryForOccurrence(
       });
       return;
     }
-    case "Obito": {
+    case "Óbito": {
       await closeVigenteHistory(ctx, dog._id, {
         fim: occurredAt,
         tipo_fim: typeName,

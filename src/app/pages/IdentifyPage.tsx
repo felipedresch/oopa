@@ -61,7 +61,7 @@ export function IdentifyPage() {
     event.preventDefault();
     const digits = manualChip.replace(/\D/g, "");
     if (digits.length !== 15) {
-      setError("Informe os 15 digitos do microchip.");
+      setError("Informe os 15 dígitos do microchip.");
       return;
     }
     setConfirmChip(maskMicrochipInput(digits));
@@ -87,14 +87,14 @@ export function IdentifyPage() {
       if (ocrResult.needsManualReview) {
         setOcrWarning(
           ocrResult.candidate
-            ? "Nao consegui ler com seguranca. Confira o numero antes de buscar."
-            : "Nao consegui ler com seguranca. Informe o microchip manualmente.",
+            ? "Não consegui ler com segurança. Confira o número antes de buscar."
+            : "Não consegui ler com segurança. Informe o microchip manualmente.",
         );
       }
 
       setStep("confirm");
     } catch (cause) {
-      setOcrWarning("Nao consegui ler com seguranca. Confira o numero ou digite manualmente.");
+      setOcrWarning("Não consegui ler com segurança. Confira o número ou digite manualmente.");
       setStep("confirm");
       setError(getErrorMessage(cause, "Falha ao processar a foto."));
     }
@@ -103,7 +103,7 @@ export function IdentifyPage() {
   const handleConfirmSearch = () => {
     const digits = confirmChip.replace(/\D/g, "");
     if (digits.length !== 15) {
-      setError("Informe os 15 digitos do microchip.");
+      setError("Informe os 15 dígitos do microchip.");
       return;
     }
     setManualChip(maskMicrochipInput(digits));
@@ -121,7 +121,7 @@ export function IdentifyPage() {
       await reportDogNotFound({ microchip: submittedChip });
       setReported(true);
     } catch (cause) {
-      setError(getErrorMessage(cause, "Nao foi possivel avisar a ONG."));
+      setError(getErrorMessage(cause, "Não foi possível avisar a ONG."));
     } finally {
       setReporting(false);
     }
@@ -132,21 +132,21 @@ export function IdentifyPage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Use a camera do leitor RFID ou digite os 15 digitos. A busca so ocorre apos confirmacao."
-        title="Identificar cao"
+        description="Use a câmera do leitor RFID ou digite os 15 dígitos. A busca so ocorre apos confirmacao."
+        title="Identificar cão"
       />
 
       {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+        <p className="rounded-lg bg-destructive/10 p-3 text-sm font-medium text-destructive" role="alert">
           {error}
         </p>
       ) : null}
 
       {step === "processing" ? (
-        <div className="rounded-xl border bg-card p-6 text-center">
-          <p className="text-lg font-medium">Processando foto...</p>
+        <div className="rounded-xl bg-accent/50 p-6 text-center">
+          <p className="text-lg font-semibold">Processando foto...</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Aguarde enquanto lemos o numero do leitor.
+            Aguarde enquanto lemos o número do leitor.
           </p>
           <div className="mt-4">
             <LoadingSkeleton rows={2} />
@@ -169,14 +169,14 @@ export function IdentifyPage() {
 
       <MicrochipCameraCapture disabled={step === "processing"} onCapture={(file) => void handleCapture(file)} />
 
-      <form className="rounded-xl border bg-card p-4" onSubmit={handleManualSubmit}>
+      <form className="flex flex-col gap-2 border-t pt-5" onSubmit={handleManualSubmit}>
         <Label htmlFor="identify-microchip">Microchip manual</Label>
-        <p className="mb-2 text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           O campo manual fica sempre disponivel para uso na rua.
         </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="mt-1 flex flex-col gap-2 sm:flex-row">
           <Input
-            className="min-h-12 text-lg"
+            className="min-h-12 text-lg tabular-nums"
             id="identify-microchip"
             inputMode="numeric"
             onChange={(event) => setManualChip(maskMicrochipInput(event.target.value))}
@@ -184,7 +184,7 @@ export function IdentifyPage() {
             value={manualChip}
           />
           <Button className="min-h-12 px-6 text-base" type="submit">
-            Revisar numero
+            Revisar número
           </Button>
         </div>
       </form>
@@ -204,20 +204,20 @@ export function IdentifyPage() {
             status={result.status_atual}
           />
           <Button asChild className="min-h-12 text-base">
-            <Link to={`/dogs/${result._id}`}>Abrir ficha do cao</Link>
+            <Link to={`/dogs/${result._id}`}>Abrir ficha do cão</Link>
           </Button>
         </div>
       ) : null}
 
       {showNotFound ? (
         <EmptyState
-          description="Nenhum cao foi encontrado com este microchip."
-          title="Microchip nao encontrado"
+          description="Nenhum cão foi encontrado com este microchip."
+          title="Microchip não encontrado"
         >
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
             {can("dogs.create") ? (
               <Button asChild className="min-h-12 text-base">
-                <Link to={`/dogs/new?microchip=${submittedChip}`}>Cadastrar novo cao</Link>
+                <Link to={`/dogs/new?microchip=${submittedChip}`}>Cadastrar novo cão</Link>
               </Button>
             ) : (
               <Button
@@ -236,7 +236,7 @@ export function IdentifyPage() {
                 onClick={() => navigate("/notifications")}
                 type="button"
               >
-                Ver notificacoes
+                Ver notificações
               </Button>
             ) : null}
           </div>

@@ -1,10 +1,10 @@
 export const VALIDATION_MESSAGES = {
-  microchip: "Microchip deve ter exatamente 15 digitos numericos.",
-  cpf: "CPF invalido.",
-  phone: "Telefone deve ter 10 ou 11 digitos.",
-  email: "Email invalido.",
-  cep: "CEP deve ter 8 digitos.",
-  required: "Campo obrigatorio.",
+  microchip: "Microchip deve ter exatamente 15 dígitos numericos.",
+  cpf: "CPF inválido.",
+  phone: "Telefone deve ter 10 ou 11 dígitos.",
+  email: "Email inválido.",
+  cep: "CEP deve ter 8 dígitos.",
+  required: "Campo obrigatório.",
 } as const;
 
 export function validateMicrochip(value: string): string | null {

@@ -48,8 +48,8 @@ describe("IdentifyPage", () => {
 
     expect(screen.getByLabelText(/microchip manual/i)).toBeInTheDocument();
     await user.type(screen.getByLabelText(/microchip manual/i), "956000013141707");
-    await user.click(screen.getByRole("button", { name: /revisar numero/i }));
+    await user.click(screen.getByRole("button", { name: /revisar número/i }));
 
-    expect(screen.getByText(/confira o numero antes de buscar/i)).toBeInTheDocument();
+    expect(screen.getByText(/confira o número antes de buscar/i)).toBeInTheDocument();
   });
 });

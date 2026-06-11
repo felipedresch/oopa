@@ -38,7 +38,7 @@ export const extractMicrochip = action({
       bytes = Buffer.from(args.imageBase64, "base64");
       validateOcrImageInput(bytes, args.contentType);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Imagem invalida.";
+      const message = error instanceof Error ? error.message : "Imagem inválida.";
       await ctx.runMutation(internal.ocrInternals.logAttempt, {
         userId: actor._id,
         success: false,
@@ -62,7 +62,7 @@ export const extractMicrochip = action({
       return parsed;
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Nao foi possivel ler o microchip na foto.";
+        error instanceof Error ? error.message : "Não foi possível ler o microchip na foto.";
       const code =
         error && typeof error === "object" && "data" in error
           ? ((error as { data?: { code?: string } }).data?.code ?? buildOcrFailureCode(message))
