@@ -1,0 +1,29 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      VITE_CONVEX_URL: https://hardy-labrador-399.convex.cloud
+      VITE_CONVEX_SITE_URL: https://hardy-labrador-399.convex.site
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run quality gate
+        run: npm run quality
