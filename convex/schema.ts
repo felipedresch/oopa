@@ -208,4 +208,14 @@ export default defineSchema({
   }).index("by_user_unread", ["user_id", "lida"]),
 
   audit_logs: defineTable(auditMetadataFields).index("by_created_at", ["created_at"]),
+
+  ocr_logs: defineTable({
+    user_id: v.id("users"),
+    success: v.boolean(),
+    candidate: v.optional(v.string()),
+    confidence: v.optional(v.number()),
+    failure_code: v.optional(v.string()),
+    failure_message: v.optional(v.string()),
+    created_at: v.number(),
+  }).index("by_created_at", ["created_at"]),
 });

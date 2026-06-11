@@ -24,7 +24,8 @@ mesmo conjunto de mudancas.
   Supabase ou banco paralelo.
 - Tabelas Convex usam nomes plurais em snake_case: `users`, `permission_templates`,
   `dogs`, `dog_photos`, `tutors`, `bairros`, `occurrence_types`, `occurrences`,
-  `occurrence_photos`, `tutor_dog_history`, `notifications`, `audit_logs`.
+  `occurrence_photos`, `tutor_dog_history`, `notifications`, `audit_logs`,
+  `ocr_logs`.
 - Arquivos Convex ficam por dominio: `convex/auth.ts`, `convex/users.ts`,
   `convex/permissions.ts`, `convex/dogs.ts`, `convex/tutors.ts`,
   `convex/bairros.ts`, `convex/occurrenceTypes.ts`, `convex/occurrences.ts`,
@@ -44,9 +45,11 @@ mesmo conjunto de mudancas.
   apenas o mapa modulo/nivel e nunca salva papel abstrato no usuario.
 - Email transacional usa Resend via Convex action para convite e reset de senha.
 - Fotos usam Cloudflare R2 com URL assinada gerada por Convex action.
-- OCR e implementado por action Convex. A imagem enviada ao OCR nao e persistida
-  no banco; o sistema salva apenas microchip candidato, confianca, usuario,
-  sucesso/falha e timestamp tecnico.
+- OCR e implementado por action Convex (`ocr.extractMicrochip`). A imagem enviada
+  ao OCR nao e persistida no banco; o sistema salva apenas microchip candidato,
+  confianca, usuario, sucesso/falha e timestamp tecnico em `ocr_logs`.
+- Provedor OCR padrao: OpenAI Vision com `OPENAI_API_KEY`; testes usam
+  `OCR_PROVIDER=fixture` e `OCR_FIXTURE_TEXT`.
 - Bairros sao geridos na tela Configuracoes > Bairros. Seed inicial cria
   `Centro`, `Zona Rural` e `Nao informado`; a ONG completa a lista pela UI.
 - "Avisar a ONG" no cao nao encontrado cria notificacao in-app para usuarios
@@ -461,37 +464,38 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Implementar action `ocr.extractMicrochip` protegida por usuario ativo.
-- [ ] Aceitar imagem JPEG, PNG ou WebP ate 8 MB.
-- [ ] Retornar `candidate`, `confidence` e `needsManualReview`.
-- [ ] Marcar `needsManualReview` como `true` para qualquer confianca abaixo de
+- [x] Implementar action `ocr.extractMicrochip` protegida por usuario ativo.
+- [x] Aceitar imagem JPEG, PNG ou WebP ate 8 MB.
+- [x] Retornar `candidate`, `confidence` e `needsManualReview`.
+- [x] Marcar `needsManualReview` como `true` para qualquer confianca abaixo de
       0.98 ou numero diferente de 15 digitos.
-- [ ] Nao persistir imagem enviada ao OCR.
-- [ ] Persistir log tecnico sem imagem com usuario, sucesso/falha, candidate,
-      confidence e timestamp.
-- [ ] Manter `dogs.findByMicrochip` como unica busca final; OCR apenas preenche
+- [x] Nao persistir imagem enviada ao OCR.
+- [x] Persistir log tecnico sem imagem com usuario, sucesso/falha, candidate,
+      confidence e timestamp (`ocr_logs`).
+- [x] Manter `dogs.findByMicrochip` como unica busca final; OCR apenas preenche
       candidato.
-- [ ] Testar OCR com sucesso, baixa confianca, falha, numero invalido e entrada
-      manual.
+- [x] Testar OCR com sucesso, baixa confianca, falha, numero invalido e entrada
+      manual (`convex/lib/ocr.test.ts`, `convex/ocr.test.ts`).
+- [x] Implementar `notifications.reportDogNotFound` para o CTA "Avisar a ONG".
 
 ### Frontend
 
-- [ ] Criar `/identify` com camera e campo manual sempre visivel.
-- [ ] Criar captura de foto da tela do leitor RFID com moldura central,
+- [x] Criar `/identify` com camera e campo manual sempre visivel.
+- [x] Criar captura de foto da tela do leitor RFID com moldura central,
       instrucao curta e botao grande.
-- [ ] Criar tela obrigatoria de confirmacao dos 15 digitos em fonte grande.
-- [ ] Permitir editar o numero antes da busca.
-- [ ] Mostrar estados "Processando foto", "Nao consegui ler com seguranca" e
+- [x] Criar tela obrigatoria de confirmacao dos 15 digitos em fonte grande.
+- [x] Permitir editar o numero antes da busca.
+- [x] Mostrar estados "Processando foto", "Nao consegui ler com seguranca" e
       "Confira o numero antes de buscar".
-- [ ] Abrir ficha do cao quando encontrado.
-- [ ] Mostrar resultado nao encontrado com CTA Cadastrar novo cao para quem tem
+- [x] Abrir ficha do cao quando encontrado.
+- [x] Mostrar resultado nao encontrado com CTA Cadastrar novo cao para quem tem
       `dogs.create`.
-- [ ] Mostrar resultado nao encontrado com CTA Avisar a ONG para quem nao tem
+- [x] Mostrar resultado nao encontrado com CTA Avisar a ONG para quem nao tem
       `dogs.create`; o CTA cria notificacao in-app para a ONG.
-- [ ] Otimizar para uso na rua: botoes de pelo menos 44px, poucos toques, alto
+- [x] Otimizar para uso na rua: botoes de pelo menos 44px, poucos toques, alto
       contraste e feedback imediato.
-- [ ] Testar fluxo manual, OCR mockado com sucesso, OCR com baixa confianca e
-      cao nao encontrado.
+- [x] Testar fluxo manual, OCR mockado com sucesso, OCR com baixa confianca e
+      cao nao encontrado (`IdentifyPage.test.tsx`, smoke E2E).
 
 ## Fase 8 - Notificacoes, auditoria e configuracoes operacionais
 

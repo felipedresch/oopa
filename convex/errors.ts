@@ -61,3 +61,7 @@ export function tokenUsed(message = "Este link ja foi utilizado.") {
 export function uploadRejected(message: string) {
   return new DomainError(ERROR_CODES.UPLOAD_REJECTED, message);
 }
+
+export function ocrFailed(message = "Nao foi possivel ler o microchip na foto.") {
+  return new DomainError(ERROR_CODES.OCR_FAILED, message);
+}
