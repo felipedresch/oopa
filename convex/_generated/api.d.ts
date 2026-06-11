@@ -10,6 +10,7 @@
 
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
+import type * as bairros from "../bairros.js";
 import type * as bootstrap from "../bootstrap.js";
 import type * as dogPhotos from "../dogPhotos.js";
 import type * as dogs from "../dogs.js";
@@ -21,12 +22,14 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_dogs from "../lib/dogs.js";
 import type * as lib_storage from "../lib/storage.js";
 import type * as lib_tokens from "../lib/tokens.js";
+import type * as lib_tutors from "../lib/tutors.js";
 import type * as permissionTemplates from "../permissionTemplates.js";
 import type * as permissions from "../permissions.js";
 import type * as seeds from "../seeds.js";
 import type * as storage from "../storage.js";
 import type * as testFixtures from "../testFixtures.js";
 import type * as testHelpers from "../testHelpers.js";
+import type * as tutors from "../tutors.js";
 import type * as users from "../users.js";
 
 import type {
@@ -38,6 +41,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   audit: typeof audit;
   auth: typeof auth;
+  bairros: typeof bairros;
   bootstrap: typeof bootstrap;
   dogPhotos: typeof dogPhotos;
   dogs: typeof dogs;
@@ -49,12 +53,14 @@ declare const fullApi: ApiFromModules<{
   "lib/dogs": typeof lib_dogs;
   "lib/storage": typeof lib_storage;
   "lib/tokens": typeof lib_tokens;
+  "lib/tutors": typeof lib_tutors;
   permissionTemplates: typeof permissionTemplates;
   permissions: typeof permissions;
   seeds: typeof seeds;
   storage: typeof storage;
   testFixtures: typeof testFixtures;
   testHelpers: typeof testHelpers;
+  tutors: typeof tutors;
   users: typeof users;
 }>;
 

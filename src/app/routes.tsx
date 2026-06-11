@@ -18,6 +18,10 @@ import { DogDetailPage } from "@/app/pages/DogDetailPage";
 import { DogFormPage } from "@/app/pages/DogFormPage";
 import { DogsListPage } from "@/app/pages/DogsListPage";
 import { IdentifyPage } from "@/app/pages/IdentifyPage";
+import { BairrosSettingsPage } from "@/app/pages/BairrosSettingsPage";
+import { TutorDetailPage } from "@/app/pages/TutorDetailPage";
+import { TutorFormPage } from "@/app/pages/TutorFormPage";
+import { TutorsListPage } from "@/app/pages/TutorsListPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -42,10 +46,10 @@ export const appRoutes: RouteObject[] = [
         path: "dogs/:dogId/occurrences/new",
         element: <PlaceholderPage title="Nova ocorrencia" />,
       },
-      { path: "tutors", element: <PlaceholderPage title="Tutores" /> },
-      { path: "tutors/new", element: <PlaceholderPage title="Novo tutor" /> },
-      { path: "tutors/:tutorId", element: <PlaceholderPage title="Ficha do tutor" /> },
-      { path: "tutors/:tutorId/edit", element: <PlaceholderPage title="Editar tutor" /> },
+      { path: "tutors", element: <TutorsListPage /> },
+      { path: "tutors/new", element: <TutorFormPage /> },
+      { path: "tutors/:tutorId", element: <TutorDetailPage /> },
+      { path: "tutors/:tutorId/edit", element: <TutorFormPage /> },
       { path: "adoptions/new", element: <PlaceholderPage title="Nova adocao" /> },
       { path: "returns/new", element: <PlaceholderPage title="Nova devolucao" /> },
       { path: "team", element: <TeamPage /> },
@@ -65,10 +69,7 @@ export const appRoutes: RouteObject[] = [
           />
         ),
       },
-      {
-        path: "settings/bairros",
-        element: <AdminPlaceholderPage permission="bairros.manage" title="Bairros" />,
-      },
+      { path: "settings/bairros", element: <BairrosSettingsPage /> },
       {
         path: "audit",
         element: <AdminPlaceholderPage permission="system.audit_log" title="Auditoria" />,

@@ -327,38 +327,38 @@ mesmo conjunto de mudancas.
 
 ### Backend
 
-- [ ] Implementar CRUD de bairros protegido por `bairros.manage`.
-- [ ] Desativar bairro usado em vez de excluir fisicamente.
-- [ ] Implementar query `bairros.search` com autocomplete por prefixo.
-- [ ] Implementar mutation `tutors.create` protegida por `tutors.create`.
-- [ ] Implementar mutation `tutors.update` protegida por `tutors.edit`.
-- [ ] Exigir CPF unico para tutor com CPF informado.
-- [ ] Implementar query `tutors.get` com leitura basica por `tutors.read` e
+- [x] Implementar CRUD de bairros protegido por `bairros.manage`.
+- [x] Desativar bairro usado em vez de excluir fisicamente.
+- [x] Implementar query `bairros.search` com autocomplete por prefixo.
+- [x] Implementar mutation `tutors.create` protegida por `tutors.create`.
+- [x] Implementar mutation `tutors.update` protegida por `tutors.edit`.
+- [x] Exigir CPF unico para tutor com CPF informado.
+- [x] Implementar query `tutors.get` com leitura basica por `tutors.read` e
       campos sensiveis apenas por `tutors.read_sensitive`.
-- [ ] Implementar calculo de alerta do tutor: vermelho com pelo menos uma
+- [x] Implementar calculo de alerta do tutor: vermelho com pelo menos uma
       ocorrencia alta atribuivel; amarelo com pelo menos uma media atribuivel;
       sem alerta com zero medias/altas atribuidas.
-- [ ] Implementar query `tutors.list` com busca por nome, CPF para usuario com
+- [x] Implementar query `tutors.list` com busca por nome, CPF para usuario com
       permissao sensivel e bairro.
-- [ ] Auditar criacao e edicao de tutor e gestao de bairros.
-- [ ] Testar leitura basica, leitura sensivel, alerta derivado, CPF duplicado e
+- [x] Auditar criacao e edicao de tutor e gestao de bairros.
+- [x] Testar leitura basica, leitura sensivel, alerta derivado, CPF duplicado e
       autocomplete.
 
 ### Frontend
 
-- [ ] Criar `/tutors` com busca por nome, filtro de bairro e badge de alerta.
-- [ ] Criar `/tutors/:tutorId` com dados, caes atuais, historico, ocorrencias e
+- [x] Criar `/tutors` com busca por nome, filtro de bairro e badge de alerta.
+- [x] Criar `/tutors/:tutorId` com dados, caes atuais, historico, ocorrencias e
       alertas.
-- [ ] Ocultar CPF, RG, endereco, telefone, email, data de nascimento,
+- [x] Ocultar CPF, RG, endereco, telefone, email, data de nascimento,
       observacoes e alertas sem `tutors.read_sensitive`.
-- [ ] Mostrar bloco "Dados sensiveis ocultos" para usuario sem permissao.
-- [ ] Criar `/tutors/new` e `/tutors/:tutorId/edit` com mascara de CPF,
+- [x] Mostrar bloco "Dados sensiveis ocultos" para usuario sem permissao.
+- [x] Criar `/tutors/new` e `/tutors/:tutorId/edit` com mascara de CPF,
       telefone e CEP.
-- [ ] Criar autocomplete de bairro com opcao de selecionar "Nao informado".
-- [ ] Criar painel de alerta do tutor com contagem e lista filtravel por
+- [x] Criar autocomplete de bairro com opcao de selecionar "Nao informado".
+- [x] Criar painel de alerta do tutor com contagem e lista filtravel por
       gravidade.
-- [ ] Criar `/settings/bairros` com lista, busca, criar, ativar e desativar.
-- [ ] Testar cadastro, edicao, ficha com permissao sensivel, ficha sem
+- [x] Criar `/settings/bairros` com lista, busca, criar, ativar e desativar.
+- [x] Testar cadastro, edicao, ficha com permissao sensivel, ficha sem
       permissao sensivel e gestao de bairros.
 
 ## Fase 5 - Ocorrencias, auditabilidade e historico tutor-cao

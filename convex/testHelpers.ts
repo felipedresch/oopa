@@ -37,3 +37,38 @@ export async function storeTestImage(t: ConvexTestClient): Promise<Id<"_storage"
     return await ctx.storage.store(file);
   });
 }
+
+export async function seedBairro(
+  t: ConvexTestClient,
+  nome = "Centro",
+): Promise<Id<"bairros">> {
+  return await t.run(async (ctx) => {
+    return await ctx.db.insert("bairros", {
+      nome,
+      ativo: true,
+      criado_em: Date.now(),
+    });
+  });
+}
+
+export async function seedUser(
+  t: ConvexTestClient,
+  args: {
+    nome: string;
+    email: string;
+    permissions: string[];
+  },
+): Promise<Id<"users">> {
+  const now = Date.now();
+  return await t.run(async (ctx) => {
+    return await ctx.db.insert("users", {
+      nome: args.nome,
+      name: args.nome,
+      email: args.email,
+      organizacao: "ONG OOPA",
+      ativo: true,
+      permissions: args.permissions,
+      criado_em: now,
+    });
+  });
+}
