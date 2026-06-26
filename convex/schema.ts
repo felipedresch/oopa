@@ -6,6 +6,7 @@ import {
   adoptionPayloadValidator,
   dogSexValidator,
   dogSizeValidator,
+  dogSpeciesValidator,
   dogStatusValidator,
   entityTypeValidator,
   notificationTypeValidator,
@@ -90,6 +91,7 @@ export default defineSchema({
   dogs: defineTable({
     microchip: v.string(),
     nome: v.string(),
+    especie: v.optional(dogSpeciesValidator),
     sexo: dogSexValidator,
     data_nascimento_aproximada: v.optional(v.number()),
     porte: dogSizeValidator,

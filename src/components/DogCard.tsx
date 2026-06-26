@@ -3,13 +3,15 @@ import { Link } from "react-router-dom";
 
 import { DogStatusBadge } from "@/components/DogStatusBadge";
 import { formatMicrochip } from "@/lib/formatters";
-import type { DogStatus } from "@/lib/domain-colors";
+import type { DogEspecie, DogStatus } from "@/lib/domain-colors";
+import { ESPECIE_EMOJI, ESPECIE_LABELS } from "@/lib/domain-colors";
 
 type DogCardProps = {
   dogId: string;
   nome: string;
   microchip: string;
   status: DogStatus;
+  especie?: DogEspecie;
   fotoUrl?: string | null;
   graveAlert?: boolean;
   selectable?: boolean;
@@ -20,6 +22,7 @@ export function DogCard({
   nome,
   microchip,
   status,
+  especie,
   fotoUrl,
   graveAlert = false,
   selectable = false,
@@ -47,7 +50,14 @@ export function DogCard({
       <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate font-semibold">{nome}</p>
+            <p className="flex items-center gap-1.5 truncate font-semibold">
+              {especie ? (
+                <span aria-label={ESPECIE_LABELS[especie]} title={ESPECIE_LABELS[especie]}>
+                  {ESPECIE_EMOJI[especie]}
+                </span>
+              ) : null}
+              <span className="truncate">{nome}</span>
+            </p>
             <p className="text-sm tabular-nums text-muted-foreground">
               {formatMicrochip(microchip)}
             </p>

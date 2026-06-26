@@ -19,7 +19,7 @@ import { DOG_STATUS_LABELS } from "@/lib/domain-colors";
 const PORTE_OPTIONS = [
   { value: "", label: "Todos os portes" },
   { value: "pequeno", label: "Pequeno" },
-  { value: "medio", label: "Medio" },
+  { value: "medio", label: "Médio" },
   { value: "grande", label: "Grande" },
 ] as const;
 
@@ -60,12 +60,12 @@ export function DogsListPage() {
         actions={
           can("dogs.create") ? (
             <Button asChild className="min-h-11">
-              <Link to="/dogs/new">Novo cão</Link>
+              <Link to="/dogs/new">Novo animal</Link>
             </Button>
           ) : undefined
         }
         description="Filtre por status, porte e alertas recentes de ocorrências graves."
-        title="Cães"
+        title="Animais"
       />
 
       <FilterBar>
@@ -127,8 +127,8 @@ export function DogsListPage() {
 
       {results?.length === 0 ? (
         <EmptyState
-          description="Ajuste os filtros ou cadastre um novo cão."
-          title="Nenhum cão encontrado"
+          description="Ajuste os filtros ou cadastre um novo animal."
+          title="Nenhum animal encontrado"
         />
       ) : null}
 
@@ -136,6 +136,7 @@ export function DogsListPage() {
         {results?.map((dog) => (
           <DogCard
             dogId={dog._id}
+            especie={dog.especie}
             fotoUrl={dog.foto_perfil_url}
             graveAlert={dog.grave_alert}
             key={dog._id}

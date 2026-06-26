@@ -22,6 +22,7 @@ export const exportDogsCsv = query({
       [
         "microchip",
         "nome",
+        "especie",
         "sexo",
         "porte",
         "status_atual",
@@ -36,6 +37,7 @@ export const exportDogsCsv = query({
       rows.push([
         dog.microchip,
         dog.nome,
+        dog.especie ?? "cao",
         dog.sexo,
         dog.porte,
         dog.status_atual,

@@ -3,6 +3,7 @@ import type { QueryCtx } from "../_generated/server";
 import {
   dogSexValidator,
   dogSizeValidator,
+  dogSpeciesValidator,
   dogStatusValidator,
   isValidMicrochip,
   normalizeMicrochip,
@@ -20,7 +21,7 @@ export const dogFieldsValidator = {
 export function assertValidMicrochip(value: string): string {
   const microchip = normalizeMicrochip(value);
   if (!isValidMicrochip(microchip)) {
-    throw validationError("Microchip deve ter exatamente 15 digitos numericos.");
+    throw validationError("Microchip deve ter exatamente 15 dígitos numéricos.");
   }
   return microchip;
 }
@@ -56,6 +57,7 @@ export function filterDogForViewer(
     _id: dog._id,
     microchip: dog.microchip,
     nome: dog.nome,
+    especie: dog.especie ?? "cao",
     sexo: dog.sexo,
     data_nascimento_aproximada: dog.data_nascimento_aproximada,
     porte: dog.porte,
@@ -77,4 +79,4 @@ export function filterDogForViewer(
   };
 }
 
-export { dogSexValidator, dogSizeValidator, dogStatusValidator };
+export { dogSexValidator, dogSizeValidator, dogSpeciesValidator, dogStatusValidator };

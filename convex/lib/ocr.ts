@@ -24,7 +24,7 @@ export function validateOcrImageInput(bytes: Uint8Array, contentType: string): v
   }
 
   if (!ALLOWED_IMAGE_CONTENT_TYPES.has(contentType)) {
-    throw new Error("Formato invalido. Use JPEG, PNG ou WebP.");
+    throw new Error("Formato inválido. Use JPEG, PNG ou WebP.");
   }
 }
 
@@ -92,7 +92,7 @@ export function buildOcrFailureCode(message: string): string {
   if (message.includes("8 MB")) {
     return ERROR_CODES.UPLOAD_REJECTED;
   }
-  if (message.includes("Formato invalido")) {
+  if (message.includes("Formato inválido")) {
     return ERROR_CODES.UPLOAD_REJECTED;
   }
   return ERROR_CODES.OCR_FAILED;

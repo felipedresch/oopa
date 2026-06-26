@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
@@ -9,12 +9,14 @@ import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
+import { fetchAddressByCep, normalizeBairroName } from "@/lib/cep";
 import { maskCep, maskCpf, maskPhone } from "@/lib/masks";
 import {
   validateCep,
@@ -23,6 +25,11 @@ import {
   validatePhone,
   validateRequired,
 } from "@/lib/validations";
+
+/** Aplica um validador apenas quando o campo está preenchido (campos opcionais). */
+function optional(validate: (value: string) => string | null) {
+  return (value: string) => (value.trim() ? validate(value) : null);
+}
 
 export function TutorFormPage() {
   const { tutorId } = useParams();
@@ -79,11 +86,23 @@ type TutorFormContentProps = {
   } | null;
 };
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <fieldset className="flex flex-col gap-4 rounded-xl border bg-card p-4">
+      <legend className="px-1 text-sm font-semibold">{title}</legend>
+      {children}
+    </fieldset>
+  );
+}
+
 function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
   const navigate = useNavigate();
   const createTutor = useMutation(api.tutors.create);
   const updateTutor = useMutation(api.tutors.update);
   const sensitive = initial?.sensitive;
+
+  // Lista de bairros para casar o retorno do ViaCEP (Alegrete tem ~48).
+  const bairroOptions = useQuery(api.bairros.search, { limit: 50 });
 
   const [nome, setNome] = useState(initial?.nome_completo ?? "");
   const [cpf, setCpf] = useState(sensitive?.cpf ? maskCpf(sensitive.cpf) : "");
@@ -108,48 +127,86 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
   const [submitting, setSubmitting] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  const blocker = useDirtyFormGuard(isDirty);
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+  const lastLookedUpCep = useRef<string | null>(null);
+
+  const { blocker, allowNavigation } = useDirtyFormGuard(isDirty);
+
+  const cepDigits = cep.replace(/\D/g, "");
+
+  // Busca ViaCEP ao completar 8 dígitos e autopreenche o endereço.
+  useEffect(() => {
+    if (cepDigits.length !== 8) {
+      lastLookedUpCep.current = null;
+      return;
+    }
+    if (lastLookedUpCep.current === cepDigits) {
+      return;
+    }
+    lastLookedUpCep.current = cepDigits;
+
+    let cancelled = false;
+    setCepLoading(true);
+    setCepError(null);
+
+    fetchAddressByCep(cepDigits)
+      .then((address) => {
+        if (cancelled) {
+          return;
+        }
+        if (!address) {
+          setCepError("CEP não encontrado.");
+          return;
+        }
+        if (address.logradouro) {
+          setLogradouro(address.logradouro);
+        }
+        if (address.complemento) {
+          setComplemento(address.complemento);
+        }
+        if (address.bairro && bairroOptions) {
+          const target = normalizeBairroName(address.bairro);
+          const match = bairroOptions.find(
+            (option) => normalizeBairroName(option.nome) === target,
+          );
+          if (match) {
+            setBairroId(match._id);
+            setBairroLabel(match.nome);
+          }
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCepError("Não foi possível consultar o CEP agora.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setCepLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cepDigits, bairroOptions]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
 
-    const nomeError = validateRequired(nome);
-    if (nomeError) {
-      setError(nomeError);
+    const checks = [
+      validateRequired(nome),
+      cpf ? validateCpf(cpf) : null,
+      telefone ? validatePhone(telefone) : null,
+      email ? validateEmail(email) : null,
+      cep ? validateCep(cep) : null,
+    ];
+    const firstError = checks.find((message) => message);
+    if (firstError) {
+      setError(firstError);
       return;
-    }
-
-    if (cpf) {
-      const cpfError = validateCpf(cpf);
-      if (cpfError) {
-        setError(cpfError);
-        return;
-      }
-    }
-
-    if (telefone) {
-      const phoneError = validatePhone(telefone);
-      if (phoneError) {
-        setError(phoneError);
-        return;
-      }
-    }
-
-    if (email) {
-      const emailError = validateEmail(email);
-      if (emailError) {
-        setError(emailError);
-        return;
-      }
-    }
-
-    if (cep) {
-      const cepError = validateCep(cep);
-      if (cepError) {
-        setError(cepError);
-        return;
-      }
     }
 
     const payload = {
@@ -176,9 +233,13 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
           tutorId: tutorId as Id<"tutors">,
           ...payload,
         });
+        setIsDirty(false);
+        allowNavigation();
         void navigate(`/tutors/${tutorId}`);
       } else {
         const createdId = await createTutor(payload);
+        setIsDirty(false);
+        allowNavigation();
         void navigate(`/tutors/${createdId}`);
       }
     } catch (submitError) {
@@ -196,124 +257,130 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
       />
 
       <form
-        className="flex max-w-2xl flex-col gap-4"
+        className="flex max-w-2xl flex-col gap-5"
         onChange={() => setIsDirty(true)}
         onSubmit={handleSubmit}
       >
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="nome">Nome completo</Label>
-          <Input
+        <Section title="Identificação">
+          <Field
             id="nome"
-            onChange={(event) => setNome(event.target.value)}
+            label="Nome completo"
+            onChange={setNome}
             required
+            validate={validateRequired}
             value={nome}
           />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
               id="cpf"
-              onChange={(event) => setCpf(maskCpf(event.target.value))}
+              inputMode="numeric"
+              label="CPF"
+              mask={maskCpf}
+              onChange={setCpf}
+              validate={optional(validateCpf)}
               value={cpf}
             />
+            <Field id="rg" label="RG" onChange={setRg} value={rg} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="rg">RG</Label>
-            <Input id="rg" onChange={(event) => setRg(event.target.value)} value={rg} />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              onChange={(event) => setTelefone(maskPhone(event.target.value))}
-              value={telefone}
+            <Label htmlFor="data-nascimento">Data de nascimento</Label>
+            <DatePicker
+              id="data-nascimento"
+              onChange={(value) => {
+                setDataNascimento(value);
+                setIsDirty(true);
+              }}
+              toDate={new Date()}
+              value={dataNascimento}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
+        </Section>
+
+        <Section title="Contato">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              id="telefone"
+              inputMode="tel"
+              label="Telefone"
+              mask={maskPhone}
+              onChange={setTelefone}
+              validate={optional(validatePhone)}
+              value={telefone}
+            />
+            <Field
               id="email"
-              onChange={(event) => setEmail(event.target.value)}
+              label="Email"
+              onChange={setEmail}
               type="email"
+              validate={optional(validateEmail)}
               value={email}
             />
           </div>
-        </div>
+        </Section>
 
-        <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
+        <Section title="Endereço">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="logradouro">Logradouro</Label>
-            <Input
-              id="logradouro"
-              onChange={(event) => setLogradouro(event.target.value)}
-              value={logradouro}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="numero">Numero</Label>
-            <Input id="numero" onChange={(event) => setNumero(event.target.value)} value={numero} />
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="complemento">Complemento</Label>
-            <Input
-              id="complemento"
-              onChange={(event) => setComplemento(event.target.value)}
-              value={complemento}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="cep">CEP</Label>
-            <Input
+            <Field
+              hint={cepLoading ? "Buscando endereço…" : "Digite o CEP para preencher o endereço."}
               id="cep"
-              onChange={(event) => setCep(maskCep(event.target.value))}
+              inputMode="numeric"
+              label="CEP"
+              mask={maskCep}
+              onChange={(value) => {
+                setCep(value);
+                setCepError(null);
+              }}
+              validate={optional(validateCep)}
               value={cep}
             />
+            {cepError ? <p className="text-sm text-destructive">{cepError}</p> : null}
           </div>
-        </div>
 
-        <BairroAutocomplete
-          initialLabel={bairroLabel}
-          key={bairroLabel || "empty-bairro"}
-          onChange={(id, label) => {
-            setBairroId(id);
-            setBairroLabel(label);
-          }}
-          value={bairroId}
-        />
+          <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
+            <Field
+              id="logradouro"
+              label="Logradouro"
+              onChange={setLogradouro}
+              value={logradouro}
+            />
+            <Field id="numero" label="Número" onChange={setNumero} value={numero} />
+          </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="data-nascimento">Data de nascimento</Label>
-          <Input
-            id="data-nascimento"
-            onChange={(event) => setDataNascimento(event.target.value)}
-            type="date"
-            value={dataNascimento}
+          <Field
+            id="complemento"
+            label="Complemento"
+            onChange={setComplemento}
+            value={complemento}
           />
-        </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="observacoes">Observações</Label>
-          <textarea
-            className="min-h-24 rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            id="observacoes"
-            onChange={(event) => setObservacoes(event.target.value)}
-            value={observacoes}
+          <BairroAutocomplete
+            initialLabel={bairroLabel}
+            key={bairroLabel || "empty-bairro"}
+            onChange={(id, label) => {
+              setBairroId(id);
+              setBairroLabel(label);
+            }}
+            value={bairroId}
           />
-        </div>
+        </Section>
+
+        <Section title="Observações">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="observacoes">Anotações livres</Label>
+            <textarea
+              className="min-h-24 rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              id="observacoes"
+              onChange={(event) => setObservacoes(event.target.value)}
+              value={observacoes}
+            />
+          </div>
+        </Section>
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
           <Button className="min-h-11" disabled={submitting} type="submit">
-            {submitting ? "Salvando..." : isEdit ? "Salvar alteracoes" : "Cadastrar tutor"}
+            {submitting ? "Salvando..." : isEdit ? "Salvar alterações" : "Cadastrar tutor"}
           </Button>
           <Button asChild className="min-h-11" type="button" variant="outline">
             <Link to={isEdit && tutorId ? `/tutors/${tutorId}` : "/tutors"}>Cancelar</Link>

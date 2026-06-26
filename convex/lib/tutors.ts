@@ -121,7 +121,7 @@ export function normalizeTutorInput(input: TutorInput): TutorInput {
 
 export function validateTutorInput(input: TutorInput): void {
   if (!input.nome_completo) {
-    throw validationError("Nome completo obrigatorio.");
+    throw validationError("Nome completo obrigatório.");
   }
 
   if (input.cpf && !isValidCpf(input.cpf)) {
@@ -156,7 +156,7 @@ export async function assertUniqueCpf(
     .unique();
 
   if (existing && existing._id !== excludeTutorId) {
-    throw conflict("Ja existe um tutor com este CPF.");
+    throw conflict("Já existe um tutor com este CPF.");
   }
 }
 

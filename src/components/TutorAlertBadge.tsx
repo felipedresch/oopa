@@ -3,7 +3,7 @@ import type { TutorAlertLevel } from "@/lib/domain-colors";
 import { tutorAlertBadgeClass } from "@/lib/domain-colors";
 
 const ALERT_LABELS: Record<Exclude<TutorAlertLevel, "none">, string> = {
-  yellow: "Alerta medio",
+  yellow: "Alerta médio",
   red: "Alerta alto",
 };
 

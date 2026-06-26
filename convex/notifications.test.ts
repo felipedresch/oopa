@@ -136,6 +136,7 @@ test("ocorrencia legal gera notificacao para read_legal", async () => {
     client.mutation(api.dogs.create, {
       microchip: "444444444444444",
       nome: "Thor",
+      especie: "cao",
       sexo: "macho",
       porte: "grande",
       castrado: true,

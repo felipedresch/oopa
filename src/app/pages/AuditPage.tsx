@@ -3,27 +3,41 @@ import { useMemo, useState } from "react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterBar } from "@/components/FilterBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePermissions } from "@/hooks/usePermissions";
+import {
+  AUDIT_TONE_CLASS,
+  getAuditActionInfo,
+  getEntityIdLabel,
+  getEntityLabel,
+} from "@/lib/audit-labels";
 import { formatDateTime } from "@/lib/formatters";
 
 const ENTITY_OPTIONS = [
   { value: "", label: "Todas as entidades" },
   { value: "user", label: "Usuário" },
-  { value: "dog", label: "Cão" },
+  { value: "dog", label: "Animal" },
   { value: "tutor", label: "Tutor" },
   { value: "occurrence", label: "Ocorrência" },
   { value: "permission_template", label: "Template" },
   { value: "bairro", label: "Bairro" },
   { value: "occurrence_type", label: "Tipo de ocorrência" },
 ] as const;
+
+type PendingExport = {
+  title: string;
+  description: string;
+  run: () => Promise<void>;
+};
 
 export function AuditPage() {
   const { can } = usePermissions();
@@ -35,8 +49,13 @@ export function AuditPage() {
   const [to, setTo] = useState("");
   const [exporting, setExporting] = useState(false);
   const [exportingOperational, setExportingOperational] = useState<string | null>(null);
+  const [pendingExport, setPendingExport] = useState<PendingExport | null>(null);
 
   const actors = useQuery(api.audit.listActors, can("system.audit_log") ? {} : "skip");
+
+  const hasActiveFilters = Boolean(
+    actorUserId || entityType || action.trim() || from || to,
+  );
 
   const filters = useMemo(
     () => ({
@@ -69,7 +88,7 @@ export function AuditPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExport = async () => {
+  const runAuditExport = async () => {
     setExporting(true);
     try {
       const csv = await convex.query(api.audit.exportCsv, {
@@ -82,17 +101,42 @@ export function AuditPage() {
     }
   };
 
-  const handleOperationalExport = async (
+  const requestAuditExport = () => {
+    setPendingExport({
+      title: "Exportar registros de auditoria",
+      description: hasActiveFilters
+        ? "Será exportado apenas o que corresponde aos filtros aplicados acima (até 2000 registros)."
+        : "Nenhum filtro aplicado: isto exportará TODOS os registros de auditoria do sistema (até 2000).",
+      run: runAuditExport,
+    });
+  };
+
+  const requestOperationalExport = (
     key: string,
+    label: string,
     queryFn: () => Promise<string>,
     filename: string,
   ) => {
-    setExportingOperational(key);
-    try {
-      const csv = await queryFn();
-      downloadCsv(csv, filename);
-    } finally {
-      setExportingOperational(null);
+    setPendingExport({
+      title: `Exportar ${label.toLowerCase()}`,
+      description: `Isto exporta TODOS os ${label.toLowerCase()} do sistema, independentemente dos filtros acima.`,
+      run: async () => {
+        setExportingOperational(key);
+        try {
+          const csv = await queryFn();
+          downloadCsv(csv, filename);
+        } finally {
+          setExportingOperational(null);
+        }
+      },
+    });
+  };
+
+  const confirmPendingExport = () => {
+    const pending = pendingExport;
+    setPendingExport(null);
+    if (pending) {
+      void pending.run();
     }
   };
 
@@ -103,13 +147,13 @@ export function AuditPage() {
           <Button
             className="min-h-11"
             disabled={exporting}
-            onClick={() => void handleExport()}
+            onClick={requestAuditExport}
             type="button"
           >
             {exporting ? "Exportando..." : "Exportar CSV"}
           </Button>
         }
-        description="Consulte ações sensiveis com filtros e exportação para análise."
+        description="Consulte ações sensíveis com filtros e exportação para análise."
         title="Auditoria"
       />
 
@@ -151,7 +195,7 @@ export function AuditPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="audit-action">Acao</Label>
+            <Label htmlFor="audit-action">Ação</Label>
             <Input
               id="audit-action"
               onChange={(event) => setAction(event.target.value)}
@@ -162,39 +206,29 @@ export function AuditPage() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="audit-from">De</Label>
-            <Input
-              id="audit-from"
-              onChange={(event) => setFrom(event.target.value)}
-              type="date"
-              value={from}
-            />
+            <DatePicker id="audit-from" onChange={setFrom} value={from} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="audit-to">Até</Label>
-            <Input
-              id="audit-to"
-              onChange={(event) => setTo(event.target.value)}
-              type="date"
-              value={to}
-            />
+            <DatePicker id="audit-to" onChange={setTo} value={to} />
           </div>
         </div>
       </FilterBar>
 
       <section className="border-t pt-5">
-        <h2 className="mb-1 font-semibold">Exportacoes operacionais</h2>
+        <h2 className="mb-1 font-semibold">Exportações operacionais</h2>
         <p className="mb-4 text-sm text-muted-foreground">
-          Baixe snapshots de cães, tutores, ocorrências e histórico tutor-cão para análise
-          externa.
+          Baixe snapshots completos de animais, tutores, ocorrências e histórico tutor-animal para
+          análise externa. Estas exportações ignoram os filtros acima e incluem todo o sistema.
         </p>
         <div className="flex flex-wrap gap-2">
           {[
             {
               key: "dogs",
-              label: "Cães",
+              label: "Animais",
               query: () => convex.query(api.exports.exportDogsCsv, { limit: 2000 }),
-              file: "caes",
+              file: "animais",
             },
             {
               key: "tutors",
@@ -210,9 +244,9 @@ export function AuditPage() {
             },
             {
               key: "history",
-              label: "Histórico tutor-cão",
+              label: "Histórico tutor-animal",
               query: () => convex.query(api.exports.exportTutorDogHistoryCsv, { limit: 2000 }),
-              file: "historico-tutor-cao",
+              file: "historico-tutor-animal",
             },
           ].map((item) => (
             <Button
@@ -220,8 +254,9 @@ export function AuditPage() {
               disabled={exportingOperational !== null}
               key={item.key}
               onClick={() =>
-                void handleOperationalExport(
+                requestOperationalExport(
                   item.key,
+                  item.label,
                   item.query,
                   `${item.file}-${new Date().toISOString().slice(0, 10)}.csv`,
                 )
@@ -245,20 +280,44 @@ export function AuditPage() {
       ) : null}
 
       <ul className="divide-y divide-border">
-        {results.map((entry) => (
-          <li className="flex flex-col gap-1 py-3.5 first:pt-0" key={entry._id}>
-            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <p className="font-medium">{entry.summary}</p>
-              <span className="text-xs whitespace-nowrap text-muted-foreground">
-                {formatDateTime(entry.created_at)}
+        {results.map((entry) => {
+          const info = getAuditActionInfo(entry.action);
+          const ActionIcon = info.icon;
+          return (
+            <li className="flex gap-3 py-3.5 first:pt-0" key={entry._id}>
+              <span
+                aria-hidden="true"
+                className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full ${AUDIT_TONE_CLASS[info.tone]}`}
+              >
+                <ActionIcon className="size-4" />
               </span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {entry.actor_nome ?? "Sistema"} · {entry.action} · {entry.entity_type}
-              {entry.entity_id ? ` · ${entry.entity_id}` : ""}
-            </p>
-          </li>
-        ))}
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <p className="font-medium">{entry.summary}</p>
+                  <span className="text-xs whitespace-nowrap text-muted-foreground">
+                    {formatDateTime(entry.created_at)}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium ${AUDIT_TONE_CLASS[info.tone]}`}
+                  >
+                    {info.label}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {entry.actor_nome ?? "Sistema"} · {getEntityLabel(entry.entity_type)}
+                  </span>
+                </div>
+                {entry.entity_id ? (
+                  <p className="text-xs text-muted-foreground">
+                    {getEntityIdLabel(entry.entity_type)}:{" "}
+                    <span className="font-mono">{entry.entity_id}</span>
+                  </p>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       {status === "CanLoadMore" ? (
@@ -266,6 +325,19 @@ export function AuditPage() {
           Carregar mais
         </Button>
       ) : null}
+
+      <ConfirmDialog
+        confirmLabel="Exportar"
+        description={pendingExport?.description ?? ""}
+        onConfirm={confirmPendingExport}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingExport(null);
+          }
+        }}
+        open={pendingExport !== null}
+        title={pendingExport?.title ?? ""}
+      />
     </section>
   );
 }

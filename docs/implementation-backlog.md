@@ -648,3 +648,61 @@ Direcao registrada em `PRODUCT.md` e `DESIGN.md` na raiz do repositorio.
 - [x] Nomes de tipos seed (`convex/seeds.ts`) e switches de historico
       (`convex/lib/tutorDogHistory.ts`) alinhados com a grafia acentuada.
 - [x] Testes Convex atualizados para buscar tipos pelo nome acentuado.
+
+## Fase 11 - Refinamento transversal (UX, espécie, CEP, auditoria)
+
+### Decisões
+
+- [x] Rótulos visíveis "Cães/Cão" passam a "Animais/Animal"; identificadores
+      internos (tabela `dogs`, ações `dogs.*`) permanecem inalterados.
+- [x] Novo campo `especie` (`cao`/`gato`) em `dogs`, opcional no schema para
+      evitar migração destrutiva; leitura assume `cao` quando ausente; novos
+      cadastros sempre gravam espécie.
+- [x] Microchip continua obrigatório e único; passa a ser validado já no passo
+      de identificação do formulário (query leve `dogs.microchipExists`).
+- [x] Seed de bairros substituído pela lista real de Alegrete/RS (48 entradas,
+      incluindo "Zona Rural" e "Não informado"); fonte pública versionada no
+      código, sem chamada em runtime.
+
+### Frontend
+
+- [x] `src/components/ui/field.tsx`: Label + Input + erro por campo (validação
+      `onBlur`), com máscara opcional. Cobre validações reusando `validations.ts`.
+- [x] Date picker shadcn (`calendar` + `popover` + `react-day-picker`):
+      `src/components/ui/date-picker.tsx` (pt-BR, dd/mm/aaaa, contrato
+      `yyyy-MM-dd`) substitui `<input type="date">` em `TutorFormPage`,
+      `AuditPage`, `AdoptionNewPage` e `OccurrenceTimeline`.
+- [x] `TutorFormPage` reorganizado em seções (Identificação/Contato/Endereço/
+      Observações), CEP como primeiro campo do endereço com busca ViaCEP
+      (`src/lib/cep.ts`) que autopreenche logradouro/complemento e casa o bairro
+      semeado por nome normalizado; máscaras + validação inline.
+- [x] Espécie: seletor 🐶/🐱 no `DogFormPage`, ícone no `DogCard`, exibição em
+      `DogDetailPage` e `DogsListPage`; labels centralizados em
+      `src/lib/domain-colors.ts` (`ESPECIE_LABELS`/`ESPECIE_EMOJI`).
+- [x] Bug "alterações não salvas" ao salvar corrigido (`setIsDirty(false)`
+      antes de `navigate` em `DogFormPage` e `TutorFormPage`).
+- [x] Auditoria: `src/lib/audit-labels.ts` mapeia `action`/`entity_type` para
+      rótulo PT-BR + ícone lucide + tom de cor; logs com chip colorido e ID
+      rotulado; exportações (CSV e operacionais) pedem confirmação de escopo via
+      `ConfirmDialog`. Copy corrigida ("ações sensíveis", "Ação",
+      "Exportações operacionais").
+- [x] Varredura de acentuação/cedilha em literais de UI e mensagens
+      user-facing remanescentes.
+
+### Backend
+
+- [x] `convex/domainValidators.ts`: `dogSpeciesValidator` (`cao`/`gato`).
+- [x] `convex/schema.ts`: `especie: v.optional(dogSpeciesValidator)` em `dogs`.
+- [x] `convex/dogs.ts`: `especie` em summary/detail/inputs e em `create`/
+      `update`; nova query `dogs.microchipExists`.
+- [x] `convex/exports.ts`: coluna `especie` no CSV de animais.
+- [x] `convex/seeds.ts`: lista real de bairros + `internalMutation`
+      `syncBairros` (upsert idempotente por `by_nome`).
+
+### Testes
+
+- [x] `dogs.test.ts` (espécie + `microchipExists`), `seeds.test.ts`
+      (`syncBairros` + contagem 48), `cep.test.ts`, `audit-labels.test.ts`,
+      `field.test.tsx`, `date-picker.test.tsx`, `DogCard.test.tsx` (ícone de
+      espécie); fixtures de `dogs.create` ajustadas com `especie`.
+- [x] `npm run quality` verde (lint, typecheck, testes, build).

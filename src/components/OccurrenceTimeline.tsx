@@ -8,6 +8,7 @@ import { FilterBar } from "@/components/FilterBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { OccurrenceCard } from "@/components/OccurrenceCard";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import type { Severity } from "@/lib/domain-colors";
 import { SEVERITY_LABELS } from "@/lib/domain-colors";
@@ -95,24 +96,12 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
 
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-from">De</Label>
-          <input
-            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            id="occ-from"
-            onChange={(event) => setFromDate(event.target.value)}
-            type="date"
-            value={fromDate}
-          />
+          <DatePicker id="occ-from" onChange={setFromDate} value={fromDate} />
         </div>
 
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-to">Até</Label>
-          <input
-            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            id="occ-to"
-            onChange={(event) => setToDate(event.target.value)}
-            type="date"
-            value={toDate}
-          />
+          <DatePicker id="occ-to" onChange={setToDate} value={toDate} />
         </div>
       </FilterBar>
 

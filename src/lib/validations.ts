@@ -1,5 +1,5 @@
 export const VALIDATION_MESSAGES = {
-  microchip: "Microchip deve ter exatamente 15 dígitos numericos.",
+  microchip: "Microchip deve ter exatamente 15 dígitos numéricos.",
   cpf: "CPF inválido.",
   phone: "Telefone deve ter 10 ou 11 dígitos.",
   email: "Email inválido.",

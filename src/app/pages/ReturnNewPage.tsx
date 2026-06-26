@@ -124,7 +124,7 @@ export function ReturnNewPage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Registre a devolução de um cão adotado. Fotos sao obrigatórias."
+        description="Registre a devolução de um cão adotado. Fotos são obrigatórias."
         title="Nova devolução"
       />
 

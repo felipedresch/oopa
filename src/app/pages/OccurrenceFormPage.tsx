@@ -18,6 +18,7 @@ import { MultiPhotoUpload } from "@/components/MultiPhotoUpload";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
@@ -48,9 +49,12 @@ export function OccurrenceFormPage() {
 
   const [typeId, setTypeId] = useState<Id<"occurrence_types"> | "">("");
   const [descricao, setDescricao] = useState("");
-  const [dataOcorrencia, setDataOcorrencia] = useState(
-    new Date(now).toISOString().slice(0, 16),
-  );
+  const [dataOcorrencia, setDataOcorrencia] = useState(() => {
+    // Horário local (não UTC), coerente com `new Date(value)` na submissão.
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const d = new Date(now);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
   const [bairroId, setBairroId] = useState<Id<"bairros"> | undefined>();
   const [bairroLabel, setBairroLabel] = useState("");
   const [localDescricao, setLocalDescricao] = useState("");
@@ -62,7 +66,7 @@ export function OccurrenceFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
 
-  const blocker = useDirtyFormGuard(isDirty);
+  const { blocker, allowNavigation } = useDirtyFormGuard(isDirty);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -145,6 +149,8 @@ export function OccurrenceFormPage() {
     setSubmitting(true);
     try {
       const occurrenceId = await createOccurrence(buildPayload(typeId));
+      setIsDirty(false);
+      allowNavigation();
       void navigate(`/dogs/${dog._id}/occurrences/${occurrenceId}`);
     } catch (submitError) {
       setError(getErrorMessage(submitError, "Não foi possível registrar a ocorrência."));
@@ -198,12 +204,15 @@ export function OccurrenceFormPage() {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="occ-date">Data da ocorrência</Label>
-          <Input
+          <DatePicker
             id="occ-date"
-            onChange={(event) => setDataOcorrencia(event.target.value)}
-            required
-            type="datetime-local"
+            onChange={(value) => {
+              setDataOcorrencia(value);
+              setIsDirty(true);
+            }}
+            toDate={new Date()}
             value={dataOcorrencia}
+            withTime
           />
         </div>
 

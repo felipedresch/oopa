@@ -104,7 +104,7 @@ export const create = mutation({
 
     const nome = normalizeNome(args.nome);
     if (!nome) {
-      throw validationError("Nome do bairro obrigatorio.");
+      throw validationError("Nome do bairro obrigatório.");
     }
 
     const existing = await ctx.db
@@ -112,7 +112,7 @@ export const create = mutation({
       .withIndex("by_nome", (q) => q.eq("nome", nome))
       .unique();
     if (existing) {
-      throw conflict("Ja existe um bairro com este nome.");
+      throw conflict("Já existe um bairro com este nome.");
     }
 
     const now = Date.now();

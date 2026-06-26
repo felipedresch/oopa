@@ -94,7 +94,7 @@ export function TutorDetailPage() {
             <SensitiveDataHidden />
           ) : tutor.sensitive ? (
             <section className="border-t pt-6">
-              <h3 className="mb-3 font-semibold">Dados sensiveis</h3>
+              <h3 className="mb-3 font-semibold">Dados sensíveis</h3>
               <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
                 <div>
                   <dt className="text-muted-foreground">CPF</dt>

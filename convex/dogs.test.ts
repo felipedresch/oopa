@@ -11,6 +11,7 @@ const modules = import.meta.glob("./**/*.ts");
 
 const baseDogInput = {
   nome: FIXTURE_DOG.nome,
+  especie: "cao" as const,
   sexo: FIXTURE_DOG.sexo,
   porte: FIXTURE_DOG.porte,
   castrado: FIXTURE_DOG.castrado,
@@ -50,6 +51,57 @@ test("create exige foto de perfil e microchip unico", async () => {
       });
     }),
   ).rejects.toThrow(/microchip/i);
+});
+
+test("create grava especie gato e leitura preserva valor", async () => {
+  const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
+  const storageId = await storeTestImage(t);
+  const now = Date.now();
+
+  const dogId = await asUser(t, adminId, async (client) => {
+    return await client.mutation(api.dogs.create, {
+      ...baseDogInput,
+      especie: "gato",
+      microchip: "222333444555666",
+      foto_perfil_storage_id: storageId,
+    });
+  });
+
+  const dog = await asUser(t, adminId, async (client) =>
+    client.query(api.dogs.get, { dogId, now }),
+  );
+
+  expect(dog?.especie).toBe("gato");
+});
+
+test("microchipExists bloqueia microchip ja cadastrado", async () => {
+  const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
+  const storageId = await storeTestImage(t);
+
+  await asUser(t, adminId, async (client) => {
+    await client.mutation(api.dogs.create, {
+      ...baseDogInput,
+      microchip: "333444555666777",
+      foto_perfil_storage_id: storageId,
+    });
+  });
+
+  const taken = await asUser(t, adminId, async (client) =>
+    client.query(api.dogs.microchipExists, { microchip: "333444555666777" }),
+  );
+  expect(taken).toEqual({ exists: true, nome: FIXTURE_DOG.nome });
+
+  const free = await asUser(t, adminId, async (client) =>
+    client.query(api.dogs.microchipExists, { microchip: "999888777666555" }),
+  );
+  expect(free).toEqual({ exists: false, nome: null });
+
+  const partial = await asUser(t, adminId, async (client) =>
+    client.query(api.dogs.microchipExists, { microchip: "123" }),
+  );
+  expect(partial).toEqual({ exists: false, nome: null });
 });
 
 test("findByMicrochip retorna cao cadastrado", async () => {

@@ -96,7 +96,58 @@ const SEED_OCCURRENCE_TYPES = [
   },
 ] as const;
 
-const SEED_BAIRROS = ["Centro", "Zona Rural", "Não informado"] as const;
+// Bairros de Alegrete/RS (fontes públicas: cepbrasil.org / ruacep.com.br),
+// acrescidos de "Zona Rural" e "Não informado" para cobrir casos sem bairro.
+const SEED_BAIRROS = [
+  "Airton Senna",
+  "Alberto Grande",
+  "Anita Garibaldi",
+  "Assunção",
+  "Atlântida",
+  "Balneário Caverá",
+  "Boa Vista",
+  "Canjiqueira",
+  "Canudos",
+  "Capão do Angico",
+  "Capivari",
+  "Centenário",
+  "Centro",
+  "Cidade Alta",
+  "Dr. Romário A. de Oliveira",
+  "Emílio Zuneda",
+  "Favila",
+  "Fênix",
+  "Fronteira Oeste",
+  "Gamino",
+  "Getúlio Vargas",
+  "Honório Lemos",
+  "Ibirapuitã",
+  "Independência",
+  "Izabel",
+  "Jardim Planalto",
+  "Joaquim Fonseca Milano",
+  "José de Abreu",
+  "Kennedy",
+  "Lara",
+  "Liberdade",
+  "Macedo",
+  "Medianeira",
+  "Militar",
+  "Nossa Senhora da Conceição Aparecida",
+  "Nova Brasília",
+  "Novo Lar",
+  "Olhos D'Água de Natal",
+  "Prado",
+  "Promorar",
+  "Restinga",
+  "Rui Ramos",
+  "Saint Pastous",
+  "Sepé Tiaraju",
+  "Vera Cruz",
+  "Vila Nova",
+  "Zona Rural",
+  "Não informado",
+] as const;
 
 const now = () => Date.now();
 
@@ -117,21 +168,31 @@ async function seedOccurrenceTypes(ctx: Pick<MutationCtx, "db">) {
   return SEED_OCCURRENCE_TYPES.length;
 }
 
-async function seedBairros(ctx: Pick<MutationCtx, "db">) {
-  const existing = await ctx.db.query("bairros").first();
-  if (existing) {
-    return 0;
-  }
-
+/**
+ * Insere apenas os bairros que ainda não existem (match exato por nome via
+ * índice by_nome). Idempotente: pode rodar em deployments já populados sem
+ * duplicar e preenchendo os que faltam. Retorna quantos foram inseridos.
+ */
+async function upsertMissingBairros(ctx: Pick<MutationCtx, "db">) {
+  let inserted = 0;
   for (const nome of SEED_BAIRROS) {
+    const existing = await ctx.db
+      .query("bairros")
+      .withIndex("by_nome", (q) => q.eq("nome", nome))
+      .unique();
+    if (existing) {
+      continue;
+    }
+
     await ctx.db.insert("bairros", {
       nome,
       ativo: true,
       criado_em: now(),
     });
+    inserted += 1;
   }
 
-  return SEED_BAIRROS.length;
+  return inserted;
 }
 
 async function seedPermissionTemplates(ctx: Pick<MutationCtx, "db">) {
@@ -162,10 +223,19 @@ export const runInitialSeeds = internalMutation({
   }),
   handler: async (ctx) => {
     const occurrenceTypes = await seedOccurrenceTypes(ctx);
-    const bairros = await seedBairros(ctx);
+    const bairros = await upsertMissingBairros(ctx);
     const permissionTemplates = await seedPermissionTemplates(ctx);
 
     return { occurrenceTypes, bairros, permissionTemplates };
+  },
+});
+
+export const syncBairros = internalMutation({
+  args: {},
+  returns: v.object({ inserted: v.number() }),
+  handler: async (ctx) => {
+    const inserted = await upsertMissingBairros(ctx);
+    return { inserted };
   },
 });
 
@@ -181,7 +251,7 @@ export const seedAll = mutation({
     requirePermission(actor, "templates.manage");
 
     const occurrenceTypes = await seedOccurrenceTypes(ctx);
-    const bairros = await seedBairros(ctx);
+    const bairros = await upsertMissingBairros(ctx);
     const permissionTemplates = await seedPermissionTemplates(ctx);
 
     return { occurrenceTypes, bairros, permissionTemplates };

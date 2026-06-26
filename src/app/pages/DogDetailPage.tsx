@@ -14,6 +14,12 @@ import { PermissionDenied } from "@/components/PermissionDenied";
 import { PlaceholderPage } from "@/app/pages/PlaceholderPage";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
+import {
+  DOG_PORTE_LABELS,
+  DOG_SEXO_LABELS,
+  ESPECIE_EMOJI,
+  ESPECIE_LABELS,
+} from "@/lib/domain-colors";
 import { formatMicrochip } from "@/lib/formatters";
 
 const TABS = ["Dados", "Histórico de tutores", "Ocorrências", "Fotos"] as const;
@@ -39,7 +45,9 @@ export function DogDetailPage() {
   }
 
   if (!dog) {
-    return <PlaceholderPage description="O cão solicitado não existe." title="Cão não encontrado" />;
+    return (
+      <PlaceholderPage description="O animal solicitado não existe." title="Animal não encontrado" />
+    );
   }
 
   return (
@@ -131,15 +139,21 @@ export function DogDetailPage() {
       {activeTab === "Dados" ? (
         <dl className="grid gap-x-6 gap-y-4 text-sm md:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
           <div>
+            <dt className="text-muted-foreground">Espécie</dt>
+            <dd>
+              {ESPECIE_EMOJI[dog.especie]} {ESPECIE_LABELS[dog.especie]}
+            </dd>
+          </div>
+          <div>
             <dt className="text-muted-foreground">Sexo</dt>
-            <dd>{dog.sexo}</dd>
+            <dd>{DOG_SEXO_LABELS[dog.sexo]}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Porte</dt>
-            <dd>{dog.porte}</dd>
+            <dd>{DOG_PORTE_LABELS[dog.porte]}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Raca aparente</dt>
+            <dt className="text-muted-foreground">Raça aparente</dt>
             <dd>{dog.raca_aparente ?? "—"}</dd>
           </div>
           <div>
@@ -164,7 +178,7 @@ export function DogDetailPage() {
           </div>
           {dog.condicoes_saude ? (
             <div className="md:col-span-2">
-              <dt className="text-muted-foreground">Condicoes de saúde</dt>
+              <dt className="text-muted-foreground">Condições de saúde</dt>
               <dd>{dog.condicoes_saude}</dd>
             </div>
           ) : null}

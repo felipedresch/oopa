@@ -2,6 +2,32 @@ import type { PermissionLevel } from "@/lib/permissions";
 
 export type Severity = "info" | "baixa" | "media" | "alta";
 
+export type DogEspecie = "cao" | "gato";
+
+export const ESPECIE_LABELS: Record<DogEspecie, string> = {
+  cao: "Cão",
+  gato: "Gato",
+};
+
+export const ESPECIE_EMOJI: Record<DogEspecie, string> = {
+  cao: "🐶",
+  gato: "🐱",
+};
+
+export type DogSexo = "macho" | "femea";
+export type DogPorte = "pequeno" | "medio" | "grande";
+
+export const DOG_SEXO_LABELS: Record<DogSexo, string> = {
+  macho: "Macho",
+  femea: "Fêmea",
+};
+
+export const DOG_PORTE_LABELS: Record<DogPorte, string> = {
+  pequeno: "Pequeno",
+  medio: "Médio",
+  grande: "Grande",
+};
+
 export type DogStatus =
   | "na_ong"
   | "adotado"

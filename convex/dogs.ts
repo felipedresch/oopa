@@ -5,6 +5,7 @@ import { recordAudit } from "./audit";
 import {
   dogSexValidator,
   dogSizeValidator,
+  dogSpeciesValidator,
   dogStatusValidator,
   normalizeMicrochip,
 } from "./domainValidators";
@@ -24,6 +25,7 @@ const dogSummaryValidator = v.object({
   _id: v.id("dogs"),
   microchip: v.string(),
   nome: v.string(),
+  especie: dogSpeciesValidator,
   porte: dogSizeValidator,
   status_atual: dogStatusValidator,
   foto_perfil_url: v.union(v.string(), v.null()),
@@ -34,6 +36,7 @@ const dogDetailValidator = v.object({
   _id: v.id("dogs"),
   microchip: v.string(),
   nome: v.string(),
+  especie: dogSpeciesValidator,
   sexo: dogSexValidator,
   data_nascimento_aproximada: v.optional(v.number()),
   porte: dogSizeValidator,
@@ -59,6 +62,7 @@ const dogDetailValidator = v.object({
 const dogInputFields = {
   microchip: v.string(),
   nome: v.string(),
+  especie: dogSpeciesValidator,
   sexo: dogSexValidator,
   data_nascimento_aproximada: v.optional(v.number()),
   porte: dogSizeValidator,
@@ -83,11 +87,11 @@ export const create = mutation({
     const microchip = assertValidMicrochip(args.microchip);
     const nome = args.nome.trim();
     if (!nome) {
-      throw validationError("Nome obrigatorio.");
+      throw validationError("Nome obrigatório.");
     }
 
     if (!args.foto_perfil_storage_id) {
-      throw validationError("Foto de perfil obrigatoria.");
+      throw validationError("Foto de perfil obrigatória.");
     }
 
     await validateImageStorage(ctx, args.foto_perfil_storage_id);
@@ -97,13 +101,14 @@ export const create = mutation({
       .withIndex("by_microchip", (q) => q.eq("microchip", microchip))
       .unique();
     if (existing) {
-      throw conflict("Ja existe um cao com este microchip.");
+      throw conflict("Já existe um animal com este microchip.");
     }
 
     const now = Date.now();
     const dogId = await ctx.db.insert("dogs", {
       microchip,
       nome,
+      especie: args.especie,
       sexo: args.sexo,
       data_nascimento_aproximada: args.data_nascimento_aproximada,
       porte: args.porte,
@@ -127,7 +132,7 @@ export const create = mutation({
       action: "dogs.create",
       entityType: "dog",
       entityId: dogId,
-      summary: `Cao cadastrado: ${nome} (${microchip})`,
+      summary: `${args.especie === "gato" ? "Gato" : "Cão"} cadastrado: ${nome} (${microchip})`,
     });
 
     return dogId;
@@ -138,6 +143,7 @@ export const update = mutation({
   args: {
     dogId: v.id("dogs"),
     nome: v.string(),
+    especie: dogSpeciesValidator,
     sexo: dogSexValidator,
     data_nascimento_aproximada: v.optional(v.number()),
     porte: dogSizeValidator,
@@ -158,12 +164,12 @@ export const update = mutation({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Animal");
     }
 
     const nome = args.nome.trim();
     if (!nome) {
-      throw validationError("Nome obrigatorio.");
+      throw validationError("Nome obrigatório.");
     }
 
     if (args.foto_perfil_storage_id) {
@@ -173,6 +179,7 @@ export const update = mutation({
     const now = Date.now();
     await ctx.db.patch(args.dogId, {
       nome,
+      especie: args.especie,
       sexo: args.sexo,
       data_nascimento_aproximada: args.data_nascimento_aproximada,
       porte: args.porte,
@@ -195,7 +202,7 @@ export const update = mutation({
       action: "dogs.update",
       entityType: "dog",
       entityId: args.dogId,
-      summary: `Cao atualizado: ${nome}`,
+      summary: `Animal atualizado: ${nome}`,
     });
 
     return null;
@@ -214,7 +221,7 @@ export const changeStatus = mutation({
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
-      throw notFound("Cao");
+      throw notFound("Animal");
     }
 
     if (dog.status_atual === args.status) {
@@ -323,6 +330,7 @@ export const list = query({
             _id: dog._id,
             microchip: dog.microchip,
             nome: dog.nome,
+            especie: dog.especie ?? ("cao" as const),
             porte: dog.porte,
             status_atual: dog.status_atual,
             foto_perfil_url: dog.foto_perfil_storage_id
@@ -339,6 +347,37 @@ export const list = query({
       isDone: result.isDone,
       continueCursor: result.continueCursor,
     };
+  },
+});
+
+export const microchipExists = query({
+  args: {
+    microchip: v.string(),
+  },
+  returns: v.object({
+    exists: v.boolean(),
+    nome: v.union(v.string(), v.null()),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await getCurrentUser(ctx);
+    if (
+      !hasPermission(actor.permissions, "dogs.create") &&
+      !hasPermission(actor.permissions, "dogs.read")
+    ) {
+      throw forbidden();
+    }
+
+    const microchip = normalizeMicrochip(args.microchip);
+    if (microchip.length !== 15) {
+      return { exists: false, nome: null };
+    }
+
+    const dog = await ctx.db
+      .query("dogs")
+      .withIndex("by_microchip", (q) => q.eq("microchip", microchip))
+      .unique();
+
+    return { exists: dog !== null, nome: dog?.nome ?? null };
   },
 });
 

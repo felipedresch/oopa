@@ -16,6 +16,7 @@ async function seedDog(t: ReturnType<typeof convexTest>, adminId: Id<"users">) {
     client.mutation(api.dogs.create, {
       microchip: "333333333333333",
       nome: "Bolt",
+      especie: "cao",
       sexo: "macho",
       porte: "medio",
       castrado: true,

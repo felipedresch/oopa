@@ -83,7 +83,7 @@ export async function notifyLegalOccurrence(
     organizacao: args.organizacao,
     shouldNotify: (user) => user.permissions.includes("occurrences.read_legal"),
     tipo: "legal_occurrence",
-    titulo: "Ocorrencia legal registrada",
+    titulo: "Ocorrência legal registrada",
     mensagem: `${args.actorNome} registrou ${args.typeNome} para ${args.dogNome}.`,
     entidade_tipo: "occurrence",
     entidade_id: args.occurrenceId,

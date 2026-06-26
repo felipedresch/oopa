@@ -2,6 +2,8 @@ import { v } from "convex/values";
 
 export const MICROCHIP_LENGTH = 15;
 
+export const dogSpeciesValidator = v.union(v.literal("cao"), v.literal("gato"));
+
 export const dogSexValidator = v.union(v.literal("macho"), v.literal("femea"));
 
 export const dogSizeValidator = v.union(
@@ -137,10 +139,10 @@ export function normalizeCep(value: string): string {
 }
 
 export const VALIDATION_MESSAGES = {
-  microchip: "Microchip deve ter exatamente 15 digitos numericos.",
-  cpf: "CPF invalido.",
-  phone: "Telefone deve ter 10 ou 11 digitos.",
-  email: "Email invalido.",
-  cep: "CEP deve ter 8 digitos.",
-  required: "Campo obrigatorio.",
+  microchip: "Microchip deve ter exatamente 15 dígitos numéricos.",
+  cpf: "CPF inválido.",
+  phone: "Telefone deve ter 10 ou 11 dígitos.",
+  email: "Email inválido.",
+  cep: "CEP deve ter 8 dígitos.",
+  required: "Campo obrigatório.",
 } as const;

@@ -16,12 +16,20 @@ import { useDirtyFormGuard } from "@/hooks/useDirtyFormGuard";
 import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
+import type { DogEspecie } from "@/lib/domain-colors";
+import {
+  DOG_PORTE_LABELS,
+  DOG_SEXO_LABELS,
+  ESPECIE_EMOJI,
+  ESPECIE_LABELS,
+} from "@/lib/domain-colors";
 import { formatMicrochip } from "@/lib/formatters";
 import { maskMicrochipInput } from "@/lib/masks";
 import { validateMicrochip, validateRequired } from "@/lib/validations";
 
 const STEPS = ["Identificação", "Características", "Saúde", "Foto", "Revisão"];
 
+type Especie = DogEspecie;
 type Sexo = "macho" | "femea";
 type Porte = "pequeno" | "medio" | "grande";
 
@@ -29,6 +37,7 @@ type DogFormInitial = {
   _id: Id<"dogs">;
   microchip: string;
   nome: string;
+  especie: Especie;
   sexo: Sexo;
   porte: Porte;
   raca_aparente?: string;
@@ -65,7 +74,7 @@ export function DogFormPage() {
   }
 
   if (isEdit && !existing) {
-    return <PermissionDenied message="Cão não encontrado." />;
+    return <PermissionDenied message="Animal não encontrado." />;
   }
 
   const formKey = isEdit && existing ? existing._id : `new-${searchParams.get("microchip") ?? ""}`;
@@ -101,6 +110,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
     initial ? formatMicrochip(initial.microchip) : maskMicrochipInput(initialMicrochip),
   );
   const [nome, setNome] = useState(initial?.nome ?? "");
+  const [especie, setEspecie] = useState<Especie>(initial?.especie ?? "cao");
   const [sexo, setSexo] = useState<Sexo>(initial?.sexo ?? "macho");
   const [porte, setPorte] = useState<Porte>(initial?.porte ?? "medio");
   const [racaAparente, setRacaAparente] = useState(initial?.raca_aparente ?? "");
@@ -119,12 +129,22 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
   const [fotoPreview, setFotoPreview] = useState<string | null>(initial?.foto_perfil_url ?? null);
   const [isDirty, setIsDirty] = useState(false);
 
-  const blocker = useDirtyFormGuard(isDirty);
+  const { blocker, allowNavigation } = useDirtyFormGuard(isDirty);
   const markDirty = () => setIsDirty(true);
+
+  const microchipDigits = microchip.replace(/\D/g, "");
+  const microchipCheck = useQuery(
+    api.dogs.microchipExists,
+    !isEdit && microchipDigits.length === 15 ? { microchip: microchipDigits } : "skip",
+  );
+  const microchipTaken = !isEdit && (microchipCheck?.exists ?? false);
 
   const canContinue = (() => {
     if (step === 0) {
-      return !validateRequired(nome) && (isEdit || !validateMicrochip(microchip));
+      return (
+        !validateRequired(nome) &&
+        (isEdit || (!validateMicrochip(microchip) && !microchipTaken))
+      );
     }
     if (step === 3) {
       return Boolean(fotoStorageId);
@@ -141,6 +161,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
         await updateDog({
           dogId: dogId as Id<"dogs">,
           nome,
+          especie,
           sexo,
           porte,
           raca_aparente: racaAparente || undefined,
@@ -153,6 +174,8 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
           foto_perfil_storage_id: fotoStorageId,
           observacoes: observacoes || undefined,
         });
+        setIsDirty(false);
+        allowNavigation();
         void navigate(`/dogs/${dogId}`);
         return;
       }
@@ -164,6 +187,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
       const createdId = await createDog({
         microchip: microchip.replace(/\D/g, ""),
         nome,
+        especie,
         sexo,
         porte,
         raca_aparente: racaAparente || undefined,
@@ -177,9 +201,11 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
         observacoes: observacoes || undefined,
       });
 
+      setIsDirty(false);
+      allowNavigation();
       void navigate(`/dogs/${createdId}`);
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Não foi possível salvar o cão."));
+      setError(getErrorMessage(submitError, "Não foi possível salvar o animal."));
     } finally {
       setLoading(false);
     }
@@ -190,10 +216,10 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
       <PageHeader
         description={
           isEdit
-            ? "Atualize os dados do cão mantendo o microchip original."
-            : "Cadastre o cão em etapas com foto de perfil obrigatória."
+            ? "Atualize os dados do animal mantendo o microchip original."
+            : "Cadastre o animal em etapas com foto de perfil obrigatória."
         }
-        title={isEdit ? "Editar cão" : "Novo cão"}
+        title={isEdit ? "Editar animal" : "Novo animal"}
       />
 
       <div onChange={markDirty}>
@@ -209,15 +235,45 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
       >
         {step === 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <Label>Espécie</Label>
+              <div className="flex gap-2">
+                {(["cao", "gato"] as const).map((value) => (
+                  <button
+                    aria-pressed={especie === value}
+                    className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border text-sm font-medium transition-colors ${
+                      especie === value
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-input bg-card text-muted-foreground hover:border-ring"
+                    }`}
+                    key={value}
+                    onClick={() => {
+                      setEspecie(value);
+                      markDirty();
+                    }}
+                    type="button"
+                  >
+                    {ESPECIE_EMOJI[value]} {ESPECIE_LABELS[value]}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="microchip">Microchip</Label>
               <Input
+                aria-invalid={microchipTaken}
                 disabled={isEdit}
                 id="microchip"
                 inputMode="numeric"
                 onChange={(event) => setMicrochip(maskMicrochipInput(event.target.value))}
                 value={microchip}
               />
+              {microchipTaken ? (
+                <p className="text-sm text-destructive">
+                  Um animal com este microchip já está cadastrado
+                  {microchipCheck?.nome ? `: ${microchipCheck.nome}` : ""}.
+                </p>
+              ) : null}
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="nome">Nome</Label>
@@ -237,7 +293,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
                 value={sexo}
               >
                 <option value="macho">Macho</option>
-                <option value="femea">Femea</option>
+                <option value="femea">Fêmea</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">
@@ -249,12 +305,12 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
                 value={porte}
               >
                 <option value="pequeno">Pequeno</option>
-                <option value="medio">Medio</option>
+                <option value="medio">Médio</option>
                 <option value="grande">Grande</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="raca">Raca aparente</Label>
+              <Label htmlFor="raca">Raça aparente</Label>
               <Input id="raca" onChange={(event) => setRacaAparente(event.target.value)} value={racaAparente} />
             </div>
             <div className="flex flex-col gap-2">
@@ -262,7 +318,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               <Input id="cor" onChange={(event) => setCorPelagem(event.target.value)} value={corPelagem} />
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
-              <Label htmlFor="visuais">Caracteristicas visuais</Label>
+              <Label htmlFor="visuais">Características visuais</Label>
               <Input
                 id="visuais"
                 onChange={(event) => setCaracteristicasVisuais(event.target.value)}
@@ -270,7 +326,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               />
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
-              <Label htmlFor="comportamentais">Caracteristicas comportamentais</Label>
+              <Label htmlFor="comportamentais">Características comportamentais</Label>
               <Input
                 id="comportamentais"
                 onChange={(event) => setCaracteristicasComportamentais(event.target.value)}
@@ -301,7 +357,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               Vacinas em dia
             </label>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="saude">Condicoes de saude</Label>
+              <Label htmlFor="saude">Condições de saúde</Label>
               <Input
                 id="saude"
                 onChange={(event) => setCondicoesSaude(event.target.value)}
@@ -341,10 +397,13 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               <strong>Microchip:</strong> {microchip}
             </p>
             <p>
-              <strong>Sexo / Porte:</strong> {sexo} / {porte}
+              <strong>Espécie:</strong> {ESPECIE_EMOJI[especie]} {ESPECIE_LABELS[especie]}
             </p>
             <p>
-              <strong>Saude:</strong> {castrado ? "Castrado" : "Não castrado"} ·{" "}
+              <strong>Sexo / Porte:</strong> {DOG_SEXO_LABELS[sexo]} / {DOG_PORTE_LABELS[porte]}
+            </p>
+            <p>
+              <strong>Saúde:</strong> {castrado ? "Castrado" : "Não castrado"} ·{" "}
               {vacinasEmDia ? "Vacinas em dia" : "Vacinas pendentes"}
             </p>
             {fotoPreview ? (

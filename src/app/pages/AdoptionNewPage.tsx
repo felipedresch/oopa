@@ -15,6 +15,7 @@ import { StepperForm } from "@/components/StepperForm";
 import { TutorAssessmentPanel } from "@/components/TutorAssessmentPanel";
 import { TutorCard } from "@/components/TutorCard";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -439,11 +440,10 @@ export function AdoptionNewPage() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="data-adocao">Data da adocao</Label>
-              <Input
+              <Label htmlFor="data-adocao">Data da adoção</Label>
+              <DatePicker
                 id="data-adocao"
-                onChange={(event) => setDataAdocao(event.target.value)}
-                type="date"
+                onChange={setDataAdocao}
                 value={dataAdocao}
               />
             </div>

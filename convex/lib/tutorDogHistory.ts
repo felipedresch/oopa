@@ -13,7 +13,7 @@ export async function getVigenteHistory(
 
   const vigentes = entries.filter((entry) => entry.fim === undefined);
   if (vigentes.length > 1) {
-    throw validationError("Mais de um historico vigente para o mesmo cao.");
+    throw validationError("Mais de um histórico vigente para o mesmo cão.");
   }
 
   return vigentes[0] ?? null;
@@ -52,7 +52,7 @@ export async function openHistory(
 ): Promise<Id<"tutor_dog_history">> {
   const vigente = await getVigenteHistory(ctx, args.dog_id);
   if (vigente) {
-    throw validationError("Ja existe historico vigente para este cao.");
+    throw validationError("Já existe histórico vigente para este cão.");
   }
 
   return await ctx.db.insert("tutor_dog_history", {

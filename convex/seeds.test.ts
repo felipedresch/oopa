@@ -2,7 +2,7 @@
 import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
 
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
 import { moduleMapToPermissions, SEED_PERMISSION_TEMPLATES } from "./permissions";
 import { asUser, ensureSeeds, seedAdmin } from "./testHelpers";
@@ -18,7 +18,7 @@ test("seeds occurrence types, bairros and permission templates", async () => {
   );
   expect(firstRun).toEqual({
     occurrenceTypes: 14,
-    bairros: 3,
+    bairros: 48,
     permissionTemplates: 5,
   });
 
@@ -34,10 +34,30 @@ test("seeds occurrence types, bairros and permission templates", async () => {
   const summary = await t.query(api.seeds.getSeedSummary, {});
   expect(summary).toMatchObject({
     occurrenceTypeCount: 14,
-    bairroCount: 3,
+    bairroCount: 48,
     permissionTemplateCount: 5,
     uiModuleCount: 7,
   });
+});
+
+test("syncBairros insere apenas bairros faltantes", async () => {
+  const t = convexTest(schema, modules);
+
+  await t.run(async (ctx) => {
+    await ctx.db.insert("bairros", { nome: "Centro", ativo: true, criado_em: Date.now() });
+  });
+
+  const first = await t.run(async (ctx) => (await ctx.db.query("bairros").collect()).length);
+  expect(first).toBe(1);
+
+  const result = await t.mutation(internal.seeds.syncBairros, {});
+  expect(result.inserted).toBe(47);
+
+  const again = await t.mutation(internal.seeds.syncBairros, {});
+  expect(again.inserted).toBe(0);
+
+  const total = await t.run(async (ctx) => (await ctx.db.query("bairros").collect()).length);
+  expect(total).toBe(48);
 });
 
 test("seedAll exige templates.manage", async () => {

@@ -28,6 +28,6 @@ export async function validateImageStorage(
 
   const contentType = metadata.contentType ?? "";
   if (contentType && !ALLOWED_IMAGE_CONTENT_TYPES.has(contentType)) {
-    throw uploadRejected("Formato invalido. Use JPEG, PNG ou WebP.");
+    throw uploadRejected("Formato inválido. Use JPEG, PNG ou WebP.");
   }
 }

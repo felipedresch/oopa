@@ -20,4 +20,20 @@ describe("DogCard", () => {
     expect(screen.getByText("123 456 789 012 345")).toBeInTheDocument();
     expect(screen.getByText("Na ONG")).toBeInTheDocument();
   });
+
+  it("exibe icone da especie quando informada", () => {
+    render(
+      <MemoryRouter>
+        <DogCard
+          dogId="dog123"
+          especie="gato"
+          microchip="123456789012345"
+          nome="Mimi"
+          status="na_ong"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByLabelText("Gato")).toBeInTheDocument();
+  });
 });

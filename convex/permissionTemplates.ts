@@ -163,7 +163,7 @@ export const get = query({
 
     const template = await ctx.db.get("permission_templates", args.templateId);
     if (!template) {
-      throw notFound("Template de permissao");
+      throw notFound("Template de permissão");
     }
 
     return toTemplate(template);
@@ -183,12 +183,12 @@ export const create = mutation({
 
     const nome = args.nome.trim();
     if (!nome) {
-      throw validationError("Nome obrigatorio.");
+      throw validationError("Nome obrigatório.");
     }
 
     const existing = await ctx.db.query("permission_templates").collect();
     if (existing.some((template) => template.nome.toLowerCase() === nome.toLowerCase())) {
-      throw conflict("Ja existe um template com este nome.");
+      throw conflict("Já existe um template com este nome.");
     }
 
     const now = Date.now();
@@ -228,7 +228,7 @@ export const update = mutation({
 
     const template = await ctx.db.get("permission_templates", args.templateId);
     if (!template) {
-      throw notFound("Template de permissao");
+      throw notFound("Template de permissão");
     }
 
     const nome = args.nome.trim();
@@ -263,7 +263,7 @@ export const duplicate = mutation({
 
     const template = await ctx.db.get("permission_templates", args.templateId);
     if (!template) {
-      throw notFound("Template de permissao");
+      throw notFound("Template de permissão");
     }
 
     const now = Date.now();
@@ -301,7 +301,7 @@ export const setActive = mutation({
 
     const template = await ctx.db.get("permission_templates", args.templateId);
     if (!template) {
-      throw notFound("Template de permissao");
+      throw notFound("Template de permissão");
     }
 
     await ctx.db.patch(args.templateId, {
