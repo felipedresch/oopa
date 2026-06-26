@@ -336,6 +336,11 @@ mesmo conjunto de mudancas.
 - [x] Implementar mutation `tutors.create` protegida por `tutors.create`.
 - [x] Implementar mutation `tutors.update` protegida por `tutors.edit`.
 - [x] Exigir CPF unico para tutor com CPF informado.
+- [x] Exigir RG unico (normalizado) para tutor com RG informado, com indice
+      `tutors.by_rg`.
+- [x] Validar RG no backend (5 a 9 caracteres, digitos e verificador `X`).
+- [x] Implementar query `tutors.checkDuplicate` para checagem ao vivo de CPF/RG
+      ja cadastrados (protegida por `tutors.create` ou `tutors.edit`).
 - [x] Implementar query `tutors.get` com leitura basica por `tutors.read` e
       campos sensiveis apenas por `tutors.read_sensitive`.
 - [x] Implementar calculo de alerta do tutor: vermelho com pelo menos uma
@@ -355,8 +360,10 @@ mesmo conjunto de mudancas.
 - [x] Ocultar CPF, RG, endereco, telefone, email, data de nascimento,
       observacoes e alertas sem `tutors.read_sensitive`.
 - [x] Mostrar bloco "Dados sensiveis ocultos" para usuario sem permissao.
-- [x] Criar `/tutors/new` e `/tutors/:tutorId/edit` com mascara de CPF,
+- [x] Criar `/tutors/new` e `/tutors/:tutorId/edit` com mascara de CPF, RG,
       telefone e CEP.
+- [x] Validar e mascarar RG no formulario e checar CPF/RG duplicados ao vivo via
+      `tutors.checkDuplicate`, bloqueando o envio quando ja existirem.
 - [x] Criar autocomplete de bairro com opcao de selecionar "Nao informado".
 - [x] Criar painel de alerta do tutor com contagem e lista filtravel por
       gravidade.

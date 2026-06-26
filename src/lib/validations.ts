@@ -1,6 +1,7 @@
 export const VALIDATION_MESSAGES = {
   microchip: "Microchip deve ter exatamente 15 dígitos numéricos.",
   cpf: "CPF inválido.",
+  rg: "RG deve ter entre 5 e 9 caracteres.",
   phone: "Telefone deve ter 10 ou 11 dígitos.",
   email: "Email inválido.",
   cep: "CEP deve ter 8 dígitos.",
@@ -36,6 +37,19 @@ export function validateCpf(value: string): string | null {
     return VALIDATION_MESSAGES.cpf;
   }
 
+  return null;
+}
+
+/** Normaliza o RG para dígitos e um eventual verificador "X" final. */
+export function normalizeRg(value: string): string {
+  return value.toUpperCase().replace(/[^0-9X]/g, "");
+}
+
+export function validateRg(value: string): string | null {
+  const cleaned = normalizeRg(value);
+  if (cleaned.length < 5 || cleaned.length > 9) {
+    return VALIDATION_MESSAGES.rg;
+  }
   return null;
 }
 

@@ -138,9 +138,23 @@ export function normalizeCep(value: string): string {
   return value.replace(/\D/g, "");
 }
 
+/**
+ * RG normalizado: apenas dígitos e um eventual dígito verificador "X" final.
+ * O formato do RG varia entre estados, então mantemos a validação flexível.
+ */
+export function normalizeRg(value: string): string {
+  return value.toUpperCase().replace(/[^0-9X]/g, "");
+}
+
+export function isValidRg(value: string): boolean {
+  const cleaned = normalizeRg(value);
+  return cleaned.length >= 5 && cleaned.length <= 9;
+}
+
 export const VALIDATION_MESSAGES = {
   microchip: "Microchip deve ter exatamente 15 dígitos numéricos.",
   cpf: "CPF inválido.",
+  rg: "RG deve ter entre 5 e 9 caracteres.",
   phone: "Telefone deve ter 10 ou 11 dígitos.",
   email: "Email inválido.",
   cep: "CEP deve ter 8 dígitos.",

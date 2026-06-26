@@ -7,9 +7,11 @@ import { dogStatusValidator, severityValidator } from "./domainValidators";
 import { forbidden, notFound } from "./errors";
 import { getCurrentUser, requirePermission } from "./lib/auth";
 import { normalizePaginationOpts } from "./lib/pagination";
+import { normalizeCpf, normalizeRg } from "./domainValidators";
 import {
   assertActiveBairro,
   assertUniqueCpf,
+  assertUniqueRg,
   canReadSensitiveTutorData,
   computeTutorAlert,
   getAttributableOccurrences,
@@ -159,6 +161,7 @@ export const create = mutation({
 
     const data = await persistTutor(ctx, args);
     await assertUniqueCpf(ctx, data.cpf);
+    await assertUniqueRg(ctx, data.rg);
 
     const now = Date.now();
     const tutorId = await ctx.db.insert("tutors", {
@@ -196,6 +199,7 @@ export const update = mutation({
 
     const data = await persistTutor(ctx, args);
     await assertUniqueCpf(ctx, data.cpf, args.tutorId);
+    await assertUniqueRg(ctx, data.rg, args.tutorId);
 
     const now = Date.now();
     await ctx.db.patch(args.tutorId, {
@@ -213,6 +217,63 @@ export const update = mutation({
     });
 
     return null;
+  },
+});
+
+const duplicateMatchValidator = v.object({
+  exists: v.boolean(),
+  nome: v.union(v.string(), v.null()),
+});
+
+/**
+ * Checagem ao vivo de CPF/RG já cadastrados, usada pelo formulário enquanto o
+ * usuário digita. A unicidade definitiva é garantida nas mutations.
+ */
+export const checkDuplicate = query({
+  args: {
+    cpf: v.optional(v.string()),
+    rg: v.optional(v.string()),
+    excludeTutorId: v.optional(v.id("tutors")),
+  },
+  returns: v.object({
+    cpf: duplicateMatchValidator,
+    rg: duplicateMatchValidator,
+  }),
+  handler: async (ctx, args) => {
+    const actor = await getCurrentUser(ctx);
+    if (
+      !hasPermission(actor.permissions, "tutors.create") &&
+      !hasPermission(actor.permissions, "tutors.edit")
+    ) {
+      throw forbidden();
+    }
+
+    const empty = { exists: false, nome: null as string | null };
+    const result = { cpf: { ...empty }, rg: { ...empty } };
+
+    const cpf = args.cpf ? normalizeCpf(args.cpf) : "";
+    if (cpf.length === 11) {
+      const match = await ctx.db
+        .query("tutors")
+        .withIndex("by_cpf", (q) => q.eq("cpf", cpf))
+        .unique();
+      if (match && match._id !== args.excludeTutorId) {
+        result.cpf = { exists: true, nome: match.nome_completo };
+      }
+    }
+
+    const rg = args.rg ? normalizeRg(args.rg) : "";
+    if (rg.length >= 5) {
+      const match = await ctx.db
+        .query("tutors")
+        .withIndex("by_rg", (q) => q.eq("rg", rg))
+        .unique();
+      if (match && match._id !== args.excludeTutorId) {
+        result.rg = { exists: true, nome: match.nome_completo };
+      }
+    }
+
+    return result;
   },
 });
 

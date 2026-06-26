@@ -34,3 +34,19 @@ export function maskCep(value: string): string {
   if (digits.length <= 5) return digits;
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
+
+/**
+ * RG: mantém dígitos e um eventual dígito verificador "X" final, limitando a 9
+ * caracteres e formatando no padrão XX.XXX.XXX-X.
+ */
+export function maskRg(value: string): string {
+  const cleaned = value.toUpperCase().replace(/[^0-9X]/g, "");
+  const hasTrailingX = cleaned.endsWith("X");
+  const digits = cleaned.replace(/X/g, "").slice(0, hasTrailingX ? 8 : 9);
+  const raw = hasTrailingX ? `${digits}X` : digits;
+
+  if (raw.length <= 2) return raw;
+  if (raw.length <= 5) return `${raw.slice(0, 2)}.${raw.slice(2)}`;
+  if (raw.length <= 8) return `${raw.slice(0, 2)}.${raw.slice(2, 5)}.${raw.slice(5)}`;
+  return `${raw.slice(0, 2)}.${raw.slice(2, 5)}.${raw.slice(5, 8)}-${raw.slice(8)}`;
+}

@@ -136,6 +136,7 @@ export default defineSchema({
     ...timestampFields,
   })
     .index("by_cpf", ["cpf"])
+    .index("by_rg", ["rg"])
     .index("by_bairro", ["bairro_id"]),
 
   bairros: defineTable({

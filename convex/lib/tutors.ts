@@ -5,9 +5,11 @@ import {
   isValidCpf,
   isValidEmail,
   isValidPhone,
+  isValidRg,
   normalizeCep,
   normalizeCpf,
   normalizePhone,
+  normalizeRg,
   VALIDATION_MESSAGES,
 } from "../domainValidators";
 import { conflict, notFound, validationError } from "../errors";
@@ -103,10 +105,12 @@ export function normalizeTutorInput(input: TutorInput): TutorInput {
   const email = input.email?.trim() || undefined;
   const endereco_cep = input.endereco_cep ? normalizeCep(input.endereco_cep) : undefined;
 
+  const rg = input.rg ? normalizeRg(input.rg) : undefined;
+
   return {
     nome_completo: nome,
     cpf: cpf || undefined,
-    rg: input.rg?.trim() || undefined,
+    rg: rg || undefined,
     telefone: telefone || undefined,
     email,
     endereco_logradouro: input.endereco_logradouro?.trim() || undefined,
@@ -126,6 +130,10 @@ export function validateTutorInput(input: TutorInput): void {
 
   if (input.cpf && !isValidCpf(input.cpf)) {
     throw validationError(VALIDATION_MESSAGES.cpf);
+  }
+
+  if (input.rg && !isValidRg(input.rg)) {
+    throw validationError(VALIDATION_MESSAGES.rg);
   }
 
   if (input.telefone && !isValidPhone(input.telefone)) {
@@ -157,6 +165,25 @@ export async function assertUniqueCpf(
 
   if (existing && existing._id !== excludeTutorId) {
     throw conflict("Já existe um tutor com este CPF.");
+  }
+}
+
+export async function assertUniqueRg(
+  ctx: Pick<MutationCtx, "db">,
+  rg: string | undefined,
+  excludeTutorId?: Id<"tutors">,
+): Promise<void> {
+  if (!rg) {
+    return;
+  }
+
+  const existing = await ctx.db
+    .query("tutors")
+    .withIndex("by_rg", (q) => q.eq("rg", rg))
+    .unique();
+
+  if (existing && existing._id !== excludeTutorId) {
+    throw conflict("Já existe um tutor com este RG.");
   }
 }
 

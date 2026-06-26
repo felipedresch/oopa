@@ -82,6 +82,74 @@ test("create exige CPF unico e get oculta dados sensiveis", async () => {
   expect(basic?.alert).toBeUndefined();
 });
 
+test("create exige RG unico (normalizado)", async () => {
+  const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
+  const bairroId = await seedBairro(t, "Centro");
+
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.tutors.create, {
+      ...FIXTURE_TUTOR_WITHOUT_ALERT,
+      bairro_id: bairroId,
+    }),
+  );
+
+  // Mesmo RG (com mascara diferente) mas CPF distinto deve conflitar no RG.
+  await expect(
+    asUser(t, adminId, async (client) => {
+      await client.mutation(api.tutors.create, {
+        ...FIXTURE_TUTOR_WITHOUT_ALERT,
+        cpf: FIXTURE_TUTOR_WITH_ALERT.cpf,
+        rg: "1.234.567",
+        bairro_id: bairroId,
+      });
+    }),
+  ).rejects.toThrow(/rg/i);
+});
+
+test("checkDuplicate sinaliza CPF e RG ja cadastrados", async () => {
+  const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
+  const bairroId = await seedBairro(t, "Centro");
+
+  const tutorId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.tutors.create, {
+      ...FIXTURE_TUTOR_WITHOUT_ALERT,
+      bairro_id: bairroId,
+    }),
+  );
+
+  const taken = await asUser(t, adminId, async (client) =>
+    client.query(api.tutors.checkDuplicate, {
+      cpf: FIXTURE_TUTOR_WITHOUT_ALERT.cpf,
+      rg: "1.234.567",
+    }),
+  );
+  expect(taken.cpf.exists).toBe(true);
+  expect(taken.cpf.nome).toBe(FIXTURE_TUTOR_WITHOUT_ALERT.nome_completo);
+  expect(taken.rg.exists).toBe(true);
+
+  // O proprio tutor nao deve conflitar consigo mesmo na edicao.
+  const excluded = await asUser(t, adminId, async (client) =>
+    client.query(api.tutors.checkDuplicate, {
+      cpf: FIXTURE_TUTOR_WITHOUT_ALERT.cpf,
+      rg: FIXTURE_TUTOR_WITHOUT_ALERT.rg,
+      excludeTutorId: tutorId,
+    }),
+  );
+  expect(excluded.cpf.exists).toBe(false);
+  expect(excluded.rg.exists).toBe(false);
+
+  const free = await asUser(t, adminId, async (client) =>
+    client.query(api.tutors.checkDuplicate, {
+      cpf: FIXTURE_TUTOR_WITH_ALERT.cpf,
+      rg: FIXTURE_TUTOR_WITH_ALERT.rg,
+    }),
+  );
+  expect(free.cpf.exists).toBe(false);
+  expect(free.rg.exists).toBe(false);
+});
+
 test("alerta vermelho e amarelo derivam de ocorrencias atribuiveis", async () => {
   const t = convexTest(schema, modules);
   const adminId = await seedAdmin(t);

@@ -17,13 +17,15 @@ import { UnsavedChangesDialog } from "@/components/UnsavedChangesDialog";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { fetchAddressByCep, normalizeBairroName } from "@/lib/cep";
-import { maskCep, maskCpf, maskPhone } from "@/lib/masks";
+import { maskCep, maskCpf, maskPhone, maskRg } from "@/lib/masks";
 import {
+  normalizeRg,
   validateCep,
   validateCpf,
   validateEmail,
   validatePhone,
   validateRequired,
+  validateRg,
 } from "@/lib/validations";
 
 /** Aplica um validador apenas quando o campo está preenchido (campos opcionais). */
@@ -133,6 +135,24 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
 
   const { blocker, allowNavigation } = useDirtyFormGuard(isDirty);
 
+  // Checagem ao vivo de CPF/RG já cadastrados enquanto o usuário digita.
+  const cpfDigits = cpf.replace(/\D/g, "");
+  const rgNormalized = normalizeRg(rg);
+  const cpfReady = cpfDigits.length === 11 && !validateCpf(cpf);
+  const rgReady = rgNormalized.length >= 5 && rgNormalized.length <= 9;
+  const duplicateCheck = useQuery(
+    api.tutors.checkDuplicate,
+    cpfReady || rgReady
+      ? {
+          cpf: cpfReady ? cpfDigits : undefined,
+          rg: rgReady ? rgNormalized : undefined,
+          excludeTutorId: isEdit && tutorId ? (tutorId as Id<"tutors">) : undefined,
+        }
+      : "skip",
+  );
+  const cpfTaken = cpfReady && (duplicateCheck?.cpf.exists ?? false);
+  const rgTaken = rgReady && (duplicateCheck?.rg.exists ?? false);
+
   const cepDigits = cep.replace(/\D/g, "");
 
   // Busca ViaCEP ao completar 8 dígitos e autopreenche o endereço.
@@ -209,6 +229,15 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
       return;
     }
 
+    if (cpfTaken) {
+      setError("Já existe um tutor com este CPF.");
+      return;
+    }
+    if (rgTaken) {
+      setError("Já existe um tutor com este RG.");
+      return;
+    }
+
     const payload = {
       nome_completo: nome.trim(),
       cpf: cpf || undefined,
@@ -271,16 +300,41 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
             value={nome}
           />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              id="cpf"
-              inputMode="numeric"
-              label="CPF"
-              mask={maskCpf}
-              onChange={setCpf}
-              validate={optional(validateCpf)}
-              value={cpf}
-            />
-            <Field id="rg" label="RG" onChange={setRg} value={rg} />
+            <div className="flex flex-col gap-2">
+              <Field
+                hint={cpfTaken && duplicateCheck?.cpf.nome ? undefined : "Somente números."}
+                id="cpf"
+                inputMode="numeric"
+                label="CPF"
+                mask={maskCpf}
+                onChange={setCpf}
+                validate={optional(validateCpf)}
+                value={cpf}
+              />
+              {cpfTaken ? (
+                <p className="text-sm text-destructive">
+                  Já existe um tutor com este CPF
+                  {duplicateCheck?.cpf.nome ? `: ${duplicateCheck.cpf.nome}` : ""}.
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Field
+                id="rg"
+                inputMode="numeric"
+                label="RG"
+                mask={maskRg}
+                onChange={setRg}
+                validate={optional(validateRg)}
+                value={rg}
+              />
+              {rgTaken ? (
+                <p className="text-sm text-destructive">
+                  Já existe um tutor com este RG
+                  {duplicateCheck?.rg.nome ? `: ${duplicateCheck.rg.nome}` : ""}.
+                </p>
+              ) : null}
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="data-nascimento">Data de nascimento</Label>
@@ -379,7 +433,11 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
-          <Button className="min-h-11" disabled={submitting} type="submit">
+          <Button
+            className="min-h-11"
+            disabled={submitting || cpfTaken || rgTaken}
+            type="submit"
+          >
             {submitting ? "Salvando..." : isEdit ? "Salvar alterações" : "Cadastrar tutor"}
           </Button>
           <Button asChild className="min-h-11" type="button" variant="outline">
