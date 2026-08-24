@@ -30,7 +30,7 @@ test("traduz modulo e nivel para permissoes granulares", () => {
 test("mapa de modulos e permissoes faz round-trip para modulos independentes", () => {
   const map = {
     dogs: "none",
-    tutors: "none",
+    people: "none",
     occurrences: "none",
     adoptions: "none",
     team: "manage",
@@ -47,7 +47,7 @@ test("mapa de modulos e permissoes faz round-trip para modulos independentes", (
 test("helpers de permissao avaliam conjuntos esperados", () => {
   const permissions = moduleMapToPermissions({
     dogs: "manage",
-    tutors: "manage",
+    people: "manage",
     occurrences: "manage",
     adoptions: "manage",
     team: "manage",

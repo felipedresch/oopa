@@ -6,12 +6,12 @@ import { EmptyState } from "@/components/EmptyState";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { formatDate } from "@/lib/formatters";
 
-type TutorDogHistoryListProps = {
+type PersonDogHistoryListProps = {
   dogId: Id<"dogs">;
 };
 
-export function TutorDogHistoryList({ dogId }: TutorDogHistoryListProps) {
-  const history = useQuery(api.tutors.listHistoryByDog, { dogId });
+export function PersonDogHistoryList({ dogId }: PersonDogHistoryListProps) {
+  const history = useQuery(api.people.listHistoryByDog, { dogId });
 
   if (history === undefined) {
     return <LoadingSkeleton rows={3} />;
@@ -28,10 +28,10 @@ export function TutorDogHistoryList({ dogId }: TutorDogHistoryListProps) {
 
   return (
     <ul className="divide-y divide-border">
-      {history.map((entry) => (
+      {history.map((entry: NonNullable<typeof history>[number]) => (
         <li className="flex flex-col gap-0.5 py-3 first:pt-0 last:pb-0" key={entry._id}>
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-            <p className="font-medium">{entry.tutor_nome}</p>
+            <p className="font-medium">{entry.pessoa_nome}</p>
             {entry.fim ? null : (
               <span className="rounded-full bg-success/12 px-2.5 py-0.5 text-xs font-medium text-success">
                 Vigente

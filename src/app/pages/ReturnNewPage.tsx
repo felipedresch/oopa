@@ -51,10 +51,10 @@ export function ReturnNewPage() {
     selectedDogId ? { dogId: selectedDogId, now } : "skip",
   );
 
-  const currentTutor = useQuery(
-    api.tutors.get,
-    selectedDog?.tutor_atual_id && can("tutors.read")
-      ? { tutorId: selectedDog.tutor_atual_id }
+  const currentPerson = useQuery(
+    api.people.get,
+    selectedDog?.pessoa_atual_id && can("people.read")
+      ? { personId: selectedDog.pessoa_atual_id }
       : "skip",
   );
 
@@ -84,7 +84,7 @@ export function ReturnNewPage() {
   }
 
   const canSubmit =
-    Boolean(selectedDogId && selectedDog?.tutor_atual_id && motivo.trim()) &&
+    Boolean(selectedDogId && selectedDog?.pessoa_atual_id && motivo.trim()) &&
     photos.length > 0;
 
   const handleSubmit = async () => {
@@ -178,13 +178,13 @@ export function ReturnNewPage() {
           <div className="rounded-xl bg-accent/50 p-4">
             <p className="font-semibold">{selectedDog.nome}</p>
             <p className="text-sm text-muted-foreground">
-              {formatMicrochip(selectedDog.microchip)}
+              {selectedDog.microchip ? formatMicrochip(selectedDog.microchip) : "Sem microchip"}
             </p>
-            {!selectedDog.tutor_atual_id ? (
+            {!selectedDog.pessoa_atual_id ? (
               <p className="mt-2 text-sm text-warning">
                 Este cão não possui tutor atual. Selecione outro cão para devolução.
               </p>
-            ) : currentTutor === undefined ? (
+            ) : currentPerson === undefined ? (
               <LoadingSkeleton rows={1} />
             ) : (
               <div className="mt-3 flex flex-col gap-1">
@@ -192,10 +192,10 @@ export function ReturnNewPage() {
                 <Input
                   disabled
                   readOnly
-                  value={currentTutor?.nome_completo ?? "Tutor não encontrado"}
+                  value={currentPerson?.nome_completo ?? "Tutor não encontrado"}
                 />
-                {currentTutor?.bairro?.nome ? (
-                  <p className="text-sm text-muted-foreground">{currentTutor.bairro.nome}</p>
+                {currentPerson?.bairro?.nome ? (
+                  <p className="text-sm text-muted-foreground">{currentPerson.bairro.nome}</p>
                 ) : null}
               </div>
             )}

@@ -12,8 +12,9 @@ import {
   notificationTypeValidator,
   occurrenceCategoryValidator,
   permissionStringValidator,
+  personPapelValidator,
+  personSnapshotValidator,
   severityValidator,
-  tutorSnapshotValidator,
 } from "./domainValidators";
 import { permissionValidator } from "./permissions";
 
@@ -54,6 +55,8 @@ export default defineSchema({
     ativo: v.boolean(),
     permissions: v.array(permissionStringValidator),
     ultimo_acesso_em: v.optional(v.number()),
+    veterinario: v.optional(v.boolean()),
+    receber_alertas_resgate: v.optional(v.boolean()),
     ...timestampFields,
   })
     .index("email", ["email"])
@@ -89,7 +92,7 @@ export default defineSchema({
   }),
 
   dogs: defineTable({
-    microchip: v.string(),
+    microchip: v.optional(v.string()),
     nome: v.string(),
     especie: v.optional(dogSpeciesValidator),
     sexo: dogSexValidator,
@@ -104,13 +107,13 @@ export default defineSchema({
     vacinas_em_dia: v.boolean(),
     foto_perfil_storage_id: v.optional(v.id("_storage")),
     status_atual: dogStatusValidator,
-    tutor_atual_id: v.optional(v.id("tutors")),
+    pessoa_atual_id: v.optional(v.id("people")),
     observacoes: v.optional(v.string()),
     ...timestampFields,
   })
     .index("by_microchip", ["microchip"])
     .index("by_status", ["status_atual"])
-    .index("by_tutor", ["tutor_atual_id"]),
+    .index("by_pessoa", ["pessoa_atual_id"]),
 
   dog_photos: defineTable({
     dog_id: v.id("dogs"),
@@ -120,7 +123,7 @@ export default defineSchema({
     criado_por: v.optional(v.id("users")),
   }).index("by_dog", ["dog_id"]),
 
-  tutors: defineTable({
+  people: defineTable({
     nome_completo: v.string(),
     cpf: v.optional(v.string()),
     rg: v.optional(v.string()),
@@ -132,6 +135,8 @@ export default defineSchema({
     endereco_cep: v.optional(v.string()),
     bairro_id: v.optional(v.id("bairros")),
     data_nascimento: v.optional(v.number()),
+    data_cadastro_cadunico: v.optional(v.number()),
+    papeis: v.optional(v.array(personPapelValidator)),
     observacoes: v.optional(v.string()),
     ...timestampFields,
   })
@@ -155,10 +160,10 @@ export default defineSchema({
   }),
 
   occurrences: defineTable({
-    dog_id: v.id("dogs"),
-    tutor_id: v.optional(v.id("tutors")),
-    tutor_snapshot: v.optional(tutorSnapshotValidator),
-    atribuivel_ao_tutor: v.boolean(),
+    dog_id: v.optional(v.id("dogs")),
+    pessoa_id: v.optional(v.id("people")),
+    pessoa_snapshot: v.optional(personSnapshotValidator),
+    atribuivel_a_pessoa: v.boolean(),
     occurrence_type_id: v.id("occurrence_types"),
     gravidade: severityValidator,
     data_ocorrencia: v.number(),
@@ -171,7 +176,7 @@ export default defineSchema({
     criado_em: v.number(),
   })
     .index("by_dog", ["dog_id"])
-    .index("by_tutor", ["tutor_id"])
+    .index("by_pessoa", ["pessoa_id"])
     .index("by_type", ["occurrence_type_id"])
     .index("by_gravity", ["gravidade"])
     .index("by_bairro", ["bairro_id"])
@@ -185,9 +190,9 @@ export default defineSchema({
     criado_por: v.optional(v.id("users")),
   }).index("by_occurrence", ["occurrence_id"]),
 
-  tutor_dog_history: defineTable({
+  person_dog_history: defineTable({
     dog_id: v.id("dogs"),
-    tutor_id: v.id("tutors"),
+    pessoa_id: v.id("people"),
     inicio: v.number(),
     fim: v.optional(v.number()),
     tipo_inicio: v.string(),
@@ -196,7 +201,7 @@ export default defineSchema({
     occurrence_id_fim: v.optional(v.id("occurrences")),
   })
     .index("by_dog", ["dog_id"])
-    .index("by_tutor", ["tutor_id"]),
+    .index("by_pessoa", ["pessoa_id"]),
 
   notifications: defineTable({
     user_id: v.id("users"),

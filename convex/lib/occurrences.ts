@@ -13,7 +13,8 @@ export type OccurrenceCategory =
   | "risco"
   | "legal"
   | "adocao"
-  | "outro";
+  | "outro"
+  | "denuncia_externa";
 
 export type Severity = Doc<"occurrences">["gravidade"];
 
@@ -24,6 +25,10 @@ export const CREATE_PERMISSION_BY_CATEGORY: Record<OccurrenceCategory, Permissio
   legal: "occurrences.create_legal",
   adocao: "occurrences.create_adocao",
   outro: "occurrences.create_outro",
+  // Sem permissão dedicada ainda: denúncias externas são criadas pela
+  // triagem de `public_reports` (ver Fase 16 do backlog), não pelo fluxo
+  // manual comum de ocorrência.
+  denuncia_externa: "occurrences.create_outro",
 };
 
 export const HISTORY_AFFECTING_TYPE_NAMES = new Set([
@@ -50,12 +55,13 @@ export function canReadOccurrenceCategory(
     case "rotina":
     case "clinica":
     case "outro":
+    case "denuncia_externa":
       return hasPermission(permissions, "occurrences.read");
     case "risco":
     case "legal":
       return hasPermission(permissions, "occurrences.read_legal");
     case "adocao":
-      return hasAllPermissions(permissions, ["dogs.read", "tutors.read"]);
+      return hasAllPermissions(permissions, ["dogs.read", "people.read"]);
   }
 }
 
@@ -86,31 +92,31 @@ export function isSensitiveCategory(category: OccurrenceCategory): boolean {
   return category === "risco" || category === "legal";
 }
 
-export async function buildTutorSnapshot(
+export async function buildPersonSnapshot(
   ctx: Pick<QueryCtx, "db">,
-  tutorId: Id<"tutors">,
-): Promise<NonNullable<Doc<"occurrences">["tutor_snapshot"]>> {
-  const tutor = await ctx.db.get("tutors", tutorId);
-  if (!tutor) {
-    throw validationError("Tutor não encontrado para snapshot.");
+  pessoaId: Id<"people">,
+): Promise<NonNullable<Doc<"occurrences">["pessoa_snapshot"]>> {
+  const pessoa = await ctx.db.get("people", pessoaId);
+  if (!pessoa) {
+    throw validationError("Pessoa não encontrada para snapshot.");
   }
 
-  const bairro = tutor.bairro_id ? await ctx.db.get("bairros", tutor.bairro_id) : null;
+  const bairro = pessoa.bairro_id ? await ctx.db.get("bairros", pessoa.bairro_id) : null;
 
   return {
-    nome_completo: tutor.nome_completo,
-    cpf: tutor.cpf,
-    rg: tutor.rg,
-    telefone: tutor.telefone,
-    email: tutor.email,
-    endereco_logradouro: tutor.endereco_logradouro,
-    endereco_numero: tutor.endereco_numero,
-    endereco_complemento: tutor.endereco_complemento,
-    endereco_cep: tutor.endereco_cep,
-    bairro_id: tutor.bairro_id,
+    nome_completo: pessoa.nome_completo,
+    cpf: pessoa.cpf,
+    rg: pessoa.rg,
+    telefone: pessoa.telefone,
+    email: pessoa.email,
+    endereco_logradouro: pessoa.endereco_logradouro,
+    endereco_numero: pessoa.endereco_numero,
+    endereco_complemento: pessoa.endereco_complemento,
+    endereco_cep: pessoa.endereco_cep,
+    bairro_id: pessoa.bairro_id,
     bairro_nome: bairro?.nome,
-    data_nascimento: tutor.data_nascimento,
-    observacoes: tutor.observacoes,
+    data_nascimento: pessoa.data_nascimento,
+    observacoes: pessoa.observacoes,
   };
 }
 

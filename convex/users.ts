@@ -51,7 +51,7 @@ const userSummaryValidator = v.object({
       v.literal("write"),
       v.literal("manage"),
     ),
-    tutors: v.union(
+    people: v.union(
       v.literal("none"),
       v.literal("read"),
       v.literal("write"),
@@ -90,6 +90,8 @@ const userSummaryValidator = v.object({
   }),
   ultimo_acesso_em: v.optional(v.number()),
   criado_em: v.number(),
+  veterinario: v.boolean(),
+  receber_alertas_resgate: v.boolean(),
 });
 
 function toUserSummary(user: Doc<"users">) {
@@ -104,6 +106,8 @@ function toUserSummary(user: Doc<"users">) {
     moduleMap: permissionsToModuleMap(user.permissions),
     ultimo_acesso_em: user.ultimo_acesso_em,
     criado_em: user.criado_em,
+    veterinario: user.veterinario ?? false,
+    receber_alertas_resgate: user.receber_alertas_resgate ?? true,
   };
 }
 
@@ -323,6 +327,57 @@ export const updatePermissions = mutation({
       entityId: args.userId,
       summary: `Permissoes atualizadas para ${user.email ?? user.nome}`,
       metadata: { permissions },
+    });
+
+    return null;
+  },
+});
+
+export const setVeterinario = mutation({
+  args: {
+    userId: v.id("users"),
+    veterinario: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await getCurrentUser(ctx);
+    requirePermission(actor, "users.manage_permissions");
+
+    const user = await ctx.db.get("users", args.userId);
+    if (!user) {
+      throw notFound("Usuário");
+    }
+
+    await ctx.db.patch(args.userId, {
+      veterinario: args.veterinario,
+      atualizado_em: Date.now(),
+      atualizado_por: actor._id,
+    });
+
+    await recordAudit(ctx, {
+      actorUserId: actor._id,
+      action: "users.set_veterinario",
+      entityType: "user",
+      entityId: args.userId,
+      summary: `Marcação de veterinário ${args.veterinario ? "ativada" : "removida"} para ${user.email ?? user.nome}`,
+    });
+
+    return null;
+  },
+});
+
+export const updateMyPreferences = mutation({
+  args: {
+    receber_alertas_resgate: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await getCurrentUser(ctx);
+
+    await ctx.db.patch(actor._id, {
+      receber_alertas_resgate: args.receber_alertas_resgate,
+      atualizado_em: Date.now(),
+      atualizado_por: actor._id,
     });
 
     return null;

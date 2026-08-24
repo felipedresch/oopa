@@ -28,7 +28,7 @@ export const exportDogsCsv = query({
         "status_atual",
         "castrado",
         "vacinas_em_dia",
-        "tutor_atual_id",
+        "pessoa_atual_id",
         "criado_em",
       ],
     ];
@@ -43,7 +43,7 @@ export const exportDogsCsv = query({
         dog.status_atual,
         dog.castrado,
         dog.vacinas_em_dia,
-        dog.tutor_atual_id ?? "",
+        dog.pessoa_atual_id ?? "",
         new Date(dog.criado_em).toISOString(),
       ]);
     }
@@ -52,7 +52,7 @@ export const exportDogsCsv = query({
   },
 });
 
-export const exportTutorsCsv = query({
+export const exportPeopleCsv = query({
   args: {
     limit: v.optional(v.number()),
   },
@@ -62,7 +62,7 @@ export const exportTutorsCsv = query({
     requirePermission(actor, "system.audit_log");
 
     const maxRows = Math.min(args.limit ?? 2000, MAX_EXPORT_ROWS);
-    const tutors = await ctx.db.query("tutors").order("desc").take(maxRows);
+    const people = await ctx.db.query("people").order("desc").take(maxRows);
 
     const rows: Array<Array<string | number | boolean | null | undefined>> = [
       [
@@ -76,15 +76,15 @@ export const exportTutorsCsv = query({
       ],
     ];
 
-    for (const tutor of tutors) {
+    for (const person of people) {
       rows.push([
-        tutor.nome_completo,
-        tutor.cpf ?? "",
-        tutor.telefone ?? "",
-        tutor.email ?? "",
-        tutor.bairro_id ?? "",
-        tutor.endereco_cep ?? "",
-        new Date(tutor.criado_em).toISOString(),
+        person.nome_completo,
+        person.cpf ?? "",
+        person.telefone ?? "",
+        person.email ?? "",
+        person.bairro_id ?? "",
+        person.endereco_cep ?? "",
+        new Date(person.criado_em).toISOString(),
       ]);
     }
 
@@ -111,8 +111,8 @@ export const exportOccurrencesCsv = query({
         "gravidade",
         "data_ocorrencia",
         "bairro_id",
-        "tutor_id",
-        "atribuivel_ao_tutor",
+        "pessoa_id",
+        "atribuivel_a_pessoa",
         "descricao",
         "criado_em",
       ],
@@ -125,8 +125,8 @@ export const exportOccurrencesCsv = query({
         occurrence.gravidade,
         new Date(occurrence.data_ocorrencia).toISOString(),
         occurrence.bairro_id ?? "",
-        occurrence.tutor_id ?? "",
-        occurrence.atribuivel_ao_tutor,
+        occurrence.pessoa_id ?? "",
+        occurrence.atribuivel_a_pessoa,
         occurrence.descricao,
         new Date(occurrence.criado_em).toISOString(),
       ]);
@@ -136,7 +136,7 @@ export const exportOccurrencesCsv = query({
   },
 });
 
-export const exportTutorDogHistoryCsv = query({
+export const exportPersonDogHistoryCsv = query({
   args: {
     limit: v.optional(v.number()),
   },
@@ -146,12 +146,12 @@ export const exportTutorDogHistoryCsv = query({
     requirePermission(actor, "system.audit_log");
 
     const maxRows = Math.min(args.limit ?? 2000, MAX_EXPORT_ROWS);
-    const history = await ctx.db.query("tutor_dog_history").order("desc").take(maxRows);
+    const history = await ctx.db.query("person_dog_history").order("desc").take(maxRows);
 
     const rows: Array<Array<string | number | boolean | null | undefined>> = [
       [
         "dog_id",
-        "tutor_id",
+        "pessoa_id",
         "inicio",
         "fim",
         "tipo_inicio",
@@ -164,7 +164,7 @@ export const exportTutorDogHistoryCsv = query({
     for (const entry of history) {
       rows.push([
         entry.dog_id,
-        entry.tutor_id,
+        entry.pessoa_id,
         new Date(entry.inicio).toISOString(),
         entry.fim ? new Date(entry.fim).toISOString() : "",
         entry.tipo_inicio,

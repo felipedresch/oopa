@@ -294,7 +294,7 @@ export const getPermissionTemplateMaps = query({
           v.literal("write"),
           v.literal("manage"),
         ),
-        tutors: v.union(
+        people: v.union(
           v.literal("none"),
           v.literal("read"),
           v.literal("write"),

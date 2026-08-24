@@ -5,10 +5,10 @@ export const PERMISSION_CATALOG = [
   "dogs.create",
   "dogs.edit",
   "dogs.change_status",
-  "tutors.read",
-  "tutors.read_sensitive",
-  "tutors.create",
-  "tutors.edit",
+  "people.read",
+  "people.read_sensitive",
+  "people.create",
+  "people.edit",
   "occurrences.read",
   "occurrences.read_legal",
   "occurrences.create_rotina",
@@ -30,7 +30,7 @@ export type Permission = (typeof PERMISSION_CATALOG)[number];
 
 export const UI_MODULES = [
   "dogs",
-  "tutors",
+  "people",
   "occurrences",
   "adoptions",
   "team",
@@ -46,7 +46,7 @@ export type PermissionLevel = (typeof PERMISSION_LEVELS)[number];
 
 export const uiModuleValidator = v.union(
   v.literal("dogs"),
-  v.literal("tutors"),
+  v.literal("people"),
   v.literal("occurrences"),
   v.literal("adoptions"),
   v.literal("team"),
@@ -66,10 +66,10 @@ export const permissionValidator = v.union(
   v.literal("dogs.create"),
   v.literal("dogs.edit"),
   v.literal("dogs.change_status"),
-  v.literal("tutors.read"),
-  v.literal("tutors.read_sensitive"),
-  v.literal("tutors.create"),
-  v.literal("tutors.edit"),
+  v.literal("people.read"),
+  v.literal("people.read_sensitive"),
+  v.literal("people.create"),
+  v.literal("people.edit"),
   v.literal("occurrences.read"),
   v.literal("occurrences.read_legal"),
   v.literal("occurrences.create_rotina"),
@@ -89,7 +89,7 @@ export const permissionValidator = v.union(
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
   dogs: "Caes",
-  tutors: "Tutores",
+  people: "Pessoas",
   occurrences: "Ocorrencias",
   adoptions: "Adocoes e devolucoes",
   team: "Equipe",
@@ -111,11 +111,11 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
     write: ["dogs.read", "dogs.create", "dogs.edit"],
     manage: ["dogs.read", "dogs.create", "dogs.edit", "dogs.change_status"],
   },
-  tutors: {
+  people: {
     none: [],
-    read: ["tutors.read"],
-    write: ["tutors.read", "tutors.create", "tutors.edit"],
-    manage: ["tutors.read", "tutors.read_sensitive", "tutors.create", "tutors.edit"],
+    read: ["people.read"],
+    write: ["people.read", "people.create", "people.edit"],
+    manage: ["people.read", "people.read_sensitive", "people.create", "people.edit"],
   },
   occurrences: {
     none: [],
@@ -139,12 +139,12 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
   },
   adoptions: {
     none: [],
-    read: ["dogs.read", "tutors.read"],
-    write: ["dogs.read", "tutors.read", "occurrences.create_adocao"],
+    read: ["dogs.read", "people.read"],
+    write: ["dogs.read", "people.read", "occurrences.create_adocao"],
     manage: [
       "dogs.read",
-      "tutors.read",
-      "tutors.read_sensitive",
+      "people.read",
+      "people.read_sensitive",
       "occurrences.create_adocao",
       "occurrences.create_outro",
     ],
@@ -236,7 +236,7 @@ export const SEED_PERMISSION_TEMPLATES = [
     descricao: "Acesso completo a todos os modulos do sistema.",
     moduleMap: {
       dogs: "manage",
-      tutors: "manage",
+      people: "manage",
       occurrences: "manage",
       adoptions: "manage",
       team: "manage",
@@ -246,10 +246,10 @@ export const SEED_PERMISSION_TEMPLATES = [
   },
   {
     nome: "Agente Prefeitura",
-    descricao: "Leitura de caes e tutores com registro de ocorrencias de campo.",
+    descricao: "Leitura de caes e pessoas com registro de ocorrencias de campo.",
     moduleMap: {
       dogs: "read",
-      tutors: "read",
+      people: "read",
       occurrences: "write",
       adoptions: "none",
       team: "none",
@@ -262,7 +262,7 @@ export const SEED_PERMISSION_TEMPLATES = [
     descricao: "Cadastro e acompanhamento operacional em campo.",
     moduleMap: {
       dogs: "write",
-      tutors: "write",
+      people: "write",
       occurrences: "write",
       adoptions: "write",
       team: "none",
@@ -275,7 +275,7 @@ export const SEED_PERMISSION_TEMPLATES = [
     descricao: "Consulta basica e registro de rotina.",
     moduleMap: {
       dogs: "read",
-      tutors: "read",
+      people: "read",
       occurrences: "write",
       adoptions: "none",
       team: "none",
@@ -288,7 +288,7 @@ export const SEED_PERMISSION_TEMPLATES = [
     descricao: "Somente consulta sem alteracao de dados.",
     moduleMap: {
       dogs: "read",
-      tutors: "read",
+      people: "read",
       occurrences: "read",
       adoptions: "read",
       team: "none",

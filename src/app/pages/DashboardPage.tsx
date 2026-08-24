@@ -1,7 +1,9 @@
 import {
   ChevronRightIcon,
   DogIcon,
+  HeartIcon,
   PlusIcon,
+  RotateCcwIcon,
   ScanLineIcon,
   SearchIcon,
   UsersIcon,
@@ -130,12 +132,28 @@ export function DashboardPage() {
               to="/dogs/new"
             />
           ) : null}
-          {can("tutors.read") ? (
+          {can("people.read") ? (
             <QuickLink
               description="Cadastros, alertas e histórico"
               icon={UsersIcon}
-              title="Tutores"
-              to="/tutors"
+              title="Pessoas"
+              to="/people"
+            />
+          ) : null}
+          {can("occurrences.create_adocao") ? (
+            <QuickLink
+              description="Avaliação do tutor, termo e confirmações"
+              icon={HeartIcon}
+              title="Nova adoção"
+              to="/adoptions/new"
+            />
+          ) : null}
+          {can("occurrences.create_adocao") ? (
+            <QuickLink
+              description="Encerrar tutoria e voltar o cão para a ONG"
+              icon={RotateCcwIcon}
+              title="Nova devolução"
+              to="/returns/new"
             />
           ) : null}
         </div>

@@ -23,6 +23,8 @@ export function TeamUserPage() {
   const { can, canAny, user: currentUser } = usePermissions();
   const updatePermissions = useMutation(api.users.updatePermissions);
   const deactivate = useMutation(api.users.deactivate);
+  const setVeterinario = useMutation(api.users.setVeterinario);
+  const [savingVeterinario, setSavingVeterinario] = useState(false);
 
   const user = useQuery(
     api.users.get,
@@ -106,6 +108,26 @@ export function TeamUserPage() {
         <span className="text-muted-foreground">Organização:</span>{" "}
         <span className="font-medium">{user.organizacao}</span>
       </p>
+
+      {can("users.manage_permissions") ? (
+        <label className="flex min-h-11 w-fit cursor-pointer items-center gap-2.5 rounded-lg border border-input bg-card px-3 text-sm font-medium transition-colors has-checked:border-primary has-checked:bg-accent has-checked:text-accent-foreground">
+          <input
+            checked={user.veterinario}
+            className="accent-primary"
+            disabled={savingVeterinario}
+            onChange={async (event) => {
+              setSavingVeterinario(true);
+              try {
+                await setVeterinario({ userId: user._id, veterinario: event.target.checked });
+              } finally {
+                setSavingVeterinario(false);
+              }
+            }}
+            type="checkbox"
+          />
+          Veterinário (aparece no seletor de responsável em atendimentos)
+        </label>
+      ) : null}
 
       {can("users.manage_permissions") && effectiveMap ? (
         <>

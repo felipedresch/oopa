@@ -2,7 +2,7 @@ import type { ModulePermissionMap } from "@/lib/permissions";
 
 export const fixtureModuleMap: ModulePermissionMap = {
   dogs: "manage",
-  tutors: "manage",
+  people: "manage",
   occurrences: "write",
   adoptions: "write",
   team: "read",
@@ -31,8 +31,8 @@ export const fixtureDog = {
   vacinas_em_dia: true,
 };
 
-export const fixtureTutor = {
-  id: "tutor_daniela",
+export const fixturePerson = {
+  id: "person_daniela",
   nome_completo: "Daniela Tutora",
   cpf: "529.982.247-25",
   telefone: "(11) 98888-0001",
@@ -41,9 +41,9 @@ export const fixtureTutor = {
   alerta: "none" as const,
 };
 
-export const fixtureTutorWithAlert = {
-  ...fixtureTutor,
-  id: "tutor_eduardo",
+export const fixturePersonWithAlert = {
+  ...fixturePerson,
+  id: "person_eduardo",
   nome_completo: "Eduardo Tutor",
   cpf: "390.533.447-05",
   alerta: "red" as const,
@@ -55,7 +55,7 @@ export const fixtureOccurrence = {
   gravidade: "info" as const,
   data_ocorrencia: Date.UTC(2026, 5, 1),
   descricao: "Consulta de rotina.",
-  atribuivel_ao_tutor: false,
+  atribuivel_a_pessoa: false,
 };
 
 export const fixturePermissionTemplate = {
@@ -63,7 +63,7 @@ export const fixturePermissionTemplate = {
   descricao: "Cadastro e acompanhamento operacional em campo.",
   moduleMap: {
     dogs: "write",
-    tutors: "write",
+    people: "write",
     occurrences: "write",
     adoptions: "write",
     team: "none",

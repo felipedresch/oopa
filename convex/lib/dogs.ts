@@ -51,7 +51,7 @@ export function filterDogForViewer(
   permissions: readonly string[],
 ) {
   const canSeeHealthNotes = hasPermission(permissions, "dogs.edit");
-  const canSeeTutor = hasPermission(permissions, "tutors.read");
+  const canSeePessoa = hasPermission(permissions, "people.read");
 
   return {
     _id: dog._id,
@@ -70,7 +70,7 @@ export function filterDogForViewer(
     vacinas_em_dia: dog.vacinas_em_dia,
     foto_perfil_storage_id: dog.foto_perfil_storage_id,
     status_atual: dog.status_atual,
-    tutor_atual_id: canSeeTutor ? dog.tutor_atual_id : undefined,
+    pessoa_atual_id: canSeePessoa ? dog.pessoa_atual_id : undefined,
     observacoes: canSeeHealthNotes ? dog.observacoes : undefined,
     criado_em: dog.criado_em,
     criado_por: dog.criado_por,

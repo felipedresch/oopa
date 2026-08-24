@@ -1,7 +1,7 @@
-import { TutorAlertBadge } from "@/components/TutorAlertBadge";
+import { PersonAlertBadge } from "@/components/PersonAlertBadge";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { formatDate } from "@/lib/formatters";
-import type { Severity, TutorAlertLevel } from "@/lib/domain-colors";
+import type { Severity, PersonAlertLevel } from "@/lib/domain-colors";
 
 type AssessmentOccurrence = {
   _id: string;
@@ -11,40 +11,40 @@ type AssessmentOccurrence = {
   dog_nome: string;
 };
 
-type TutorAssessmentPanelProps = {
-  tutorNome: string;
+type PersonAssessmentPanelProps = {
+  pessoaNome: string;
   bairroNome?: string | null;
   alert?: {
-    level: TutorAlertLevel;
+    level: PersonAlertLevel;
     alta_count: number;
     media_count: number;
     occurrences: AssessmentOccurrence[];
   };
 };
 
-export function TutorAssessmentPanel({
-  tutorNome,
+export function PersonAssessmentPanel({
+  pessoaNome,
   bairroNome,
   alert,
-}: TutorAssessmentPanelProps) {
+}: PersonAssessmentPanelProps) {
   return (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-xs">
       <div>
         <h3 className="font-semibold">Avaliação do tutor</h3>
         <p className="text-sm text-muted-foreground">
-          {tutorNome}
+          {pessoaNome}
           {bairroNome ? ` — ${bairroNome}` : ""}
         </p>
       </div>
 
       {!alert ? (
         <p className="text-sm text-muted-foreground">
-          Alertas detalhados disponiveis apenas com permissão sensível de tutores.
+          Alertas detalhados disponiveis apenas com permissão sensível de pessoas.
         </p>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-3">
-            <TutorAlertBadge level={alert.level} />
+            <PersonAlertBadge level={alert.level} />
             <span className="text-sm text-muted-foreground">Alta: {alert.alta_count}</span>
             <span className="text-sm text-muted-foreground">Média: {alert.media_count}</span>
           </div>

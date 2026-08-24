@@ -4,17 +4,18 @@ import { recordAudit } from "./audit";
 import { severityValidator } from "./domainValidators";
 import { forbidden, notFound, validationError } from "./errors";
 import {
-  buildTutorAssessment,
+  buildPersonAssessment,
   computeBairroWarning,
   createOccurrenceWithHistory,
   validateAdoptionPayload,
   type AdoptionPayloadInput,
 } from "./lib/adoptions";
 import { getCurrentUser, requirePermission } from "./lib/auth";
+import { validatePdfStorage } from "./lib/storage";
 import { hasPermission } from "./permissions";
 import { mutation, query } from "./_generated/server";
 
-const tutorAlertOccurrenceValidator = v.object({
+const personAlertOccurrenceValidator = v.object({
   _id: v.id("occurrences"),
   gravidade: severityValidator,
   data_ocorrencia: v.number(),
@@ -22,21 +23,21 @@ const tutorAlertOccurrenceValidator = v.object({
   dog_nome: v.string(),
 });
 
-const tutorAssessmentValidator = v.object({
-  tutor_nome: v.string(),
+const personAssessmentValidator = v.object({
+  pessoa_nome: v.string(),
   bairro_nome: v.union(v.string(), v.null()),
   alert: v.optional(
     v.object({
       level: v.union(v.literal("none"), v.literal("yellow"), v.literal("red")),
       alta_count: v.number(),
       media_count: v.number(),
-      occurrences: v.array(tutorAlertOccurrenceValidator),
+      occurrences: v.array(personAlertOccurrenceValidator),
     }),
   ),
 });
 
-const evaluateTutorValidator = v.object({
-  tutor: tutorAssessmentValidator,
+const evaluatePersonValidator = v.object({
+  pessoa: personAssessmentValidator,
   bairro_warning: v.object({
     has_warning: v.boolean(),
     message: v.union(v.string(), v.null()),
@@ -71,18 +72,18 @@ export const listOngStaff = query({
   },
 });
 
-export const evaluateTutor = query({
+export const evaluatePerson = query({
   args: {
     dogId: v.id("dogs"),
-    tutorId: v.id("tutors"),
+    personId: v.id("people"),
   },
-  returns: evaluateTutorValidator,
+  returns: evaluatePersonValidator,
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
     if (!hasPermission(actor.permissions, "dogs.read")) {
       throw forbidden();
     }
-    if (!hasPermission(actor.permissions, "tutors.read")) {
+    if (!hasPermission(actor.permissions, "people.read")) {
       throw forbidden();
     }
 
@@ -91,16 +92,16 @@ export const evaluateTutor = query({
       throw notFound("Cão");
     }
 
-    const tutor = await ctx.db.get("tutors", args.tutorId);
-    if (!tutor) {
-      throw notFound("Tutor");
+    const person = await ctx.db.get("people", args.personId);
+    if (!person) {
+      throw notFound("Pessoa");
     }
 
-    const assessment = await buildTutorAssessment(ctx, args.tutorId, actor.permissions);
-    const bairroWarning = await computeBairroWarning(ctx, args.dogId, args.tutorId);
+    const assessment = await buildPersonAssessment(ctx, args.personId, actor.permissions);
+    const bairroWarning = await computeBairroWarning(ctx, args.dogId, args.personId);
 
     return {
-      tutor: assessment,
+      pessoa: assessment,
       bairro_warning: bairroWarning,
     };
   },
@@ -109,7 +110,7 @@ export const evaluateTutor = query({
 export const create = mutation({
   args: {
     dogId: v.id("dogs"),
-    tutorId: v.id("tutors"),
+    personId: v.id("people"),
     data_adocao: v.number(),
     numero_termo_adocao: v.string(),
     responsavel_ong_user_id: v.id("users"),
@@ -117,6 +118,7 @@ export const create = mutation({
     observacoes_adocao: v.optional(v.string()),
     confirmou_documentos: v.boolean(),
     confirmou_orientacoes: v.boolean(),
+    termo_adocao_storage_id: v.optional(v.id("_storage")),
     descricao: v.optional(v.string()),
     photo_storage_ids: v.optional(v.array(v.id("_storage"))),
   },
@@ -130,14 +132,18 @@ export const create = mutation({
       throw notFound("Cão");
     }
 
-    const tutor = await ctx.db.get("tutors", args.tutorId);
-    if (!tutor) {
-      throw notFound("Tutor");
+    const person = await ctx.db.get("people", args.personId);
+    if (!person) {
+      throw notFound("Pessoa");
     }
 
     const responsavel = await ctx.db.get("users", args.responsavel_ong_user_id);
     if (!responsavel?.ativo) {
       throw validationError("Responsavel ONG inválido.");
+    }
+
+    if (args.termo_adocao_storage_id) {
+      await validatePdfStorage(ctx, args.termo_adocao_storage_id);
     }
 
     const payload: AdoptionPayloadInput = {
@@ -148,6 +154,7 @@ export const create = mutation({
       observacoes_adocao: args.observacoes_adocao,
       confirmou_documentos: args.confirmou_documentos,
       confirmou_orientacoes: args.confirmou_orientacoes,
+      termo_adocao_storage_id: args.termo_adocao_storage_id,
     };
     validateAdoptionPayload(payload);
 
@@ -163,10 +170,10 @@ export const create = mutation({
       typeName: "Adoção",
       descricao: args.descricao?.trim() || `Adoção: termo ${adoptionPayload.numero_termo_adocao}`,
       data_ocorrencia: args.data_adocao,
-      new_tutor_id: args.tutorId,
+      new_pessoa_id: args.personId,
       adoption_payload: adoptionPayload,
       photo_storage_ids: args.photo_storage_ids ?? [],
-      atribuivel_ao_tutor: false,
+      atribuivel_a_pessoa: false,
     });
 
     await recordAudit(ctx, {
@@ -174,8 +181,12 @@ export const create = mutation({
       action: "adoptions.create",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: `Adoção registrada: ${dog.nome} para ${tutor.nome_completo}`,
-      metadata: { dog_id: args.dogId, tutor_id: args.tutorId },
+      summary: `Adoção registrada: ${dog.nome} para ${person.nome_completo}`,
+      metadata: {
+        dog_id: args.dogId,
+        pessoa_id: args.personId,
+        termo_adocao_anexado: Boolean(args.termo_adocao_storage_id),
+      },
     });
 
     return occurrenceId;
@@ -199,7 +210,7 @@ export const returnToOng = mutation({
       throw notFound("Cão");
     }
 
-    if (!dog.tutor_atual_id) {
+    if (!dog.pessoa_atual_id) {
       throw validationError("Cão não possui tutor atual para devolução.");
     }
 
@@ -233,7 +244,7 @@ export const returnToOng = mutation({
 export const transferTutor = mutation({
   args: {
     dogId: v.id("dogs"),
-    newTutorId: v.id("tutors"),
+    newPersonId: v.id("people"),
     descricao: v.string(),
     data_ocorrencia: v.optional(v.number()),
     photo_storage_ids: v.optional(v.array(v.id("_storage"))),
@@ -248,16 +259,16 @@ export const transferTutor = mutation({
       throw notFound("Cão");
     }
 
-    if (!dog.tutor_atual_id) {
+    if (!dog.pessoa_atual_id) {
       throw validationError("Cão não possui tutor atual para transferencia.");
     }
 
-    const newTutor = await ctx.db.get("tutors", args.newTutorId);
-    if (!newTutor) {
-      throw notFound("Tutor");
+    const newPerson = await ctx.db.get("people", args.newPersonId);
+    if (!newPerson) {
+      throw notFound("Pessoa");
     }
 
-    if (dog.tutor_atual_id === args.newTutorId) {
+    if (dog.pessoa_atual_id === args.newPersonId) {
       throw validationError("O tutor de destino deve ser diferente do tutor atual.");
     }
 
@@ -272,7 +283,7 @@ export const transferTutor = mutation({
       typeName: "Transferência de Tutor",
       descricao,
       data_ocorrencia: occurredAt,
-      new_tutor_id: args.newTutorId,
+      new_pessoa_id: args.newPersonId,
       photo_storage_ids: args.photo_storage_ids ?? [],
     });
 
@@ -281,8 +292,8 @@ export const transferTutor = mutation({
       action: "adoptions.transferTutor",
       entityType: "occurrence",
       entityId: occurrenceId,
-      summary: `Transferencia de tutor: ${dog.nome} para ${newTutor.nome_completo}`,
-      metadata: { dog_id: args.dogId, tutor_id: args.newTutorId },
+      summary: `Transferencia de tutor: ${dog.nome} para ${newPerson.nome_completo}`,
+      metadata: { dog_id: args.dogId, pessoa_id: args.newPersonId },
     });
 
     return occurrenceId;

@@ -75,7 +75,7 @@ test("permission templates round-trip through module maps", async () => {
 
   expect(admin?.moduleMap).toMatchObject({
     dogs: "manage",
-    tutors: "manage",
+    people: "manage",
     occurrences: "manage",
     team: "manage",
     settings: "manage",
@@ -112,7 +112,7 @@ test("schema indexes support lookups used by the domain", async () => {
       criado_em: now,
     });
 
-    const tutorId = await ctx.db.insert("tutors", {
+    const personId = await ctx.db.insert("people", {
       nome_completo: "Tutor Seed",
       cpf: "52998224725",
       bairro_id: bairro._id,
@@ -128,7 +128,7 @@ test("schema indexes support lookups used by the domain", async () => {
       castrado: true,
       vacinas_em_dia: true,
       status_atual: "na_ong",
-      tutor_atual_id: tutorId,
+      pessoa_atual_id: personId,
       criado_em: now,
       criado_por: adminId,
     });
@@ -140,8 +140,8 @@ test("schema indexes support lookups used by the domain", async () => {
 
     await ctx.db.insert("occurrences", {
       dog_id: dogId,
-      tutor_id: tutorId,
-      atribuivel_ao_tutor: false,
+      pessoa_id: personId,
+      atribuivel_a_pessoa: false,
       occurrence_type_id: occurrenceType._id,
       gravidade: "baixa",
       data_ocorrencia: now,

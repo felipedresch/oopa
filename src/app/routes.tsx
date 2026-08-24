@@ -7,7 +7,6 @@ import { LoginPage } from "@/app/pages/LoginPage";
 import { PermissionTemplatesPage } from "@/app/pages/PermissionTemplatesPage";
 import { AuditPage } from "@/app/pages/AuditPage";
 import { NotificationsPage } from "@/app/pages/NotificationsPage";
-import { PlaceholderPage } from "@/app/pages/PlaceholderPage";
 import { SettingsPage } from "@/app/pages/SettingsPage";
 import { RequestResetPage } from "@/app/pages/RequestResetPage";
 import { ResetPasswordPage } from "@/app/pages/ResetPasswordPage";
@@ -20,15 +19,16 @@ import { DogFormPage } from "@/app/pages/DogFormPage";
 import { DogsListPage } from "@/app/pages/DogsListPage";
 import { IdentifyPage } from "@/app/pages/IdentifyPage";
 import { BairrosSettingsPage } from "@/app/pages/BairrosSettingsPage";
-import { TutorDetailPage } from "@/app/pages/TutorDetailPage";
-import { TutorFormPage } from "@/app/pages/TutorFormPage";
-import { TutorsListPage } from "@/app/pages/TutorsListPage";
+import { PersonDetailPage } from "@/app/pages/PersonDetailPage";
+import { PersonFormPage } from "@/app/pages/PersonFormPage";
+import { PeopleListPage } from "@/app/pages/PeopleListPage";
 import { OccurrenceDetailPage } from "@/app/pages/OccurrenceDetailPage";
 import { OccurrenceFormPage } from "@/app/pages/OccurrenceFormPage";
 import { OccurrenceRectifyPage } from "@/app/pages/OccurrenceRectifyPage";
 import { OccurrenceTypesSettingsPage } from "@/app/pages/OccurrenceTypesSettingsPage";
 import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
 import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
+import { ProfilePage } from "@/app/pages/ProfilePage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -55,10 +55,10 @@ export const appRoutes: RouteObject[] = [
         path: "dogs/:dogId/occurrences/:occurrenceId/rectify",
         element: <OccurrenceRectifyPage />,
       },
-      { path: "tutors", element: <TutorsListPage /> },
-      { path: "tutors/new", element: <TutorFormPage /> },
-      { path: "tutors/:tutorId", element: <TutorDetailPage /> },
-      { path: "tutors/:tutorId/edit", element: <TutorFormPage /> },
+      { path: "people", element: <PeopleListPage /> },
+      { path: "people/new", element: <PersonFormPage /> },
+      { path: "people/:personId", element: <PersonDetailPage /> },
+      { path: "people/:personId/edit", element: <PersonFormPage /> },
       { path: "adoptions/new", element: <AdoptionNewPage /> },
       { path: "returns/new", element: <ReturnNewPage /> },
       { path: "team", element: <TeamPage /> },
@@ -73,7 +73,7 @@ export const appRoutes: RouteObject[] = [
       { path: "settings/bairros", element: <BairrosSettingsPage /> },
       { path: "audit", element: <AuditPage /> },
       { path: "notifications", element: <NotificationsPage /> },
-      { path: "profile", element: <PlaceholderPage title="Perfil" /> },
+      { path: "profile", element: <ProfilePage /> },
     ],
   },
   { path: "*", element: <Navigate replace to="/" /> },

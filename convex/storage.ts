@@ -14,8 +14,8 @@ export const createSignedUploadUrl = mutation({
     requireAnyPermission(actor, [
       "dogs.create",
       "dogs.edit",
-      "tutors.create",
-      "tutors.edit",
+      "people.create",
+      "people.edit",
       "occurrences.create_rotina",
       "occurrences.create_clinica",
       "occurrences.create_risco",

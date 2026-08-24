@@ -72,9 +72,9 @@ export const search = query({
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
     requireAnyPermission(actor, [
-      "tutors.read",
-      "tutors.create",
-      "tutors.edit",
+      "people.read",
+      "people.create",
+      "people.edit",
       "bairros.manage",
     ]);
 

@@ -33,17 +33,17 @@ function optional(validate: (value: string) => string | null) {
   return (value: string) => (value.trim() ? validate(value) : null);
 }
 
-export function TutorFormPage() {
-  const { tutorId } = useParams();
-  const isEdit = Boolean(tutorId);
+export function PersonFormPage() {
+  const { personId } = useParams();
+  const isEdit = Boolean(personId);
   const { can } = usePermissions();
 
   const existing = useQuery(
-    api.tutors.get,
-    isEdit && tutorId && can("tutors.read") ? { tutorId: tutorId as Id<"tutors"> } : "skip",
+    api.people.get,
+    isEdit && personId && can("people.read") ? { personId: personId as Id<"people"> } : "skip",
   );
 
-  const allowed = isEdit ? can("tutors.edit") : can("tutors.create");
+  const allowed = isEdit ? can("people.edit") : can("people.create");
   if (!allowed) {
     return <PermissionDenied />;
   }
@@ -53,24 +53,24 @@ export function TutorFormPage() {
   }
 
   if (isEdit && !existing) {
-    return <PermissionDenied message="Tutor não encontrado." />;
+    return <PermissionDenied message="Pessoa não encontrada." />;
   }
 
   return (
-    <TutorFormContent
+    <PersonFormContent
       initial={isEdit && existing ? existing : null}
       isEdit={isEdit}
       key={isEdit && existing ? existing._id : "new"}
-      tutorId={tutorId}
+      personId={personId}
     />
   );
 }
 
-type TutorFormContentProps = {
-  tutorId?: string;
+type PersonFormContentProps = {
+  personId?: string;
   isEdit: boolean;
   initial: {
-    _id: Id<"tutors">;
+    _id: Id<"people">;
     nome_completo: string;
     bairro: { _id: Id<"bairros">; nome: string } | null;
     sensitive?: {
@@ -83,6 +83,7 @@ type TutorFormContentProps = {
       endereco_complemento?: string;
       endereco_cep?: string;
       data_nascimento?: number;
+      data_cadastro_cadunico?: number;
       observacoes?: string;
     };
   } | null;
@@ -97,10 +98,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
+function PersonFormContent({ personId, isEdit, initial }: PersonFormContentProps) {
   const navigate = useNavigate();
-  const createTutor = useMutation(api.tutors.create);
-  const updateTutor = useMutation(api.tutors.update);
+  const createPerson = useMutation(api.people.create);
+  const updatePerson = useMutation(api.people.update);
   const sensitive = initial?.sensitive;
 
   // Lista de bairros para casar o retorno do ViaCEP (Alegrete tem ~48).
@@ -124,6 +125,11 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
       ? new Date(sensitive.data_nascimento).toISOString().slice(0, 10)
       : "",
   );
+  const [dataCadUnico, setDataCadUnico] = useState(
+    sensitive?.data_cadastro_cadunico
+      ? new Date(sensitive.data_cadastro_cadunico).toISOString().slice(0, 10)
+      : "",
+  );
   const [observacoes, setObservacoes] = useState(sensitive?.observacoes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -141,12 +147,12 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
   const cpfReady = cpfDigits.length === 11 && !validateCpf(cpf);
   const rgReady = rgNormalized.length >= 5 && rgNormalized.length <= 9;
   const duplicateCheck = useQuery(
-    api.tutors.checkDuplicate,
+    api.people.checkDuplicate,
     cpfReady || rgReady
       ? {
           cpf: cpfReady ? cpfDigits : undefined,
           rg: rgReady ? rgNormalized : undefined,
-          excludeTutorId: isEdit && tutorId ? (tutorId as Id<"tutors">) : undefined,
+          excludePersonId: isEdit && personId ? (personId as Id<"people">) : undefined,
         }
       : "skip",
   );
@@ -230,11 +236,11 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
     }
 
     if (cpfTaken) {
-      setError("Já existe um tutor com este CPF.");
+      setError("Já existe uma pessoa com este CPF.");
       return;
     }
     if (rgTaken) {
-      setError("Já existe um tutor com este RG.");
+      setError("Já existe uma pessoa com este RG.");
       return;
     }
 
@@ -252,27 +258,30 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
       data_nascimento: dataNascimento
         ? Date.parse(`${dataNascimento}T12:00:00.000Z`)
         : undefined,
+      data_cadastro_cadunico: dataCadUnico
+        ? Date.parse(`${dataCadUnico}T12:00:00.000Z`)
+        : undefined,
       observacoes: observacoes || undefined,
     };
 
     setSubmitting(true);
     try {
-      if (isEdit && tutorId) {
-        await updateTutor({
-          tutorId: tutorId as Id<"tutors">,
+      if (isEdit && personId) {
+        await updatePerson({
+          personId: personId as Id<"people">,
           ...payload,
         });
         setIsDirty(false);
         allowNavigation();
-        void navigate(`/tutors/${tutorId}`);
+        void navigate(`/people/${personId}`);
       } else {
-        const createdId = await createTutor(payload);
+        const createdId = await createPerson(payload);
         setIsDirty(false);
         allowNavigation();
-        void navigate(`/tutors/${createdId}`);
+        void navigate(`/people/${createdId}`);
       }
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Não foi possível salvar o tutor."));
+      setError(getErrorMessage(submitError, "Não foi possível salvar a pessoa."));
     } finally {
       setSubmitting(false);
     }
@@ -281,8 +290,8 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description={isEdit ? "Atualize os dados do tutor." : "Cadastre um novo tutor."}
-        title={isEdit ? "Editar tutor" : "Novo tutor"}
+        description={isEdit ? "Atualize os dados da pessoa." : "Cadastre uma nova pessoa."}
+        title={isEdit ? "Editar pessoa" : "Nova pessoa"}
       />
 
       <form
@@ -313,7 +322,7 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
               />
               {cpfTaken ? (
                 <p className="text-sm text-destructive">
-                  Já existe um tutor com este CPF
+                  Já existe uma pessoa com este CPF
                   {duplicateCheck?.cpf.nome ? `: ${duplicateCheck.cpf.nome}` : ""}.
                 </p>
               ) : null}
@@ -330,7 +339,7 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
               />
               {rgTaken ? (
                 <p className="text-sm text-destructive">
-                  Já existe um tutor com este RG
+                  Já existe uma pessoa com este RG
                   {duplicateCheck?.rg.nome ? `: ${duplicateCheck.rg.nome}` : ""}.
                 </p>
               ) : null}
@@ -346,6 +355,18 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
               }}
               toDate={new Date()}
               value={dataNascimento}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="data-cadunico">Data de cadastro no CadÚnico</Label>
+            <DatePicker
+              id="data-cadunico"
+              onChange={(value) => {
+                setDataCadUnico(value);
+                setIsDirty(true);
+              }}
+              toDate={new Date()}
+              value={dataCadUnico}
             />
           </div>
         </Section>
@@ -438,10 +459,10 @@ function TutorFormContent({ tutorId, isEdit, initial }: TutorFormContentProps) {
             disabled={submitting || cpfTaken || rgTaken}
             type="submit"
           >
-            {submitting ? "Salvando..." : isEdit ? "Salvar alterações" : "Cadastrar tutor"}
+            {submitting ? "Salvando..." : isEdit ? "Salvar alterações" : "Cadastrar pessoa"}
           </Button>
           <Button asChild className="min-h-11" type="button" variant="outline">
-            <Link to={isEdit && tutorId ? `/tutors/${tutorId}` : "/tutors"}>Cancelar</Link>
+            <Link to={isEdit && personId ? `/people/${personId}` : "/people"}>Cancelar</Link>
           </Button>
         </div>
       </form>

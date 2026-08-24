@@ -28,7 +28,7 @@ import { SEVERITY_LABELS } from "@/lib/domain-colors";
 import { validateRequired } from "@/lib/validations";
 
 const ADJUSTABLE_SEVERITIES = ["baixa", "media", "alta"] as const;
-const TYPES_REQUIRING_NEW_TUTOR = new Set(["Adoção", "Transferência de Tutor"]);
+const TYPES_REQUIRING_NEW_PERSON = new Set(["Adoção", "Transferência de Tutor"]);
 
 type UploadedPhoto = {
   storageId: Id<"_storage">;
@@ -61,8 +61,8 @@ export function OccurrenceFormPage() {
   const [gravidade, setGravidade] = useState<(typeof ADJUSTABLE_SEVERITIES)[number] | "">("");
   const [atribuivel, setAtribuivel] = useState(true);
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
-  const [newTutorId, setNewTutorId] = useState<Id<"tutors"> | "">("");
-  const [tutorSearch, setTutorSearch] = useState("");
+  const [newPersonId, setNewPersonId] = useState<Id<"people"> | "">("");
+  const [personSearch, setPersonSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -80,22 +80,22 @@ export function OccurrenceFormPage() {
     typeId ? { occurrenceTypeId: typeId } : "skip",
   );
 
-  const tutorOptions = useQuery(
-    api.tutors.list,
-    TYPES_REQUIRING_NEW_TUTOR.has(selectedType?.nome ?? "") && tutorSearch
+  const personOptions = useQuery(
+    api.people.list,
+    TYPES_REQUIRING_NEW_PERSON.has(selectedType?.nome ?? "") && personSearch
       ? {
           paginationOpts: { numItems: 10, cursor: null },
-          search: tutorSearch,
+          search: personSearch,
         }
       : "skip",
   );
 
   const requiresPhoto = selectedType?.requer_foto ?? false;
-  const requiresNewTutor = TYPES_REQUIRING_NEW_TUTOR.has(selectedType?.nome ?? "");
+  const requiresNewPerson = TYPES_REQUIRING_NEW_PERSON.has(selectedType?.nome ?? "");
   const canSubmit =
     Boolean(typeId && descricao.trim()) &&
     (!requiresPhoto || photos.length > 0) &&
-    (!requiresNewTutor || Boolean(newTutorId));
+    (!requiresNewPerson || Boolean(newPersonId));
 
   if (!dogId) {
     return <PermissionDenied message="Cão não informado." />;
@@ -133,9 +133,9 @@ export function OccurrenceFormPage() {
     bairro_id: bairroId,
     local_descricao: localDescricao || undefined,
     gravidade: gravidade || undefined,
-    atribuivel_ao_tutor: atribuivel,
+    atribuivel_a_pessoa: atribuivel,
     photo_storage_ids: photos.map((photo) => photo.storageId),
-    new_tutor_id: newTutorId || undefined,
+    new_pessoa_id: newPersonId || undefined,
   });
 
   const submit = async () => {
@@ -280,27 +280,27 @@ export function OccurrenceFormPage() {
           Conta para o alerta deste tutor
         </label>
 
-        {requiresNewTutor ? (
+        {requiresNewPerson ? (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="tutor-search">Tutor de destino</Label>
+            <Label htmlFor="person-search">Tutor de destino</Label>
             <Input
-              id="tutor-search"
-              onChange={(event) => setTutorSearch(event.target.value)}
+              id="person-search"
+              onChange={(event) => setPersonSearch(event.target.value)}
               placeholder="Buscar tutor por nome"
-              value={tutorSearch}
+              value={personSearch}
             />
-            {tutorOptions?.page && tutorOptions.page.length > 0 ? (
+            {personOptions?.page && personOptions.page.length > 0 ? (
               <ul className="divide-y divide-border overflow-hidden rounded-lg border border-input bg-card">
-                {tutorOptions.page.map((tutor) => (
-                  <li key={tutor._id}>
+                {personOptions.page.map((person: NonNullable<typeof personOptions>["page"][number]) => (
+                  <li key={person._id}>
                     <button
                       className={`w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/40 ${
-                        newTutorId === tutor._id ? "bg-accent font-medium text-accent-foreground" : ""
+                        newPersonId === person._id ? "bg-accent font-medium text-accent-foreground" : ""
                       }`}
-                      onClick={() => setNewTutorId(tutor._id)}
+                      onClick={() => setNewPersonId(person._id)}
                       type="button"
                     >
-                      {tutor.nome_completo}
+                      {person.nome_completo}
                     </button>
                   </li>
                 ))}

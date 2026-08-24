@@ -15,15 +15,15 @@ import {
 import { conflict, notFound, validationError } from "../errors";
 import { hasPermission } from "../permissions";
 
-export type TutorAlertLevel = "none" | "yellow" | "red";
+export type PersonAlertLevel = "none" | "yellow" | "red";
 
-export type TutorAlertSummary = {
-  level: TutorAlertLevel;
+export type PersonAlertSummary = {
+  level: PersonAlertLevel;
   altaCount: number;
   mediaCount: number;
 };
 
-export type TutorInput = {
+export type PersonInput = {
   nome_completo: string;
   cpf?: string;
   rg?: string;
@@ -35,22 +35,23 @@ export type TutorInput = {
   endereco_cep?: string;
   bairro_id?: Id<"bairros">;
   data_nascimento?: number;
+  data_cadastro_cadunico?: number;
   observacoes?: string;
 };
 
-export function canReadSensitiveTutorData(permissions: readonly string[]): boolean {
-  return hasPermission(permissions, "tutors.read_sensitive");
+export function canReadSensitivePersonData(permissions: readonly string[]): boolean {
+  return hasPermission(permissions, "people.read_sensitive");
 }
 
-export function filterTutorSnapshotForViewer(
-  snapshot: Doc<"occurrences">["tutor_snapshot"],
+export function filterPersonSnapshotForViewer(
+  snapshot: Doc<"occurrences">["pessoa_snapshot"],
   permissions: readonly string[],
-): Doc<"occurrences">["tutor_snapshot"] {
+): Doc<"occurrences">["pessoa_snapshot"] {
   if (!snapshot) {
     return undefined;
   }
 
-  if (canReadSensitiveTutorData(permissions)) {
+  if (canReadSensitivePersonData(permissions)) {
     return snapshot;
   }
 
@@ -63,24 +64,24 @@ export function filterTutorSnapshotForViewer(
 
 export async function getAttributableOccurrences(
   ctx: QueryCtx,
-  tutorId: Id<"tutors">,
+  pessoaId: Id<"people">,
 ): Promise<Doc<"occurrences">[]> {
   const occurrences = await ctx.db
     .query("occurrences")
-    .withIndex("by_tutor", (q) => q.eq("tutor_id", tutorId))
+    .withIndex("by_pessoa", (q) => q.eq("pessoa_id", pessoaId))
     .collect();
 
-  return occurrences.filter((occurrence) => occurrence.atribuivel_ao_tutor);
+  return occurrences.filter((occurrence) => occurrence.atribuivel_a_pessoa);
 }
 
-export function computeTutorAlertFromOccurrences(
+export function computePersonAlertFromOccurrences(
   occurrences: readonly Doc<"occurrences">[],
-): TutorAlertSummary {
-  const attributable = occurrences.filter((occurrence) => occurrence.atribuivel_ao_tutor);
+): PersonAlertSummary {
+  const attributable = occurrences.filter((occurrence) => occurrence.atribuivel_a_pessoa);
   const altaCount = attributable.filter((occurrence) => occurrence.gravidade === "alta").length;
   const mediaCount = attributable.filter((occurrence) => occurrence.gravidade === "media").length;
 
-  let level: TutorAlertLevel = "none";
+  let level: PersonAlertLevel = "none";
   if (altaCount > 0) {
     level = "red";
   } else if (mediaCount > 0) {
@@ -90,15 +91,15 @@ export function computeTutorAlertFromOccurrences(
   return { level, altaCount, mediaCount };
 }
 
-export async function computeTutorAlert(
+export async function computePersonAlert(
   ctx: QueryCtx,
-  tutorId: Id<"tutors">,
-): Promise<TutorAlertSummary> {
-  const occurrences = await getAttributableOccurrences(ctx, tutorId);
-  return computeTutorAlertFromOccurrences(occurrences);
+  pessoaId: Id<"people">,
+): Promise<PersonAlertSummary> {
+  const occurrences = await getAttributableOccurrences(ctx, pessoaId);
+  return computePersonAlertFromOccurrences(occurrences);
 }
 
-export function normalizeTutorInput(input: TutorInput): TutorInput {
+export function normalizePersonInput(input: PersonInput): PersonInput {
   const nome = input.nome_completo.trim();
   const cpf = input.cpf ? normalizeCpf(input.cpf) : undefined;
   const telefone = input.telefone ? normalizePhone(input.telefone) : undefined;
@@ -119,11 +120,12 @@ export function normalizeTutorInput(input: TutorInput): TutorInput {
     endereco_cep: endereco_cep || undefined,
     bairro_id: input.bairro_id,
     data_nascimento: input.data_nascimento,
+    data_cadastro_cadunico: input.data_cadastro_cadunico,
     observacoes: input.observacoes?.trim() || undefined,
   };
 }
 
-export function validateTutorInput(input: TutorInput): void {
+export function validatePersonInput(input: PersonInput): void {
   if (!input.nome_completo) {
     throw validationError("Nome completo obrigatório.");
   }
@@ -152,38 +154,38 @@ export function validateTutorInput(input: TutorInput): void {
 export async function assertUniqueCpf(
   ctx: Pick<MutationCtx, "db">,
   cpf: string | undefined,
-  excludeTutorId?: Id<"tutors">,
+  excludePersonId?: Id<"people">,
 ): Promise<void> {
   if (!cpf) {
     return;
   }
 
   const existing = await ctx.db
-    .query("tutors")
+    .query("people")
     .withIndex("by_cpf", (q) => q.eq("cpf", cpf))
     .unique();
 
-  if (existing && existing._id !== excludeTutorId) {
-    throw conflict("Já existe um tutor com este CPF.");
+  if (existing && existing._id !== excludePersonId) {
+    throw conflict("Já existe uma pessoa com este CPF.");
   }
 }
 
 export async function assertUniqueRg(
   ctx: Pick<MutationCtx, "db">,
   rg: string | undefined,
-  excludeTutorId?: Id<"tutors">,
+  excludePersonId?: Id<"people">,
 ): Promise<void> {
   if (!rg) {
     return;
   }
 
   const existing = await ctx.db
-    .query("tutors")
+    .query("people")
     .withIndex("by_rg", (q) => q.eq("rg", rg))
     .unique();
 
-  if (existing && existing._id !== excludeTutorId) {
-    throw conflict("Já existe um tutor com este RG.");
+  if (existing && existing._id !== excludePersonId) {
+    throw conflict("Já existe uma pessoa com este RG.");
   }
 }
 

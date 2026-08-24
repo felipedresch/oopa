@@ -1,23 +1,23 @@
 import { Badge } from "@/components/ui/badge";
-import type { TutorAlertLevel } from "@/lib/domain-colors";
-import { tutorAlertBadgeClass } from "@/lib/domain-colors";
+import type { PersonAlertLevel } from "@/lib/domain-colors";
+import { personAlertBadgeClass } from "@/lib/domain-colors";
 
-const ALERT_LABELS: Record<Exclude<TutorAlertLevel, "none">, string> = {
+const ALERT_LABELS: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "Alerta médio",
   red: "Alerta alto",
 };
 
-type TutorAlertBadgeProps = {
-  level: TutorAlertLevel;
+type PersonAlertBadgeProps = {
+  level: PersonAlertLevel;
 };
 
-export function TutorAlertBadge({ level }: TutorAlertBadgeProps) {
+export function PersonAlertBadge({ level }: PersonAlertBadgeProps) {
   if (level === "none") {
     return null;
   }
 
   return (
-    <Badge className={tutorAlertBadgeClass[level]} variant="secondary">
+    <Badge className={personAlertBadgeClass[level]} variant="secondary">
       {ALERT_LABELS[level]}
     </Badge>
   );

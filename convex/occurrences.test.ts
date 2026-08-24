@@ -25,9 +25,9 @@ async function seedDog(t: ReturnType<typeof convexTest>, adminId: Id<"users">) {
   );
 }
 
-async function seedTutor(t: ReturnType<typeof convexTest>, adminId: Id<"users">) {
+async function seedPerson(t: ReturnType<typeof convexTest>, adminId: Id<"users">) {
   return await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+    client.mutation(api.people.create, {
       nome_completo: "Paula Tutora",
       cpf: "39053344705",
     }),
@@ -54,12 +54,12 @@ test("create exige foto para tipo que requer foto e salva snapshot", async () =>
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const dogId = await seedDog(t, adminId);
-  const tutorId = await seedTutor(t, adminId);
+  const personId = await seedPerson(t, adminId);
   const bairroId = await seedBairro(t, "Centro");
   const resgateTypeId = await getTypeId(t, adminId, "Resgate na Rua");
 
   await t.run(async (ctx) => {
-    await ctx.db.patch(dogId, { tutor_atual_id: tutorId });
+    await ctx.db.patch(dogId, { pessoa_atual_id: personId });
   });
 
   await expect(
@@ -90,7 +90,7 @@ test("create exige foto para tipo que requer foto e salva snapshot", async () =>
     client.query(api.occurrences.get, { occurrenceId }),
   );
 
-  expect(detail?.tutor_snapshot?.nome_completo).toBe("Paula Tutora");
+  expect(detail?.pessoa_snapshot?.nome_completo).toBe("Paula Tutora");
   expect(detail?.photos).toHaveLength(1);
 });
 
@@ -156,14 +156,14 @@ test("retificacao cria ocorrencia com original_id", async () => {
   expect(rectification?.type_nome).toBe("Correção/Retificação");
 });
 
-test("adocao atualiza historico vigente e tutor atual", async () => {
+test("adocao atualiza historico vigente e pessoa atual", async () => {
   const t = convexTest(schema, modules);
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const dogId = await seedDog(t, adminId);
-  const oldTutorId = await seedTutor(t, adminId);
-  const newTutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const oldPersonId = await seedPerson(t, adminId);
+  const newPersonId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Novo Tutor",
       cpf: "52998224725",
     }),
@@ -171,10 +171,10 @@ test("adocao atualiza historico vigente e tutor atual", async () => {
   const adocaoTypeId = await getTypeId(t, adminId, "Adoção");
 
   await t.run(async (ctx) => {
-    await ctx.db.patch(dogId, { tutor_atual_id: oldTutorId, status_atual: "na_ong" });
-    await ctx.db.insert("tutor_dog_history", {
+    await ctx.db.patch(dogId, { pessoa_atual_id: oldPersonId, status_atual: "na_ong" });
+    await ctx.db.insert("person_dog_history", {
       dog_id: dogId,
-      tutor_id: oldTutorId,
+      pessoa_id: oldPersonId,
       inicio: Date.now() - 1000,
       tipo_inicio: "Resgate",
     });
@@ -187,22 +187,22 @@ test("adocao atualiza historico vigente e tutor atual", async () => {
       descricao: "Adocao formalizada",
       data_ocorrencia: Date.now(),
       photo_storage_ids: [],
-      new_tutor_id: newTutorId,
+      new_pessoa_id: newPersonId,
     });
   });
 
   const dog = await t.run(async (ctx) => ctx.db.get("dogs", dogId));
   const history = await t.run(async (ctx) =>
-    ctx.db.query("tutor_dog_history").withIndex("by_dog", (q) => q.eq("dog_id", dogId)).collect(),
+    ctx.db.query("person_dog_history").withIndex("by_dog", (q) => q.eq("dog_id", dogId)).collect(),
   );
 
-  expect(dog?.tutor_atual_id).toBe(newTutorId);
+  expect(dog?.pessoa_atual_id).toBe(newPersonId);
   expect(dog?.status_atual).toBe("adotado");
   expect(history.filter((entry) => entry.fim === undefined)).toHaveLength(1);
-  expect(history.find((entry) => entry.fim === undefined)?.tutor_id).toBe(newTutorId);
+  expect(history.find((entry) => entry.fim === undefined)?.pessoa_id).toBe(newPersonId);
 });
 
-test("get oculta snapshot sensivel do tutor sem tutors.read_sensitive", async () => {
+test("get oculta snapshot sensivel da pessoa sem people.read_sensitive", async () => {
   const t = convexTest(schema, modules);
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
@@ -212,11 +212,11 @@ test("get oculta snapshot sensivel do tutor sem tutors.read_sensitive", async ()
     permissions: ["dogs.read", "occurrences.read", "occurrences.create_rotina"],
   });
   const dogId = await seedDog(t, adminId);
-  const tutorId = await seedTutor(t, adminId);
+  const personId = await seedPerson(t, adminId);
   const typeId = await getTypeId(t, adminId, "Consulta/Visualização");
 
   await t.run(async (ctx) => {
-    await ctx.db.patch(dogId, { tutor_atual_id: tutorId });
+    await ctx.db.patch(dogId, { pessoa_atual_id: personId });
   });
 
   const occurrenceId = await asUser(t, adminId, async (client) =>
@@ -232,11 +232,11 @@ test("get oculta snapshot sensivel do tutor sem tutors.read_sensitive", async ()
   const asReader = await asUser(t, readerId, async (client) =>
     client.query(api.occurrences.get, { occurrenceId }),
   );
-  expect(asReader?.tutor_snapshot?.nome_completo).toBe("Paula Tutora");
-  expect(asReader?.tutor_snapshot?.cpf).toBeUndefined();
+  expect(asReader?.pessoa_snapshot?.nome_completo).toBe("Paula Tutora");
+  expect(asReader?.pessoa_snapshot?.cpf).toBeUndefined();
 
   const asAdmin = await asUser(t, adminId, async (client) =>
     client.query(api.occurrences.get, { occurrenceId }),
   );
-  expect(asAdmin?.tutor_snapshot?.cpf).toBeDefined();
+  expect(asAdmin?.pessoa_snapshot?.cpf).toBeDefined();
 });

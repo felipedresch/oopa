@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 
-import { filterTutorSnapshotForViewer } from "./tutors";
+import { filterPersonSnapshotForViewer } from "./people";
 
-test("filterTutorSnapshotForViewer oculta dados sensiveis", () => {
+test("filterPersonSnapshotForViewer oculta dados sensiveis", () => {
   const snapshot = {
     nome_completo: "Maria",
     cpf: "52998224725",
@@ -11,7 +11,7 @@ test("filterTutorSnapshotForViewer oculta dados sensiveis", () => {
     bairro_nome: "Centro",
   };
 
-  const filtered = filterTutorSnapshotForViewer(snapshot, ["occurrences.read"]);
+  const filtered = filterPersonSnapshotForViewer(snapshot, ["occurrences.read"]);
   expect(filtered).toEqual({
     nome_completo: "Maria",
     bairro_id: undefined,
@@ -19,7 +19,7 @@ test("filterTutorSnapshotForViewer oculta dados sensiveis", () => {
   });
 });
 
-test("filterTutorSnapshotForViewer mantem dados com tutors.read_sensitive", () => {
+test("filterPersonSnapshotForViewer mantem dados com people.read_sensitive", () => {
   const snapshot = {
     nome_completo: "Maria",
     cpf: "52998224725",
@@ -27,6 +27,6 @@ test("filterTutorSnapshotForViewer mantem dados com tutors.read_sensitive", () =
     bairro_nome: "Centro",
   };
 
-  const filtered = filterTutorSnapshotForViewer(snapshot, ["tutors.read_sensitive"]);
+  const filtered = filterPersonSnapshotForViewer(snapshot, ["people.read_sensitive"]);
   expect(filtered).toEqual(snapshot);
 });

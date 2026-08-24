@@ -63,7 +63,7 @@ test("admin pode criar e duplicar template", async () => {
     return await client.mutation(api.permissionTemplates.create, {
       nome: "Template Teste",
       descricao: "Perfil temporario",
-      permissions: ["dogs.read", "tutors.read"],
+      permissions: ["dogs.read", "people.read"],
     });
   });
 

@@ -56,10 +56,10 @@ test("audit.list filtra por acao", async () => {
     });
     await ctx.db.insert("audit_logs", {
       actor_user_id: adminId,
-      action: "tutors.create",
-      entity_type: "tutor",
-      entity_id: "tutor_test",
-      summary: "Tutor criado",
+      action: "people.create",
+      entity_type: "person",
+      entity_id: "person_test",
+      summary: "Pessoa criada",
       created_at: Date.now(),
     });
   });

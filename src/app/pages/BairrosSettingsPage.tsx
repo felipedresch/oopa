@@ -65,7 +65,7 @@ export function BairrosSettingsPage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Cadastre bairros para tutores e ocorrências. Desative em vez de excluir."
+        description="Cadastre bairros para pessoas e ocorrências. Desative em vez de excluir."
         title="Bairros"
       />
 
@@ -103,7 +103,7 @@ export function BairrosSettingsPage() {
 
       {bairros && bairros.length === 0 ? (
         <EmptyState
-          description="Cadastre o primeiro bairro para usar nos formularios de tutor."
+          description="Cadastre o primeiro bairro para usar nos formularios de pessoa."
           title="Nenhum bairro"
         />
       ) : null}

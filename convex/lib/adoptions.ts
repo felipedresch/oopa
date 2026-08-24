@@ -2,19 +2,19 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { validationError } from "../errors";
 import {
-  buildTutorSnapshot,
+  buildPersonSnapshot,
   defaultAtribuivelForCategory,
   getOccurrenceTypeByName,
   resolveSeverity,
 } from "./occurrences";
-import { applyHistoryForOccurrence } from "./tutorDogHistory";
+import { applyHistoryForOccurrence } from "./personDogHistory";
 import { validateImageStorage } from "./storage";
 import { recordAudit } from "../audit";
 import {
-  canReadSensitiveTutorData,
-  computeTutorAlert,
+  canReadSensitivePersonData,
+  computePersonAlert,
   getAttributableOccurrences,
-} from "./tutors";
+} from "./people";
 
 export const BAIRRO_WARNING_MESSAGE =
   "Este cão já teve devolução ou abandono suspeito associado a tutor deste bairro. Revise antes de concluir.";
@@ -29,6 +29,7 @@ export type AdoptionPayloadInput = {
   observacoes_adocao?: string;
   confirmou_documentos: boolean;
   confirmou_orientacoes: boolean;
+  termo_adocao_storage_id?: Id<"_storage">;
 };
 
 export function validateAdoptionPayload(payload: AdoptionPayloadInput): void {
@@ -46,31 +47,31 @@ export function validateAdoptionPayload(payload: AdoptionPayloadInput): void {
   }
 }
 
-async function resolveTutorBairroId(
+async function resolvePersonBairroId(
   ctx: Pick<QueryCtx, "db">,
   occurrence: Doc<"occurrences">,
 ): Promise<Id<"bairros"> | undefined> {
-  if (occurrence.tutor_snapshot?.bairro_id) {
-    return occurrence.tutor_snapshot.bairro_id;
+  if (occurrence.pessoa_snapshot?.bairro_id) {
+    return occurrence.pessoa_snapshot.bairro_id;
   }
-  if (!occurrence.tutor_id) {
+  if (!occurrence.pessoa_id) {
     return undefined;
   }
-  const tutor = await ctx.db.get("tutors", occurrence.tutor_id);
-  return tutor?.bairro_id;
+  const pessoa = await ctx.db.get("people", occurrence.pessoa_id);
+  return pessoa?.bairro_id;
 }
 
 export async function computeBairroWarning(
   ctx: Pick<QueryCtx, "db">,
   dogId: Id<"dogs">,
-  newTutorId: Id<"tutors">,
+  newPessoaId: Id<"people">,
 ): Promise<{ has_warning: boolean; message: string | null; bairro_nome: string | null }> {
-  const newTutor = await ctx.db.get("tutors", newTutorId);
-  if (!newTutor?.bairro_id) {
+  const newPessoa = await ctx.db.get("people", newPessoaId);
+  if (!newPessoa?.bairro_id) {
     return { has_warning: false, message: null, bairro_nome: null };
   }
 
-  const bairro = await ctx.db.get("bairros", newTutor.bairro_id);
+  const bairro = await ctx.db.get("bairros", newPessoa.bairro_id);
   const occurrences = await ctx.db
     .query("occurrences")
     .withIndex("by_dog", (q) => q.eq("dog_id", dogId))
@@ -82,8 +83,8 @@ export async function computeBairroWarning(
       continue;
     }
 
-    const tutorBairroId = await resolveTutorBairroId(ctx, occurrence);
-    if (tutorBairroId === newTutor.bairro_id) {
+    const pessoaBairroId = await resolvePersonBairroId(ctx, occurrence);
+    if (pessoaBairroId === newPessoa.bairro_id) {
       return {
         has_warning: true,
         message: BAIRRO_WARNING_MESSAGE,
@@ -99,36 +100,36 @@ export async function computeBairroWarning(
   };
 }
 
-export async function buildTutorAssessment(
+export async function buildPersonAssessment(
   ctx: QueryCtx,
-  tutorId: Id<"tutors">,
+  pessoaId: Id<"people">,
   permissions: readonly string[],
 ) {
-  const tutor = await ctx.db.get("tutors", tutorId);
-  if (!tutor) {
-    throw validationError("Tutor não encontrado.");
+  const pessoa = await ctx.db.get("people", pessoaId);
+  if (!pessoa) {
+    throw validationError("Pessoa não encontrada.");
   }
 
-  const bairro = tutor.bairro_id ? await ctx.db.get("bairros", tutor.bairro_id) : null;
-  const canSeeSensitive = canReadSensitiveTutorData(permissions);
+  const bairro = pessoa.bairro_id ? await ctx.db.get("bairros", pessoa.bairro_id) : null;
+  const canSeeSensitive = canReadSensitivePersonData(permissions);
 
   if (!canSeeSensitive) {
     return {
-      tutor_nome: tutor.nome_completo,
+      pessoa_nome: pessoa.nome_completo,
       bairro_nome: bairro?.nome ?? null,
       alert: undefined,
     };
   }
 
-  const alertSummary = await computeTutorAlert(ctx, tutorId);
-  const attributable = await getAttributableOccurrences(ctx, tutorId);
+  const alertSummary = await computePersonAlert(ctx, pessoaId);
+  const attributable = await getAttributableOccurrences(ctx, pessoaId);
   const alertOccurrences = attributable.filter(
     (occurrence) => occurrence.gravidade === "alta" || occurrence.gravidade === "media",
   );
 
   const occurrences = await Promise.all(
     alertOccurrences.map(async (occurrence) => {
-      const dog = await ctx.db.get("dogs", occurrence.dog_id);
+      const dog = occurrence.dog_id ? await ctx.db.get("dogs", occurrence.dog_id) : null;
       return {
         _id: occurrence._id,
         gravidade: occurrence.gravidade,
@@ -140,7 +141,7 @@ export async function buildTutorAssessment(
   );
 
   return {
-    tutor_nome: tutor.nome_completo,
+    pessoa_nome: pessoa.nome_completo,
     bairro_nome: bairro?.nome ?? null,
     alert: {
       level: alertSummary.level,
@@ -184,11 +185,11 @@ export async function createOccurrenceWithHistory(
     typeName: string;
     descricao: string;
     data_ocorrencia: number;
-    new_tutor_id?: Id<"tutors">;
+    new_pessoa_id?: Id<"people">;
     adoption_payload?: Doc<"occurrences">["adoption_payload"];
     photo_storage_ids: Id<"_storage">[];
     bairro_id?: Id<"bairros">;
-    atribuivel_ao_tutor?: boolean;
+    atribuivel_a_pessoa?: boolean;
   },
 ): Promise<Id<"occurrences">> {
   const type = await getOccurrenceTypeByName(ctx, args.typeName);
@@ -201,27 +202,27 @@ export async function createOccurrenceWithHistory(
   }
 
   const gravidade = resolveSeverity(type.gravidade_padrao, undefined);
-  const atribuivel = args.atribuivel_ao_tutor ?? defaultAtribuivelForCategory(type.categoria);
+  const atribuivel = args.atribuivel_a_pessoa ?? defaultAtribuivelForCategory(type.categoria);
 
-  let tutorId = args.dog.tutor_atual_id;
-  let tutorSnapshot: Awaited<ReturnType<typeof buildTutorSnapshot>> | undefined;
+  let pessoaId = args.dog.pessoa_atual_id;
+  let pessoaSnapshot: Awaited<ReturnType<typeof buildPersonSnapshot>> | undefined;
 
   if (args.typeName === "Adoção" || args.typeName === "Transferência de Tutor") {
-    if (!args.new_tutor_id) {
-      throw validationError("Informe o tutor de destino.");
+    if (!args.new_pessoa_id) {
+      throw validationError("Informe a pessoa de destino.");
     }
-    tutorId = args.new_tutor_id;
-    tutorSnapshot = await buildTutorSnapshot(ctx, args.new_tutor_id);
-  } else if (tutorId) {
-    tutorSnapshot = await buildTutorSnapshot(ctx, tutorId);
+    pessoaId = args.new_pessoa_id;
+    pessoaSnapshot = await buildPersonSnapshot(ctx, args.new_pessoa_id);
+  } else if (pessoaId) {
+    pessoaSnapshot = await buildPersonSnapshot(ctx, pessoaId);
   }
 
   const now = Date.now();
   const occurrenceId = await ctx.db.insert("occurrences", {
     dog_id: args.dog._id,
-    tutor_id: tutorId,
-    tutor_snapshot: tutorSnapshot,
-    atribuivel_ao_tutor: atribuivel,
+    pessoa_id: pessoaId,
+    pessoa_snapshot: pessoaSnapshot,
+    atribuivel_a_pessoa: atribuivel,
     occurrence_type_id: type._id,
     gravidade,
     data_ocorrencia: args.data_ocorrencia,
@@ -241,7 +242,7 @@ export async function createOccurrenceWithHistory(
     occurrenceId,
     typeName: args.typeName,
     occurredAt: args.data_ocorrencia,
-    newTutorId: args.new_tutor_id,
+    newPessoaId: args.new_pessoa_id,
   });
 
   return occurrenceId;

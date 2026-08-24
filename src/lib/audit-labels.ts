@@ -42,8 +42,8 @@ const ACTION_LABELS: Record<string, AuditActionInfo> = {
   "dogs.change_status": { label: "Status do animal alterado", icon: TagIcon, tone: "status" },
   "dog_photos.add": { label: "Foto de animal adicionada", icon: CameraIcon, tone: "create" },
 
-  "tutors.create": { label: "Tutor cadastrado", icon: UserPlusIcon, tone: "create" },
-  "tutors.update": { label: "Tutor atualizado", icon: PencilIcon, tone: "update" },
+  "people.create": { label: "Pessoa cadastrada", icon: UserPlusIcon, tone: "create" },
+  "people.update": { label: "Pessoa atualizada", icon: PencilIcon, tone: "update" },
 
   "occurrences.create": { label: "Ocorrência registrada", icon: PlusIcon, tone: "create" },
   "occurrences.rectify": {
@@ -114,7 +114,7 @@ export function getAuditActionInfo(action: string): AuditActionInfo {
 const ENTITY_LABELS: Record<string, string> = {
   user: "Usuário",
   dog: "Animal",
-  tutor: "Tutor",
+  person: "Pessoa",
   occurrence: "Ocorrência",
   permission_template: "Template de permissão",
   bairro: "Bairro",
@@ -128,7 +128,7 @@ export function getEntityLabel(entityType: string): string {
 const ENTITY_ID_LABELS: Record<string, string> = {
   user: "ID do usuário",
   dog: "ID do animal",
-  tutor: "ID do tutor",
+  person: "ID da pessoa",
   occurrence: "ID da ocorrência",
   permission_template: "ID do template",
   bairro: "ID do bairro",

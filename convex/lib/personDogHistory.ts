@@ -5,9 +5,9 @@ import { validationError } from "../errors";
 export async function getVigenteHistory(
   ctx: Pick<MutationCtx, "db">,
   dogId: Id<"dogs">,
-): Promise<Doc<"tutor_dog_history"> | null> {
+): Promise<Doc<"person_dog_history"> | null> {
   const entries = await ctx.db
-    .query("tutor_dog_history")
+    .query("person_dog_history")
     .withIndex("by_dog", (q) => q.eq("dog_id", dogId))
     .collect();
 
@@ -44,33 +44,33 @@ export async function openHistory(
   ctx: Pick<MutationCtx, "db">,
   args: {
     dog_id: Id<"dogs">;
-    tutor_id: Id<"tutors">;
+    pessoa_id: Id<"people">;
     inicio: number;
     tipo_inicio: string;
     occurrence_id_inicio?: Id<"occurrences">;
   },
-): Promise<Id<"tutor_dog_history">> {
+): Promise<Id<"person_dog_history">> {
   const vigente = await getVigenteHistory(ctx, args.dog_id);
   if (vigente) {
     throw validationError("Já existe histórico vigente para este cão.");
   }
 
-  return await ctx.db.insert("tutor_dog_history", {
+  return await ctx.db.insert("person_dog_history", {
     dog_id: args.dog_id,
-    tutor_id: args.tutor_id,
+    pessoa_id: args.pessoa_id,
     inicio: args.inicio,
     tipo_inicio: args.tipo_inicio,
     occurrence_id_inicio: args.occurrence_id_inicio,
   });
 }
 
-export async function syncDogTutorFromHistory(
+export async function syncDogPersonFromHistory(
   ctx: Pick<MutationCtx, "db">,
   dogId: Id<"dogs">,
 ): Promise<void> {
   const vigente = await getVigenteHistory(ctx, dogId);
   await ctx.db.patch(dogId, {
-    tutor_atual_id: vigente?.tutor_id,
+    pessoa_atual_id: vigente?.pessoa_id,
   });
 }
 
@@ -81,15 +81,15 @@ export async function applyHistoryForOccurrence(
     occurrenceId: Id<"occurrences">;
     typeName: string;
     occurredAt: number;
-    newTutorId?: Id<"tutors">;
+    newPessoaId?: Id<"people">;
   },
 ): Promise<void> {
-  const { dog, occurrenceId, typeName, occurredAt, newTutorId } = args;
+  const { dog, occurrenceId, typeName, occurredAt, newPessoaId } = args;
 
   switch (typeName) {
     case "Adoção": {
-      if (!newTutorId) {
-        throw validationError("Adoção exige tutor de destino.");
+      if (!newPessoaId) {
+        throw validationError("Adoção exige pessoa de destino.");
       }
       await closeVigenteHistory(ctx, dog._id, {
         fim: occurredAt,
@@ -98,20 +98,20 @@ export async function applyHistoryForOccurrence(
       });
       await openHistory(ctx, {
         dog_id: dog._id,
-        tutor_id: newTutorId,
+        pessoa_id: newPessoaId,
         inicio: occurredAt,
         tipo_inicio: typeName,
         occurrence_id_inicio: occurrenceId,
       });
       await ctx.db.patch(dog._id, {
-        tutor_atual_id: newTutorId,
+        pessoa_atual_id: newPessoaId,
         status_atual: "adotado",
       });
       return;
     }
     case "Transferência de Tutor": {
-      if (!newTutorId) {
-        throw validationError("Transferência exige tutor de destino.");
+      if (!newPessoaId) {
+        throw validationError("Transferência exige pessoa de destino.");
       }
       await closeVigenteHistory(ctx, dog._id, {
         fim: occurredAt,
@@ -120,13 +120,13 @@ export async function applyHistoryForOccurrence(
       });
       await openHistory(ctx, {
         dog_id: dog._id,
-        tutor_id: newTutorId,
+        pessoa_id: newPessoaId,
         inicio: occurredAt,
         tipo_inicio: typeName,
         occurrence_id_inicio: occurrenceId,
       });
       await ctx.db.patch(dog._id, {
-        tutor_atual_id: newTutorId,
+        pessoa_atual_id: newPessoaId,
       });
       return;
     }
@@ -137,7 +137,7 @@ export async function applyHistoryForOccurrence(
         occurrence_id_fim: occurrenceId,
       });
       await ctx.db.patch(dog._id, {
-        tutor_atual_id: undefined,
+        pessoa_atual_id: undefined,
         status_atual: "na_ong",
       });
       return;
@@ -149,7 +149,7 @@ export async function applyHistoryForOccurrence(
         occurrence_id_fim: occurrenceId,
       });
       await ctx.db.patch(dog._id, {
-        tutor_atual_id: undefined,
+        pessoa_atual_id: undefined,
       });
       return;
     }
@@ -160,7 +160,7 @@ export async function applyHistoryForOccurrence(
         occurrence_id_fim: occurrenceId,
       });
       await ctx.db.patch(dog._id, {
-        tutor_atual_id: undefined,
+        pessoa_atual_id: undefined,
         status_atual: "falecido",
       });
       return;

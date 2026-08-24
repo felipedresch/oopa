@@ -47,6 +47,15 @@ export async function storeTestImage(t: ConvexTestClient): Promise<Id<"_storage"
   });
 }
 
+export async function storeTestPdf(t: ConvexTestClient): Promise<Id<"_storage">> {
+  return await t.run(async (ctx) => {
+    const file = new File([new Uint8Array([37, 80, 68, 70, 45, 49, 46, 52])], "termo.pdf", {
+      type: "application/pdf",
+    });
+    return await ctx.storage.store(file);
+  });
+}
+
 export async function seedBairro(
   t: ConvexTestClient,
   nome = "Centro",

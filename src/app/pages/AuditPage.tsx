@@ -26,7 +26,7 @@ const ENTITY_OPTIONS = [
   { value: "", label: "Todas as entidades" },
   { value: "user", label: "Usuário" },
   { value: "dog", label: "Animal" },
-  { value: "tutor", label: "Tutor" },
+  { value: "person", label: "Pessoa" },
   { value: "occurrence", label: "Ocorrência" },
   { value: "permission_template", label: "Template" },
   { value: "bairro", label: "Bairro" },
@@ -219,7 +219,7 @@ export function AuditPage() {
       <section className="border-t pt-5">
         <h2 className="mb-1 font-semibold">Exportações operacionais</h2>
         <p className="mb-4 text-sm text-muted-foreground">
-          Baixe snapshots completos de animais, tutores, ocorrências e histórico tutor-animal para
+          Baixe snapshots completos de animais, pessoas, ocorrências e histórico tutor-animal para
           análise externa. Estas exportações ignoram os filtros acima e incluem todo o sistema.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -231,10 +231,10 @@ export function AuditPage() {
               file: "animais",
             },
             {
-              key: "tutors",
-              label: "Tutores",
-              query: () => convex.query(api.exports.exportTutorsCsv, { limit: 2000 }),
-              file: "tutores",
+              key: "people",
+              label: "Pessoas",
+              query: () => convex.query(api.exports.exportPeopleCsv, { limit: 2000 }),
+              file: "pessoas",
             },
             {
               key: "occurrences",
@@ -245,7 +245,7 @@ export function AuditPage() {
             {
               key: "history",
               label: "Histórico tutor-animal",
-              query: () => convex.query(api.exports.exportTutorDogHistoryCsv, { limit: 2000 }),
+              query: () => convex.query(api.exports.exportPersonDogHistoryCsv, { limit: 2000 }),
               file: "historico-tutor-animal",
             },
           ].map((item) => (

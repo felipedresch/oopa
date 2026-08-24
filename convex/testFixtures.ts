@@ -52,7 +52,7 @@ export const FIXTURE_DOG = {
   observacoes: "Cao de teste sem alerta.",
 };
 
-export const FIXTURE_TUTOR_WITHOUT_ALERT = {
+export const FIXTURE_PERSON_WITHOUT_ALERT = {
   nome_completo: "Daniela Tutora",
   cpf: "52998224725",
   rg: "1234567",
@@ -63,10 +63,10 @@ export const FIXTURE_TUTOR_WITHOUT_ALERT = {
   endereco_complemento: "Apto 12",
   endereco_cep: "01001000",
   data_nascimento: Date.UTC(1990, 5, 20),
-  observacoes: "Tutor sem ocorrencias atribuiveis.",
+  observacoes: "Pessoa sem ocorrencias atribuiveis.",
 };
 
-export const FIXTURE_TUTOR_WITH_ALERT = {
+export const FIXTURE_PERSON_WITH_ALERT = {
   nome_completo: "Eduardo Tutor",
   cpf: "39053344705",
   rg: "7654321",
@@ -76,5 +76,5 @@ export const FIXTURE_TUTOR_WITH_ALERT = {
   endereco_numero: "250",
   endereco_cep: "01002000",
   data_nascimento: Date.UTC(1985, 8, 10),
-  observacoes: "Tutor com historico de alerta para testes futuros.",
+  observacoes: "Pessoa com historico de alerta para testes futuros.",
 };

@@ -6,7 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { DogPhotoGallery } from "@/components/DogPhotoGallery";
 import { OccurrenceTimeline } from "@/components/OccurrenceTimeline";
-import { TutorDogHistoryList } from "@/components/TutorDogHistoryList";
+import { PersonDogHistoryList } from "@/components/PersonDogHistoryList";
 import { DogStatusBadge } from "@/components/DogStatusBadge";
 import { DogStatusChangeDialog } from "@/components/DogStatusChangeDialog";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
@@ -73,7 +73,13 @@ export function DogDetailPage() {
               {dog.nome}
             </h1>
             <p className="text-sm tabular-nums text-muted-foreground">
-              {formatMicrochip(dog.microchip)}
+              {dog.microchip ? (
+                formatMicrochip(dog.microchip)
+              ) : (
+                <span className="rounded-full bg-warning/14 px-2 py-0.5 text-xs font-medium text-warning">
+                  Sem microchip
+                </span>
+              )}
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <DogStatusBadge status={dog.status_atual} />
@@ -113,6 +119,17 @@ export function DogDetailPage() {
             >
               Alterar status
             </Button>
+          ) : null}
+          {can("occurrences.create_adocao") ? (
+            dog.pessoa_atual_id ? (
+              <Button asChild className="min-h-11" variant="outline">
+                <Link to="/returns/new">Registrar devolução</Link>
+              </Button>
+            ) : (
+              <Button asChild className="min-h-11" variant="outline">
+                <Link to="/adoptions/new">Registrar adoção</Link>
+              </Button>
+            )
           ) : null}
         </div>
       </header>
@@ -191,7 +208,7 @@ export function DogDetailPage() {
         </dl>
       ) : null}
 
-      {activeTab === "Histórico de tutores" ? <TutorDogHistoryList dogId={dog._id} /> : null}
+      {activeTab === "Histórico de tutores" ? <PersonDogHistoryList dogId={dog._id} /> : null}
 
       {activeTab === "Ocorrências" ? <OccurrenceTimeline dogId={dog._id} /> : null}
 

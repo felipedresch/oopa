@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 
 import { DogStatusBadge } from "@/components/DogStatusBadge";
 import { SeverityBadge } from "@/components/SeverityBadge";
-import { TutorAlertBadge } from "@/components/TutorAlertBadge";
+import { PersonAlertBadge } from "@/components/PersonAlertBadge";
 
 describe("badges de dominio", () => {
   it("renderiza status do cão", () => {
@@ -15,13 +15,13 @@ describe("badges de dominio", () => {
     expect(screen.getByText("Média")).toBeInTheDocument();
   });
 
-  it("oculta alerta quando tutor não tem alerta", () => {
-    const { container } = render(<TutorAlertBadge level="none" />);
+  it("oculta alerta quando pessoa não tem alerta", () => {
+    const { container } = render(<PersonAlertBadge level="none" />);
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renderiza alerta do tutor", () => {
-    render(<TutorAlertBadge level="red" />);
+  it("renderiza alerta da pessoa", () => {
+    render(<PersonAlertBadge level="red" />);
     expect(screen.getByText("Alerta alto")).toBeInTheDocument();
   });
 });

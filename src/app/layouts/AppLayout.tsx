@@ -49,10 +49,10 @@ const desktopNavItems: NavItemConfig[] = [
     canAccess: ({ can }) => can("dogs.read"),
   },
   {
-    to: "/tutors",
-    label: "Tutores",
+    to: "/people",
+    label: "Pessoas",
     icon: UsersIcon,
-    canAccess: ({ can }) => can("tutors.read"),
+    canAccess: ({ can }) => can("people.read"),
   },
   {
     to: "/team",
@@ -82,7 +82,7 @@ const desktopNavItems: NavItemConfig[] = [
 ];
 
 const mobileNavItems = desktopNavItems.filter((item) =>
-  ["/", "/identify", "/dogs", "/tutors", "/settings"].includes(item.to),
+  ["/", "/identify", "/dogs", "/people", "/settings"].includes(item.to),
 );
 
 function UnreadDot({ count, className }: { count: number; className?: string }) {

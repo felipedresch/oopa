@@ -35,7 +35,7 @@ type Porte = "pequeno" | "medio" | "grande";
 
 type DogFormInitial = {
   _id: Id<"dogs">;
-  microchip: string;
+  microchip?: string;
   nome: string;
   especie: Especie;
   sexo: Sexo;
@@ -107,7 +107,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
   const [loading, setLoading] = useState(false);
 
   const [microchip, setMicrochip] = useState(
-    initial ? formatMicrochip(initial.microchip) : maskMicrochipInput(initialMicrochip),
+    initial ? formatMicrochip(initial.microchip ?? "") : maskMicrochipInput(initialMicrochip),
   );
   const [nome, setNome] = useState(initial?.nome ?? "");
   const [especie, setEspecie] = useState<Especie>(initial?.especie ?? "cao");
@@ -141,10 +141,9 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
 
   const canContinue = (() => {
     if (step === 0) {
-      return (
-        !validateRequired(nome) &&
-        (isEdit || (!validateMicrochip(microchip) && !microchipTaken))
-      );
+      const microchipOk =
+        isEdit || microchip.trim() === "" || (!validateMicrochip(microchip) && !microchipTaken);
+      return !validateRequired(nome) && microchipOk;
     }
     if (step === 3) {
       return Boolean(fotoStorageId);
@@ -184,8 +183,9 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
         throw new Error("Foto de perfil obrigatória.");
       }
 
+      const microchipDigitsToSave = microchip.replace(/\D/g, "");
       const createdId = await createDog({
-        microchip: microchip.replace(/\D/g, ""),
+        microchip: microchipDigitsToSave.length > 0 ? microchipDigitsToSave : undefined,
         nome,
         especie,
         sexo,
@@ -268,6 +268,11 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
                 onChange={(event) => setMicrochip(maskMicrochipInput(event.target.value))}
                 value={microchip}
               />
+              {!isEdit ? (
+                <p className="text-sm text-muted-foreground">
+                  Opcional — pode ser preenchido depois, quando o animal for chipado.
+                </p>
+              ) : null}
               {microchipTaken ? (
                 <p className="text-sm text-destructive">
                   Um animal com este microchip já está cadastrado
@@ -394,7 +399,7 @@ function DogFormContent({ isEdit, dogId, initial, initialMicrochip }: DogFormCon
               <strong>Nome:</strong> {nome}
             </p>
             <p>
-              <strong>Microchip:</strong> {microchip}
+              <strong>Microchip:</strong> {microchip || "Não informado"}
             </p>
             <p>
               <strong>Espécie:</strong> {ESPECIE_EMOJI[especie]} {ESPECIE_LABELS[especie]}

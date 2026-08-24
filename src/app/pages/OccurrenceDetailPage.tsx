@@ -15,7 +15,7 @@ import { formatCep, formatCpf, formatDate, formatPhone } from "@/lib/formatters"
 
 export function OccurrenceDetailPage() {
   const { can } = usePermissions();
-  const canReadSensitive = can("tutors.read_sensitive");
+  const canReadSensitive = can("people.read_sensitive");
   const { dogId, occurrenceId } = useParams();
 
   const occurrence = useQuery(
@@ -64,7 +64,7 @@ export function OccurrenceDetailPage() {
       <div className="flex flex-wrap items-center gap-2">
         <SeverityBadge severity={occurrence.gravidade} />
         <span className="text-sm text-muted-foreground">{occurrence.categoria}</span>
-        {occurrence.atribuivel_ao_tutor ? (
+        {occurrence.atribuivel_a_pessoa ? (
           <span className="text-sm text-warning">
             Conta para alerta do tutor
           </span>
@@ -100,48 +100,88 @@ export function OccurrenceDetailPage() {
         </div>
       ) : null}
 
-      {occurrence.tutor_snapshot ? (
+      {occurrence.adoption_payload ? (
+        <section className="border-t pt-6">
+          <h3 className="mb-3 font-semibold">Termo de adoção</h3>
+          <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
+            <div>
+              <dt className="text-muted-foreground">Número do termo</dt>
+              <dd>{occurrence.adoption_payload.numero_termo_adocao}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Data da adoção</dt>
+              <dd>{formatDate(occurrence.adoption_payload.data_adocao)}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-muted-foreground">Condições</dt>
+              <dd>{occurrence.adoption_payload.condicoes_adocao}</dd>
+            </div>
+            {occurrence.adoption_payload.observacoes_adocao ? (
+              <div className="sm:col-span-2">
+                <dt className="text-muted-foreground">Observações</dt>
+                <dd>{occurrence.adoption_payload.observacoes_adocao}</dd>
+              </div>
+            ) : null}
+          </dl>
+          {occurrence.adoption_payload.termo_adocao_url ? (
+            <a
+              className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary underline underline-offset-4"
+              href={occurrence.adoption_payload.termo_adocao_url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Ver termo de adoção (PDF)
+            </a>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Nenhum arquivo de termo foi anexado a esta adoção.
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      {occurrence.pessoa_snapshot ? (
         <section className="border-t pt-6">
           <h3 className="mb-3 font-semibold">Snapshot do tutor no momento do registro</h3>
           <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
             <div>
               <dt className="text-muted-foreground">Nome</dt>
-              <dd>{occurrence.tutor_snapshot.nome_completo}</dd>
+              <dd>{occurrence.pessoa_snapshot.nome_completo}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Bairro</dt>
-              <dd>{occurrence.tutor_snapshot.bairro_nome ?? "Não informado"}</dd>
+              <dd>{occurrence.pessoa_snapshot.bairro_nome ?? "Não informado"}</dd>
             </div>
-            {canReadSensitive && occurrence.tutor_snapshot.cpf ? (
+            {canReadSensitive && occurrence.pessoa_snapshot.cpf ? (
               <div>
                 <dt className="text-muted-foreground">CPF</dt>
-                <dd>{formatCpf(occurrence.tutor_snapshot.cpf)}</dd>
+                <dd>{formatCpf(occurrence.pessoa_snapshot.cpf)}</dd>
               </div>
             ) : null}
-            {canReadSensitive && occurrence.tutor_snapshot.telefone ? (
+            {canReadSensitive && occurrence.pessoa_snapshot.telefone ? (
               <div>
                 <dt className="text-muted-foreground">Telefone</dt>
-                <dd>{formatPhone(occurrence.tutor_snapshot.telefone)}</dd>
+                <dd>{formatPhone(occurrence.pessoa_snapshot.telefone)}</dd>
               </div>
             ) : null}
-            {canReadSensitive && occurrence.tutor_snapshot.endereco_logradouro ? (
+            {canReadSensitive && occurrence.pessoa_snapshot.endereco_logradouro ? (
               <div className="sm:col-span-2">
                 <dt className="text-muted-foreground">Endereco</dt>
                 <dd>
                   {[
-                    occurrence.tutor_snapshot.endereco_logradouro,
-                    occurrence.tutor_snapshot.endereco_numero,
-                    occurrence.tutor_snapshot.endereco_complemento,
+                    occurrence.pessoa_snapshot.endereco_logradouro,
+                    occurrence.pessoa_snapshot.endereco_numero,
+                    occurrence.pessoa_snapshot.endereco_complemento,
                   ]
                     .filter(Boolean)
                     .join(", ")}
                 </dd>
               </div>
             ) : null}
-            {canReadSensitive && occurrence.tutor_snapshot.endereco_cep ? (
+            {canReadSensitive && occurrence.pessoa_snapshot.endereco_cep ? (
               <div>
                 <dt className="text-muted-foreground">CEP</dt>
-                <dd>{formatCep(occurrence.tutor_snapshot.endereco_cep)}</dd>
+                <dd>{formatCep(occurrence.pessoa_snapshot.endereco_cep)}</dd>
               </div>
             ) : null}
           </dl>

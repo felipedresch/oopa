@@ -6,13 +6,13 @@ import { recordAudit } from "./audit";
 import {
   occurrenceCategoryValidator,
   severityValidator,
-  tutorSnapshotValidator,
+  personSnapshotValidator,
 } from "./domainValidators";
 import { forbidden, notFound, validationError } from "./errors";
 import { getCurrentUser } from "./lib/auth";
 import type { MutationCtx } from "./_generated/server";
 import {
-  buildTutorSnapshot,
+  buildPersonSnapshot,
   canCreateOccurrenceCategory,
   canReadOccurrenceCategory,
   defaultAtribuivelForCategory,
@@ -25,10 +25,18 @@ import {
 } from "./lib/occurrences";
 import { notifyLegalOccurrence } from "./lib/notifications";
 import { normalizePaginationOpts } from "./lib/pagination";
-import { filterTutorSnapshotForViewer } from "./lib/tutors";
-import { applyHistoryForOccurrence } from "./lib/tutorDogHistory";
+import { filterPersonSnapshotForViewer } from "./lib/people";
+import { applyHistoryForOccurrence } from "./lib/personDogHistory";
 import { validateImageStorage } from "./lib/storage";
 import { mutation, query } from "./_generated/server";
+
+const adoptionPayloadOutputValidator = v.object({
+  data_adocao: v.number(),
+  numero_termo_adocao: v.string(),
+  condicoes_adocao: v.string(),
+  observacoes_adocao: v.optional(v.string()),
+  termo_adocao_url: v.union(v.string(), v.null()),
+});
 
 const occurrencePhotoValidator = v.object({
   _id: v.id("occurrence_photos"),
@@ -40,40 +48,41 @@ const occurrencePhotoValidator = v.object({
 
 const occurrenceSummaryValidator = v.object({
   _id: v.id("occurrences"),
-  dog_id: v.id("dogs"),
+  dog_id: v.optional(v.id("dogs")),
   occurrence_type_id: v.id("occurrence_types"),
   type_nome: v.string(),
   categoria: occurrenceCategoryValidator,
   gravidade: severityValidator,
   data_ocorrencia: v.number(),
   descricao: v.string(),
-  atribuivel_ao_tutor: v.boolean(),
+  atribuivel_a_pessoa: v.boolean(),
   original_id: v.optional(v.id("occurrences")),
   bairro_nome: v.union(v.string(), v.null()),
 });
 
 const occurrenceDetailValidator = v.object({
   _id: v.id("occurrences"),
-  dog_id: v.id("dogs"),
-  dog_nome: v.string(),
+  dog_id: v.optional(v.id("dogs")),
+  dog_nome: v.optional(v.string()),
   occurrence_type_id: v.id("occurrence_types"),
   type_nome: v.string(),
   categoria: occurrenceCategoryValidator,
   gravidade: severityValidator,
   data_ocorrencia: v.number(),
   descricao: v.string(),
-  atribuivel_ao_tutor: v.boolean(),
+  atribuivel_a_pessoa: v.boolean(),
   bairro_id: v.optional(v.id("bairros")),
   bairro_nome: v.union(v.string(), v.null()),
   local_descricao: v.optional(v.string()),
-  tutor_id: v.optional(v.id("tutors")),
-  tutor_snapshot: v.optional(tutorSnapshotValidator),
+  pessoa_id: v.optional(v.id("people")),
+  pessoa_snapshot: v.optional(personSnapshotValidator),
   original_id: v.optional(v.id("occurrences")),
   original_summary: v.optional(v.string()),
   registrado_por: v.id("users"),
   criado_em: v.number(),
   photos: v.array(occurrencePhotoValidator),
   can_rectify: v.boolean(),
+  adoption_payload: v.optional(adoptionPayloadOutputValidator),
 });
 
 function assertCanReadOccurrence(
@@ -119,9 +128,9 @@ export const create = mutation({
     bairro_id: v.optional(v.id("bairros")),
     local_descricao: v.optional(v.string()),
     gravidade: v.optional(severityValidator),
-    atribuivel_ao_tutor: v.optional(v.boolean()),
+    atribuivel_a_pessoa: v.optional(v.boolean()),
     photo_storage_ids: v.array(v.id("_storage")),
-    new_tutor_id: v.optional(v.id("tutors")),
+    new_pessoa_id: v.optional(v.id("people")),
   },
   returns: v.id("occurrences"),
   handler: async (ctx, args) => {
@@ -157,19 +166,19 @@ export const create = mutation({
 
     const gravidade = resolveSeverity(type.gravidade_padrao, args.gravidade);
     const atribuivel =
-      args.atribuivel_ao_tutor ?? defaultAtribuivelForCategory(category);
+      args.atribuivel_a_pessoa ?? defaultAtribuivelForCategory(category);
 
-    let tutorId = dog.tutor_atual_id;
-    let tutorSnapshot: Awaited<ReturnType<typeof buildTutorSnapshot>> | undefined;
+    let pessoaId = dog.pessoa_atual_id;
+    let pessoaSnapshot: Awaited<ReturnType<typeof buildPersonSnapshot>> | undefined;
 
-    if (type.nome === "Adoção" || type.nome === "Transferencia de Tutor") {
-      if (!args.new_tutor_id) {
-        throw validationError("Informe o tutor de destino.");
+    if (type.nome === "Adoção" || type.nome === "Transferência de Tutor") {
+      if (!args.new_pessoa_id) {
+        throw validationError("Informe a pessoa de destino.");
       }
-      tutorId = args.new_tutor_id;
-      tutorSnapshot = await buildTutorSnapshot(ctx, args.new_tutor_id);
-    } else if (tutorId) {
-      tutorSnapshot = await buildTutorSnapshot(ctx, tutorId);
+      pessoaId = args.new_pessoa_id;
+      pessoaSnapshot = await buildPersonSnapshot(ctx, args.new_pessoa_id);
+    } else if (pessoaId) {
+      pessoaSnapshot = await buildPersonSnapshot(ctx, pessoaId);
     }
 
     if (args.bairro_id) {
@@ -182,9 +191,9 @@ export const create = mutation({
     const now = Date.now();
     const occurrenceId = await ctx.db.insert("occurrences", {
       dog_id: args.dogId,
-      tutor_id: tutorId,
-      tutor_snapshot: tutorSnapshot,
-      atribuivel_ao_tutor: atribuivel,
+      pessoa_id: pessoaId,
+      pessoa_snapshot: pessoaSnapshot,
+      atribuivel_a_pessoa: atribuivel,
       occurrence_type_id: args.occurrenceTypeId,
       gravidade,
       data_ocorrencia: args.data_ocorrencia,
@@ -205,7 +214,7 @@ export const create = mutation({
         occurrenceId,
         typeName: type.nome,
         occurredAt: args.data_ocorrencia,
-        newTutorId: args.new_tutor_id,
+        newPessoaId: args.new_pessoa_id,
       });
     }
 
@@ -264,17 +273,19 @@ export const rectify = mutation({
       throw validationError("Descrição da retificação obrigatória.");
     }
 
-    const dog = await ctx.db.get("dogs", original.dog_id);
-    if (!dog) {
-      throw notFound("Cão");
+    if (original.dog_id) {
+      const dog = await ctx.db.get("dogs", original.dog_id);
+      if (!dog) {
+        throw notFound("Cão");
+      }
     }
 
     const now = Date.now();
     const occurrenceId = await ctx.db.insert("occurrences", {
       dog_id: original.dog_id,
-      tutor_id: original.tutor_id,
-      tutor_snapshot: original.tutor_snapshot,
-      atribuivel_ao_tutor: false,
+      pessoa_id: original.pessoa_id,
+      pessoa_snapshot: original.pessoa_snapshot,
+      atribuivel_a_pessoa: false,
       occurrence_type_id: rectificationType._id,
       gravidade: rectificationType.gravidade_padrao,
       data_ocorrencia: args.data_ocorrencia ?? now,
@@ -318,7 +329,7 @@ export const get = query({
 
     assertCanReadOccurrence(loaded.type.categoria, actor.permissions);
 
-    const dog = await ctx.db.get("dogs", loaded.dog_id);
+    const dog = loaded.dog_id ? await ctx.db.get("dogs", loaded.dog_id) : null;
     const bairro = loaded.bairro_id ? await ctx.db.get("bairros", loaded.bairro_id) : null;
     const photos = await ctx.db
       .query("occurrence_photos")
@@ -347,23 +358,35 @@ export const get = query({
       loaded.type.nome !== "Correção/Retificação" &&
       canCreateOccurrenceCategory(actor.permissions, "outro");
 
+    const adoption_payload = loaded.adoption_payload
+      ? {
+          data_adocao: loaded.adoption_payload.data_adocao,
+          numero_termo_adocao: loaded.adoption_payload.numero_termo_adocao,
+          condicoes_adocao: loaded.adoption_payload.condicoes_adocao,
+          observacoes_adocao: loaded.adoption_payload.observacoes_adocao,
+          termo_adocao_url: loaded.adoption_payload.termo_adocao_storage_id
+            ? await ctx.storage.getUrl(loaded.adoption_payload.termo_adocao_storage_id)
+            : null,
+        }
+      : undefined;
+
     return {
       _id: loaded._id,
       dog_id: loaded.dog_id,
-      dog_nome: dog?.nome ?? "Cão removido",
+      dog_nome: loaded.dog_id ? (dog?.nome ?? "Cão removido") : undefined,
       occurrence_type_id: loaded.occurrence_type_id,
       type_nome: loaded.type.nome,
       categoria: loaded.type.categoria,
       gravidade: loaded.gravidade,
       data_ocorrencia: loaded.data_ocorrencia,
       descricao: loaded.descricao,
-      atribuivel_ao_tutor: loaded.atribuivel_ao_tutor,
+      atribuivel_a_pessoa: loaded.atribuivel_a_pessoa,
       bairro_id: loaded.bairro_id,
       bairro_nome: bairro?.nome ?? null,
       local_descricao: loaded.local_descricao,
-      tutor_id: loaded.tutor_id,
-      tutor_snapshot: filterTutorSnapshotForViewer(
-        loaded.tutor_snapshot,
+      pessoa_id: loaded.pessoa_id,
+      pessoa_snapshot: filterPersonSnapshotForViewer(
+        loaded.pessoa_snapshot,
         actor.permissions,
       ),
       original_id: loaded.original_id,
@@ -372,6 +395,7 @@ export const get = query({
       criado_em: loaded.criado_em,
       photos: enrichedPhotos,
       can_rectify,
+      adoption_payload,
     };
   },
 });
@@ -448,7 +472,7 @@ export const listByDog = query({
             gravidade: occurrence.gravidade,
             data_ocorrencia: occurrence.data_ocorrencia,
             descricao: occurrence.descricao,
-            atribuivel_ao_tutor: occurrence.atribuivel_ao_tutor,
+            atribuivel_a_pessoa: occurrence.atribuivel_a_pessoa,
             original_id: occurrence.original_id,
             bairro_nome: bairro?.nome ?? null,
           };
@@ -464,9 +488,9 @@ export const listByDog = query({
   },
 });
 
-export const listByTutor = query({
+export const listByPerson = query({
   args: {
-    tutorId: v.id("tutors"),
+    personId: v.id("people"),
     gravidade: v.optional(severityValidator),
     occurrence_type_id: v.optional(v.id("occurrence_types")),
     bairro_id: v.optional(v.id("bairros")),
@@ -477,14 +501,14 @@ export const listByTutor = query({
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
 
-    const tutor = await ctx.db.get("tutors", args.tutorId);
-    if (!tutor) {
-      throw notFound("Tutor");
+    const person = await ctx.db.get("people", args.personId);
+    if (!person) {
+      throw notFound("Pessoa");
     }
 
     const occurrences = await ctx.db
       .query("occurrences")
-      .withIndex("by_tutor", (q) => q.eq("tutor_id", args.tutorId))
+      .withIndex("by_pessoa", (q) => q.eq("pessoa_id", args.personId))
       .order("desc")
       .collect();
 
@@ -530,7 +554,7 @@ export const listByTutor = query({
             gravidade: occurrence.gravidade,
             data_ocorrencia: occurrence.data_ocorrencia,
             descricao: occurrence.descricao,
-            atribuivel_ao_tutor: occurrence.atribuivel_ao_tutor,
+            atribuivel_a_pessoa: occurrence.atribuivel_a_pessoa,
             original_id: occurrence.original_id,
             bairro_nome: bairro?.nome ?? null,
           };

@@ -26,7 +26,7 @@ describe("getAuditActionInfo", () => {
 describe("getEntityLabel / getEntityIdLabel", () => {
   it("traduz entidades conhecidas", () => {
     expect(getEntityLabel("dog")).toBe("Animal");
-    expect(getEntityLabel("tutor")).toBe("Tutor");
+    expect(getEntityLabel("person")).toBe("Pessoa");
     expect(getEntityIdLabel("dog")).toBe("ID do animal");
   });
 

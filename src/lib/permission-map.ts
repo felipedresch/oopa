@@ -16,11 +16,11 @@ const MODULE_LEVEL_PERMISSIONS: Record<
     write: ["dogs.read", "dogs.create", "dogs.edit"],
     manage: ["dogs.read", "dogs.create", "dogs.edit", "dogs.change_status"],
   },
-  tutors: {
+  people: {
     none: [],
-    read: ["tutors.read"],
-    write: ["tutors.read", "tutors.create", "tutors.edit"],
-    manage: ["tutors.read", "tutors.read_sensitive", "tutors.create", "tutors.edit"],
+    read: ["people.read"],
+    write: ["people.read", "people.create", "people.edit"],
+    manage: ["people.read", "people.read_sensitive", "people.create", "people.edit"],
   },
   occurrences: {
     none: [],
@@ -44,12 +44,12 @@ const MODULE_LEVEL_PERMISSIONS: Record<
   },
   adoptions: {
     none: [],
-    read: ["dogs.read", "tutors.read"],
-    write: ["dogs.read", "tutors.read", "occurrences.create_adocao"],
+    read: ["dogs.read", "people.read"],
+    write: ["dogs.read", "people.read", "occurrences.create_adocao"],
     manage: [
       "dogs.read",
-      "tutors.read",
-      "tutors.read_sensitive",
+      "people.read",
+      "people.read_sensitive",
       "occurrences.create_adocao",
       "occurrences.create_outro",
     ],

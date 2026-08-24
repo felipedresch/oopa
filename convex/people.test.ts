@@ -4,7 +4,7 @@ import { expect, test } from "vitest";
 
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { FIXTURE_TUTOR_WITHOUT_ALERT, FIXTURE_TUTOR_WITH_ALERT } from "./testFixtures";
+import { FIXTURE_PERSON_WITHOUT_ALERT, FIXTURE_PERSON_WITH_ALERT } from "./testFixtures";
 import { asUser, seedAdmin, seedBairro, seedUser } from "./testHelpers";
 import schema from "./schema";
 
@@ -23,9 +23,9 @@ async function seedOccurrenceType(t: ReturnType<typeof convexTest>) {
   });
 }
 
-async function seedDogForTutor(
+async function seedDogForPerson(
   t: ReturnType<typeof convexTest>,
-  tutorId: Id<"tutors">,
+  personId: Id<"people">,
 ): Promise<Id<"dogs">> {
   return await t.run(async (ctx) => {
     return await ctx.db.insert("dogs", {
@@ -36,7 +36,7 @@ async function seedDogForTutor(
       castrado: true,
       vacinas_em_dia: true,
       status_atual: "adotado",
-      tutor_atual_id: tutorId,
+      pessoa_atual_id: personId,
       criado_em: Date.now(),
     });
   });
@@ -49,33 +49,33 @@ test("create exige CPF unico e get oculta dados sensiveis", async () => {
   const readerId = await seedUser(t, {
     nome: "Leitor",
     email: "leitor@ong.local",
-    permissions: ["tutors.read"],
+    permissions: ["people.read"],
   });
 
-  const tutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
-      ...FIXTURE_TUTOR_WITHOUT_ALERT,
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      ...FIXTURE_PERSON_WITHOUT_ALERT,
       bairro_id: bairroId,
     }),
   );
 
   await expect(
     asUser(t, adminId, async (client) => {
-      await client.mutation(api.tutors.create, {
-        ...FIXTURE_TUTOR_WITHOUT_ALERT,
+      await client.mutation(api.people.create, {
+        ...FIXTURE_PERSON_WITHOUT_ALERT,
         bairro_id: bairroId,
       });
     }),
   ).rejects.toThrow(/cpf/i);
 
   const sensitive = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.get, { tutorId }),
+    client.query(api.people.get, { personId }),
   );
-  expect(sensitive?.sensitive?.cpf).toBe(FIXTURE_TUTOR_WITHOUT_ALERT.cpf);
+  expect(sensitive?.sensitive?.cpf).toBe(FIXTURE_PERSON_WITHOUT_ALERT.cpf);
   expect(sensitive?.alert?.level).toBe("none");
 
   const basic = await asUser(t, readerId, async (client) =>
-    client.query(api.tutors.get, { tutorId }),
+    client.query(api.people.get, { personId }),
   );
   expect(basic?.sensitive_hidden).toBe(true);
   expect(basic?.sensitive).toBeUndefined();
@@ -88,8 +88,8 @@ test("create exige RG unico (normalizado)", async () => {
   const bairroId = await seedBairro(t, "Centro");
 
   await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
-      ...FIXTURE_TUTOR_WITHOUT_ALERT,
+    client.mutation(api.people.create, {
+      ...FIXTURE_PERSON_WITHOUT_ALERT,
       bairro_id: bairroId,
     }),
   );
@@ -97,9 +97,9 @@ test("create exige RG unico (normalizado)", async () => {
   // Mesmo RG (com mascara diferente) mas CPF distinto deve conflitar no RG.
   await expect(
     asUser(t, adminId, async (client) => {
-      await client.mutation(api.tutors.create, {
-        ...FIXTURE_TUTOR_WITHOUT_ALERT,
-        cpf: FIXTURE_TUTOR_WITH_ALERT.cpf,
+      await client.mutation(api.people.create, {
+        ...FIXTURE_PERSON_WITHOUT_ALERT,
+        cpf: FIXTURE_PERSON_WITH_ALERT.cpf,
         rg: "1.234.567",
         bairro_id: bairroId,
       });
@@ -112,38 +112,38 @@ test("checkDuplicate sinaliza CPF e RG ja cadastrados", async () => {
   const adminId = await seedAdmin(t);
   const bairroId = await seedBairro(t, "Centro");
 
-  const tutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
-      ...FIXTURE_TUTOR_WITHOUT_ALERT,
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      ...FIXTURE_PERSON_WITHOUT_ALERT,
       bairro_id: bairroId,
     }),
   );
 
   const taken = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.checkDuplicate, {
-      cpf: FIXTURE_TUTOR_WITHOUT_ALERT.cpf,
+    client.query(api.people.checkDuplicate, {
+      cpf: FIXTURE_PERSON_WITHOUT_ALERT.cpf,
       rg: "1.234.567",
     }),
   );
   expect(taken.cpf.exists).toBe(true);
-  expect(taken.cpf.nome).toBe(FIXTURE_TUTOR_WITHOUT_ALERT.nome_completo);
+  expect(taken.cpf.nome).toBe(FIXTURE_PERSON_WITHOUT_ALERT.nome_completo);
   expect(taken.rg.exists).toBe(true);
 
-  // O proprio tutor nao deve conflitar consigo mesmo na edicao.
+  // A propria pessoa nao deve conflitar consigo mesma na edicao.
   const excluded = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.checkDuplicate, {
-      cpf: FIXTURE_TUTOR_WITHOUT_ALERT.cpf,
-      rg: FIXTURE_TUTOR_WITHOUT_ALERT.rg,
-      excludeTutorId: tutorId,
+    client.query(api.people.checkDuplicate, {
+      cpf: FIXTURE_PERSON_WITHOUT_ALERT.cpf,
+      rg: FIXTURE_PERSON_WITHOUT_ALERT.rg,
+      excludePersonId: personId,
     }),
   );
   expect(excluded.cpf.exists).toBe(false);
   expect(excluded.rg.exists).toBe(false);
 
   const free = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.checkDuplicate, {
-      cpf: FIXTURE_TUTOR_WITH_ALERT.cpf,
-      rg: FIXTURE_TUTOR_WITH_ALERT.rg,
+    client.query(api.people.checkDuplicate, {
+      cpf: FIXTURE_PERSON_WITH_ALERT.cpf,
+      rg: FIXTURE_PERSON_WITH_ALERT.rg,
     }),
   );
   expect(free.cpf.exists).toBe(false);
@@ -156,19 +156,19 @@ test("alerta vermelho e amarelo derivam de ocorrencias atribuiveis", async () =>
   const bairroId = await seedBairro(t, "Centro");
   const occurrenceTypeId = await seedOccurrenceType(t);
 
-  const tutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
-      ...FIXTURE_TUTOR_WITH_ALERT,
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      ...FIXTURE_PERSON_WITH_ALERT,
       bairro_id: bairroId,
     }),
   );
-  const dogId = await seedDogForTutor(t, tutorId);
+  const dogId = await seedDogForPerson(t, personId);
 
   await t.run(async (ctx) => {
     await ctx.db.insert("occurrences", {
       dog_id: dogId,
-      tutor_id: tutorId,
-      atribuivel_ao_tutor: true,
+      pessoa_id: personId,
+      atribuivel_a_pessoa: true,
       occurrence_type_id: occurrenceTypeId,
       gravidade: "media",
       data_ocorrencia: Date.now(),
@@ -179,7 +179,7 @@ test("alerta vermelho e amarelo derivam de ocorrencias atribuiveis", async () =>
   });
 
   const yellow = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.get, { tutorId }),
+    client.query(api.people.get, { personId }),
   );
   expect(yellow?.alert?.level).toBe("yellow");
   expect(yellow?.alert?.media_count).toBe(1);
@@ -187,8 +187,8 @@ test("alerta vermelho e amarelo derivam de ocorrencias atribuiveis", async () =>
   await t.run(async (ctx) => {
     await ctx.db.insert("occurrences", {
       dog_id: dogId,
-      tutor_id: tutorId,
-      atribuivel_ao_tutor: true,
+      pessoa_id: personId,
+      atribuivel_a_pessoa: true,
       occurrence_type_id: occurrenceTypeId,
       gravidade: "alta",
       data_ocorrencia: Date.now(),
@@ -199,7 +199,7 @@ test("alerta vermelho e amarelo derivam de ocorrencias atribuiveis", async () =>
   });
 
   const red = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.get, { tutorId }),
+    client.query(api.people.get, { personId }),
   );
   expect(red?.alert?.level).toBe("red");
   expect(red?.alert?.alta_count).toBe(1);
@@ -211,26 +211,26 @@ test("list permite busca por CPF apenas com permissao sensivel", async () => {
   const readerId = await seedUser(t, {
     nome: "Leitor",
     email: "reader2@ong.local",
-    permissions: ["tutors.read"],
+    permissions: ["people.read"],
   });
 
   await asUser(t, adminId, async (client) => {
-    await client.mutation(api.tutors.create, FIXTURE_TUTOR_WITHOUT_ALERT);
+    await client.mutation(api.people.create, FIXTURE_PERSON_WITHOUT_ALERT);
   });
 
   const adminList = await asUser(t, adminId, async (client) =>
-    client.query(api.tutors.list, {
+    client.query(api.people.list, {
       paginationOpts: { numItems: 10, cursor: null },
-      search: FIXTURE_TUTOR_WITHOUT_ALERT.cpf,
+      search: FIXTURE_PERSON_WITHOUT_ALERT.cpf,
     }),
   );
   expect(adminList.page).toHaveLength(1);
   expect(adminList.page[0]?.alert_level).toBe("none");
 
   const readerList = await asUser(t, readerId, async (client) =>
-    client.query(api.tutors.list, {
+    client.query(api.people.list, {
       paginationOpts: { numItems: 10, cursor: null },
-      search: FIXTURE_TUTOR_WITHOUT_ALERT.cpf,
+      search: FIXTURE_PERSON_WITHOUT_ALERT.cpf,
     }),
   );
   expect(readerList.page).toHaveLength(0);

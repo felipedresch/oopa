@@ -11,7 +11,7 @@ import { normalizePaginationOpts } from "./lib/pagination";
 type AuditEntityType =
   | "user"
   | "dog"
-  | "tutor"
+  | "person"
   | "occurrence"
   | "permission_template"
   | "bairro"

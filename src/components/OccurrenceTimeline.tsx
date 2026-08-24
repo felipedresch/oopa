@@ -114,7 +114,7 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         <div className="flex flex-col gap-3">
           {results.map((occurrence) => (
             <OccurrenceCard
-              atribuivel={occurrence.atribuivel_ao_tutor}
+              atribuivel={occurrence.atribuivel_a_pessoa}
               bairroNome={occurrence.bairro_nome}
               dataOcorrencia={occurrence.data_ocorrencia}
               descricao={occurrence.descricao}

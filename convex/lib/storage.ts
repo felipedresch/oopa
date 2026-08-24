@@ -11,6 +11,10 @@ export const ALLOWED_IMAGE_CONTENT_TYPES = new Set([
   "image/webp",
 ]);
 
+export const MAX_PDF_BYTES = 8 * 1024 * 1024;
+
+export const ALLOWED_PDF_CONTENT_TYPES = new Set(["application/pdf"]);
+
 type StorageCtx = Pick<MutationCtx, "db"> | Pick<QueryCtx, "db">;
 
 export async function validateImageStorage(
@@ -29,5 +33,24 @@ export async function validateImageStorage(
   const contentType = metadata.contentType ?? "";
   if (contentType && !ALLOWED_IMAGE_CONTENT_TYPES.has(contentType)) {
     throw uploadRejected("Formato inválido. Use JPEG, PNG ou WebP.");
+  }
+}
+
+export async function validatePdfStorage(
+  ctx: StorageCtx,
+  storageId: Id<"_storage">,
+): Promise<void> {
+  const metadata = await ctx.db.system.get("_storage", storageId);
+  if (!metadata) {
+    throw notFound("Arquivo");
+  }
+
+  if (metadata.size > MAX_PDF_BYTES) {
+    throw uploadRejected("O arquivo deve ter no maximo 8 MB.");
+  }
+
+  const contentType = metadata.contentType ?? "";
+  if (contentType && !ALLOWED_PDF_CONTENT_TYPES.has(contentType)) {
+    throw uploadRejected("Formato inválido. Envie um arquivo PDF.");
   }
 }

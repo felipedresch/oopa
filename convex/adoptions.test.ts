@@ -5,7 +5,15 @@ import { expect, test } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { BAIRRO_WARNING_MESSAGE } from "./lib/adoptions";
-import { asUser, ensureSeeds, seedAdmin, seedBairro, seedUser, storeTestImage } from "./testHelpers";
+import {
+  asUser,
+  ensureSeeds,
+  seedAdmin,
+  seedBairro,
+  seedUser,
+  storeTestImage,
+  storeTestPdf,
+} from "./testHelpers";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -34,13 +42,13 @@ const adoptionPayload = {
   condicoes_adocao: "Retornar em 30 dias se necessario.",
 };
 
-test("create exige confirmacoes e atualiza tutor e historico", async () => {
+test("create exige confirmacoes e atualiza pessoa e historico", async () => {
   const t = convexTest(schema, modules);
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const dogId = await seedDog(t, adminId);
-  const tutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Tutor Adocao",
       cpf: "39053344705",
     }),
@@ -50,7 +58,7 @@ test("create exige confirmacoes e atualiza tutor e historico", async () => {
     asUser(t, adminId, async (client) => {
       await client.mutation(api.adoptions.create, {
         dogId,
-        tutorId,
+        personId,
         responsavel_ong_user_id: adminId,
         ...adoptionPayload,
         confirmou_documentos: false,
@@ -61,7 +69,7 @@ test("create exige confirmacoes e atualiza tutor e historico", async () => {
   const occurrenceId = await asUser(t, adminId, async (client) =>
     client.mutation(api.adoptions.create, {
       dogId,
-      tutorId,
+      personId,
       responsavel_ong_user_id: adminId,
       ...adoptionPayload,
     }),
@@ -70,27 +78,27 @@ test("create exige confirmacoes e atualiza tutor e historico", async () => {
   const dog = await t.run(async (ctx) => ctx.db.get("dogs", dogId));
   const occurrence = await t.run(async (ctx) => ctx.db.get("occurrences", occurrenceId));
 
-  expect(dog?.tutor_atual_id).toBe(tutorId);
+  expect(dog?.pessoa_atual_id).toBe(personId);
   expect(dog?.status_atual).toBe("adotado");
   expect(occurrence?.adoption_payload?.numero_termo_adocao).toBe("TERM-001");
 });
 
-test("evaluateTutor retorna alerta e warning de bairro", async () => {
+test("evaluatePerson retorna alerta e warning de bairro", async () => {
   const t = convexTest(schema, modules);
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const bairroId = await seedBairro(t, "Centro");
   const dogId = await seedDog(t, adminId);
 
-  const oldTutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const oldPersonId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Tutor Antigo",
       cpf: "52998224725",
       bairro_id: bairroId,
     }),
   );
-  const newTutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const newPersonId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Tutor Novo",
       cpf: "15350946056",
       bairro_id: bairroId,
@@ -100,7 +108,7 @@ test("evaluateTutor retorna alerta e warning de bairro", async () => {
   await asUser(t, adminId, async (client) => {
     await client.mutation(api.adoptions.create, {
       dogId,
-      tutorId: oldTutorId,
+      personId: oldPersonId,
       responsavel_ong_user_id: adminId,
       ...adoptionPayload,
       numero_termo_adocao: "TERM-OLD",
@@ -121,7 +129,7 @@ test("evaluateTutor retorna alerta e warning de bairro", async () => {
   });
 
   const evaluation = await asUser(t, adminId, async (client) =>
-    client.query(api.adoptions.evaluateTutor, { dogId, tutorId: newTutorId }),
+    client.query(api.adoptions.evaluatePerson, { dogId, personId: newPersonId }),
   );
 
   expect(evaluation.bairro_warning.has_warning).toBe(true);
@@ -133,8 +141,8 @@ test("returnToOng encerra historico vigente", async () => {
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const dogId = await seedDog(t, adminId);
-  const tutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Tutor Devolucao",
       cpf: "39053344705",
     }),
@@ -144,7 +152,7 @@ test("returnToOng encerra historico vigente", async () => {
   await asUser(t, adminId, async (client) => {
     await client.mutation(api.adoptions.create, {
       dogId,
-      tutorId,
+      personId,
       responsavel_ong_user_id: adminId,
       ...adoptionPayload,
     });
@@ -160,27 +168,27 @@ test("returnToOng encerra historico vigente", async () => {
 
   const dog = await t.run(async (ctx) => ctx.db.get("dogs", dogId));
   const history = await t.run(async (ctx) =>
-    ctx.db.query("tutor_dog_history").withIndex("by_dog", (q) => q.eq("dog_id", dogId)).collect(),
+    ctx.db.query("person_dog_history").withIndex("by_dog", (q) => q.eq("dog_id", dogId)).collect(),
   );
 
-  expect(dog?.tutor_atual_id).toBeUndefined();
+  expect(dog?.pessoa_atual_id).toBeUndefined();
   expect(dog?.status_atual).toBe("na_ong");
   expect(history.every((entry) => entry.fim !== undefined)).toBe(true);
 });
 
-test("transferTutor troca tutor atual", async () => {
+test("transferTutor troca pessoa atual", async () => {
   const t = convexTest(schema, modules);
   await ensureSeeds(t);
   const adminId = await seedAdmin(t);
   const dogId = await seedDog(t, adminId);
-  const tutorA = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const personA = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Tutor A",
       cpf: "39053344705",
     }),
   );
-  const tutorB = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, {
+  const personB = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
       nome_completo: "Tutor B",
       cpf: "52998224725",
     }),
@@ -189,7 +197,7 @@ test("transferTutor troca tutor atual", async () => {
   await asUser(t, adminId, async (client) => {
     await client.mutation(api.adoptions.create, {
       dogId,
-      tutorId: tutorA,
+      personId: personA,
       responsavel_ong_user_id: adminId,
       ...adoptionPayload,
     });
@@ -198,13 +206,13 @@ test("transferTutor troca tutor atual", async () => {
   await asUser(t, adminId, async (client) => {
     await client.mutation(api.adoptions.transferTutor, {
       dogId,
-      newTutorId: tutorB,
+      newPersonId: personB,
       descricao: "Mudanca de responsavel familiar",
     });
   });
 
   const dog = await t.run(async (ctx) => ctx.db.get("dogs", dogId));
-  expect(dog?.tutor_atual_id).toBe(tutorB);
+  expect(dog?.pessoa_atual_id).toBe(personB);
 });
 
 test("usuario sem create_adocao nao cria adocao", async () => {
@@ -214,21 +222,82 @@ test("usuario sem create_adocao nao cria adocao", async () => {
   const limitedId = await seedUser(t, {
     nome: "Sem adocao",
     email: "noadopt@ong.local",
-    permissions: ["dogs.read", "tutors.read"],
+    permissions: ["dogs.read", "people.read"],
   });
   const dogId = await seedDog(t, adminId);
-  const tutorId = await asUser(t, adminId, async (client) =>
-    client.mutation(api.tutors.create, { nome_completo: "Tutor", cpf: "39053344705" }),
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, { nome_completo: "Tutor", cpf: "39053344705" }),
   );
 
   await expect(
     asUser(t, limitedId, async (client) => {
       await client.mutation(api.adoptions.create, {
         dogId,
-        tutorId,
+        personId,
         responsavel_ong_user_id: adminId,
         ...adoptionPayload,
       });
     }),
   ).rejects.toThrow();
+});
+
+test("create aceita termo de adocao em pdf e disponibiliza a url na ocorrencia", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const dogId = await seedDog(t, adminId);
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      nome_completo: "Tutor com Termo",
+      cpf: "39053344705",
+    }),
+  );
+  const termoStorageId = await storeTestPdf(t);
+
+  const occurrenceId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.adoptions.create, {
+      dogId,
+      personId,
+      responsavel_ong_user_id: adminId,
+      ...adoptionPayload,
+      termo_adocao_storage_id: termoStorageId,
+    }),
+  );
+
+  const detail = await asUser(t, adminId, async (client) =>
+    client.query(api.occurrences.get, { occurrenceId }),
+  );
+
+  expect(detail?.adoption_payload?.termo_adocao_url).toBeTruthy();
+});
+
+test("create rejeita termo de adocao acima de 8 MB", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const dogId = await seedDog(t, adminId);
+  const personId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      nome_completo: "Tutor com Termo Grande",
+      cpf: "39053344705",
+    }),
+  );
+  const oversizedStorageId = await t.run(async (ctx) => {
+    const file = new File([new Uint8Array(9 * 1024 * 1024)], "termo-grande.pdf", {
+      type: "application/pdf",
+    });
+    return await ctx.storage.store(file);
+  });
+
+  await expect(
+    asUser(t, adminId, async (client) => {
+      await client.mutation(api.adoptions.create, {
+        dogId,
+        personId,
+        responsavel_ong_user_id: adminId,
+        ...adoptionPayload,
+        termo_adocao_storage_id: oversizedStorageId,
+      });
+    }),
+  ).rejects.toThrow(/8 MB/i);
 });

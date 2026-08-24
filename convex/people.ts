@@ -3,7 +3,7 @@ import { v } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
 import { recordAudit } from "./audit";
-import { dogStatusValidator, severityValidator } from "./domainValidators";
+import { dogStatusValidator, personPapelValidator, severityValidator } from "./domainValidators";
 import { forbidden, notFound } from "./errors";
 import { getCurrentUser, requirePermission } from "./lib/auth";
 import { normalizePaginationOpts } from "./lib/pagination";
@@ -12,24 +12,24 @@ import {
   assertActiveBairro,
   assertUniqueCpf,
   assertUniqueRg,
-  canReadSensitiveTutorData,
-  computeTutorAlert,
+  canReadSensitivePersonData,
+  computePersonAlert,
   getAttributableOccurrences,
-  normalizeTutorInput,
-  validateTutorInput,
-  type TutorInput,
-} from "./lib/tutors";
+  normalizePersonInput,
+  validatePersonInput,
+  type PersonInput,
+} from "./lib/people";
 import { hasPermission } from "./permissions";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 
-const tutorAlertLevelValidator = v.union(
+const personAlertLevelValidator = v.union(
   v.literal("none"),
   v.literal("yellow"),
   v.literal("red"),
 );
 
-const tutorInputFields = {
+const personInputFields = {
   nome_completo: v.string(),
   cpf: v.optional(v.string()),
   rg: v.optional(v.string()),
@@ -41,17 +41,19 @@ const tutorInputFields = {
   endereco_cep: v.optional(v.string()),
   bairro_id: v.optional(v.id("bairros")),
   data_nascimento: v.optional(v.number()),
+  data_cadastro_cadunico: v.optional(v.number()),
+  papeis: v.optional(v.array(personPapelValidator)),
   observacoes: v.optional(v.string()),
 };
 
-const tutorSummaryValidator = v.object({
-  _id: v.id("tutors"),
+const personSummaryValidator = v.object({
+  _id: v.id("people"),
   nome_completo: v.string(),
   bairro_nome: v.union(v.string(), v.null()),
-  alert_level: v.optional(tutorAlertLevelValidator),
+  alert_level: v.optional(personAlertLevelValidator),
 });
 
-const tutorSensitiveValidator = v.object({
+const personSensitiveValidator = v.object({
   cpf: v.optional(v.string()),
   rg: v.optional(v.string()),
   telefone: v.optional(v.string()),
@@ -61,34 +63,35 @@ const tutorSensitiveValidator = v.object({
   endereco_complemento: v.optional(v.string()),
   endereco_cep: v.optional(v.string()),
   data_nascimento: v.optional(v.number()),
+  data_cadastro_cadunico: v.optional(v.number()),
   observacoes: v.optional(v.string()),
 });
 
-const tutorAlertOccurrenceValidator = v.object({
+const personAlertOccurrenceValidator = v.object({
   _id: v.id("occurrences"),
   gravidade: severityValidator,
   data_ocorrencia: v.number(),
   descricao: v.string(),
-  dog_id: v.id("dogs"),
+  dog_id: v.optional(v.id("dogs")),
   dog_nome: v.string(),
 });
 
-const tutorAlertValidator = v.object({
-  level: tutorAlertLevelValidator,
+const personAlertValidator = v.object({
+  level: personAlertLevelValidator,
   alta_count: v.number(),
   media_count: v.number(),
-  occurrences: v.array(tutorAlertOccurrenceValidator),
+  occurrences: v.array(personAlertOccurrenceValidator),
 });
 
-const tutorDogSummaryValidator = v.object({
+const personDogSummaryValidator = v.object({
   _id: v.id("dogs"),
   nome: v.string(),
-  microchip: v.string(),
+  microchip: v.optional(v.string()),
   status_atual: dogStatusValidator,
 });
 
-const tutorHistoryValidator = v.object({
-  _id: v.id("tutor_dog_history"),
+const personHistoryValidator = v.object({
+  _id: v.id("person_dog_history"),
   dog_id: v.id("dogs"),
   dog_nome: v.string(),
   inicio: v.number(),
@@ -97,8 +100,8 @@ const tutorHistoryValidator = v.object({
   tipo_fim: v.optional(v.string()),
 });
 
-const tutorDetailValidator = v.object({
-  _id: v.id("tutors"),
+const personDetailValidator = v.object({
+  _id: v.id("people"),
   nome_completo: v.string(),
   bairro: v.union(
     v.object({
@@ -108,20 +111,21 @@ const tutorDetailValidator = v.object({
     v.null(),
   ),
   sensitive_hidden: v.boolean(),
-  sensitive: v.optional(tutorSensitiveValidator),
-  alert: v.optional(tutorAlertValidator),
-  current_dogs: v.array(tutorDogSummaryValidator),
-  history: v.array(tutorHistoryValidator),
+  sensitive: v.optional(personSensitiveValidator),
+  alert: v.optional(personAlertValidator),
+  papeis: v.array(personPapelValidator),
+  current_dogs: v.array(personDogSummaryValidator),
+  history: v.array(personHistoryValidator),
   criado_em: v.number(),
   atualizado_em: v.optional(v.number()),
 });
 
-async function persistTutor(
+async function persistPerson(
   ctx: MutationCtx,
-  input: TutorInput,
-): Promise<TutorInput> {
-  const normalized = normalizeTutorInput(input);
-  validateTutorInput(normalized);
+  input: PersonInput,
+): Promise<PersonInput> {
+  const normalized = normalizePersonInput(input);
+  validatePersonInput(normalized);
   await assertActiveBairro(ctx, normalized.bairro_id);
 
   return {
@@ -136,6 +140,7 @@ async function persistTutor(
     endereco_cep: normalized.endereco_cep,
     bairro_id: normalized.bairro_id,
     data_nascimento: normalized.data_nascimento,
+    data_cadastro_cadunico: normalized.data_cadastro_cadunico,
     observacoes: normalized.observacoes,
   };
 }
@@ -153,67 +158,69 @@ async function getBairroNome(
 }
 
 export const create = mutation({
-  args: tutorInputFields,
-  returns: v.id("tutors"),
+  args: personInputFields,
+  returns: v.id("people"),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
-    requirePermission(actor, "tutors.create");
+    requirePermission(actor, "people.create");
 
-    const data = await persistTutor(ctx, args);
+    const data = await persistPerson(ctx, args);
     await assertUniqueCpf(ctx, data.cpf);
     await assertUniqueRg(ctx, data.rg);
 
     const now = Date.now();
-    const tutorId = await ctx.db.insert("tutors", {
+    const personId = await ctx.db.insert("people", {
       ...data,
+      papeis: args.papeis ?? [],
       criado_em: now,
       criado_por: actor._id,
     });
 
     await recordAudit(ctx, {
       actorUserId: actor._id,
-      action: "tutors.create",
-      entityType: "tutor",
-      entityId: tutorId,
-      summary: `Tutor criado: ${data.nome_completo}`,
+      action: "people.create",
+      entityType: "person",
+      entityId: personId,
+      summary: `Pessoa criada: ${data.nome_completo}`,
     });
 
-    return tutorId;
+    return personId;
   },
 });
 
 export const update = mutation({
   args: {
-    tutorId: v.id("tutors"),
-    ...tutorInputFields,
+    personId: v.id("people"),
+    ...personInputFields,
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
-    requirePermission(actor, "tutors.edit");
+    requirePermission(actor, "people.edit");
 
-    const tutor = await ctx.db.get("tutors", args.tutorId);
-    if (!tutor) {
-      throw notFound("Tutor");
+    const person = await ctx.db.get("people", args.personId);
+    if (!person) {
+      throw notFound("Pessoa");
     }
 
-    const data = await persistTutor(ctx, args);
-    await assertUniqueCpf(ctx, data.cpf, args.tutorId);
-    await assertUniqueRg(ctx, data.rg, args.tutorId);
+    const data = await persistPerson(ctx, args);
+    await assertUniqueCpf(ctx, data.cpf, args.personId);
+    await assertUniqueRg(ctx, data.rg, args.personId);
 
     const now = Date.now();
-    await ctx.db.patch(args.tutorId, {
+    await ctx.db.patch(args.personId, {
       ...data,
+      papeis: args.papeis ?? person.papeis ?? [],
       atualizado_em: now,
       atualizado_por: actor._id,
     });
 
     await recordAudit(ctx, {
       actorUserId: actor._id,
-      action: "tutors.update",
-      entityType: "tutor",
-      entityId: args.tutorId,
-      summary: `Tutor atualizado: ${data.nome_completo}`,
+      action: "people.update",
+      entityType: "person",
+      entityId: args.personId,
+      summary: `Pessoa atualizada: ${data.nome_completo}`,
     });
 
     return null;
@@ -233,7 +240,7 @@ export const checkDuplicate = query({
   args: {
     cpf: v.optional(v.string()),
     rg: v.optional(v.string()),
-    excludeTutorId: v.optional(v.id("tutors")),
+    excludePersonId: v.optional(v.id("people")),
   },
   returns: v.object({
     cpf: duplicateMatchValidator,
@@ -242,8 +249,8 @@ export const checkDuplicate = query({
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
     if (
-      !hasPermission(actor.permissions, "tutors.create") &&
-      !hasPermission(actor.permissions, "tutors.edit")
+      !hasPermission(actor.permissions, "people.create") &&
+      !hasPermission(actor.permissions, "people.edit")
     ) {
       throw forbidden();
     }
@@ -254,10 +261,10 @@ export const checkDuplicate = query({
     const cpf = args.cpf ? normalizeCpf(args.cpf) : "";
     if (cpf.length === 11) {
       const match = await ctx.db
-        .query("tutors")
+        .query("people")
         .withIndex("by_cpf", (q) => q.eq("cpf", cpf))
         .unique();
-      if (match && match._id !== args.excludeTutorId) {
+      if (match && match._id !== args.excludePersonId) {
         result.cpf = { exists: true, nome: match.nome_completo };
       }
     }
@@ -265,10 +272,10 @@ export const checkDuplicate = query({
     const rg = args.rg ? normalizeRg(args.rg) : "";
     if (rg.length >= 5) {
       const match = await ctx.db
-        .query("tutors")
+        .query("people")
         .withIndex("by_rg", (q) => q.eq("rg", rg))
         .unique();
-      if (match && match._id !== args.excludeTutorId) {
+      if (match && match._id !== args.excludePersonId) {
         result.rg = { exists: true, nome: match.nome_completo };
       }
     }
@@ -279,31 +286,31 @@ export const checkDuplicate = query({
 
 export const get = query({
   args: {
-    tutorId: v.id("tutors"),
+    personId: v.id("people"),
   },
-  returns: v.union(tutorDetailValidator, v.null()),
+  returns: v.union(personDetailValidator, v.null()),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
-    if (!hasPermission(actor.permissions, "tutors.read")) {
+    if (!hasPermission(actor.permissions, "people.read")) {
       throw forbidden();
     }
 
-    const tutor = await ctx.db.get("tutors", args.tutorId);
-    if (!tutor) {
+    const person = await ctx.db.get("people", args.personId);
+    if (!person) {
       return null;
     }
 
-    const canSeeSensitive = canReadSensitiveTutorData(actor.permissions);
-    const bairro = tutor.bairro_id ? await ctx.db.get("bairros", tutor.bairro_id) : null;
+    const canSeeSensitive = canReadSensitivePersonData(actor.permissions);
+    const bairro = person.bairro_id ? await ctx.db.get("bairros", person.bairro_id) : null;
 
     const currentDogs = await ctx.db
       .query("dogs")
-      .withIndex("by_tutor", (q) => q.eq("tutor_atual_id", args.tutorId))
+      .withIndex("by_pessoa", (q) => q.eq("pessoa_atual_id", args.personId))
       .collect();
 
     const historyRows = await ctx.db
-      .query("tutor_dog_history")
-      .withIndex("by_tutor", (q) => q.eq("tutor_id", args.tutorId))
+      .query("person_dog_history")
+      .withIndex("by_pessoa", (q) => q.eq("pessoa_id", args.personId))
       .collect();
 
     const history = await Promise.all(
@@ -331,22 +338,22 @@ export const get = query({
             gravidade: "info" | "baixa" | "media" | "alta";
             data_ocorrencia: number;
             descricao: string;
-            dog_id: Id<"dogs">;
+            dog_id: Id<"dogs"> | undefined;
             dog_nome: string;
           }>;
         }
       | undefined;
 
     if (canSeeSensitive) {
-      const alertSummary = await computeTutorAlert(ctx, args.tutorId);
-      const attributable = await getAttributableOccurrences(ctx, args.tutorId);
+      const alertSummary = await computePersonAlert(ctx, args.personId);
+      const attributable = await getAttributableOccurrences(ctx, args.personId);
       const alertOccurrences = attributable.filter(
         (occurrence) => occurrence.gravidade === "alta" || occurrence.gravidade === "media",
       );
 
       const occurrences = await Promise.all(
         alertOccurrences.map(async (occurrence) => {
-          const dog = await ctx.db.get("dogs", occurrence.dog_id);
+          const dog = occurrence.dog_id ? await ctx.db.get("dogs", occurrence.dog_id) : null;
           return {
             _id: occurrence._id,
             gravidade: occurrence.gravidade,
@@ -367,8 +374,8 @@ export const get = query({
     }
 
     return {
-      _id: tutor._id,
-      nome_completo: tutor.nome_completo,
+      _id: person._id,
+      nome_completo: person.nome_completo,
       bairro: bairro
         ? {
             _id: bairro._id,
@@ -378,19 +385,21 @@ export const get = query({
       sensitive_hidden: !canSeeSensitive,
       sensitive: canSeeSensitive
         ? {
-            cpf: tutor.cpf,
-            rg: tutor.rg,
-            telefone: tutor.telefone,
-            email: tutor.email,
-            endereco_logradouro: tutor.endereco_logradouro,
-            endereco_numero: tutor.endereco_numero,
-            endereco_complemento: tutor.endereco_complemento,
-            endereco_cep: tutor.endereco_cep,
-            data_nascimento: tutor.data_nascimento,
-            observacoes: tutor.observacoes,
+            cpf: person.cpf,
+            rg: person.rg,
+            telefone: person.telefone,
+            email: person.email,
+            endereco_logradouro: person.endereco_logradouro,
+            endereco_numero: person.endereco_numero,
+            endereco_complemento: person.endereco_complemento,
+            endereco_cep: person.endereco_cep,
+            data_nascimento: person.data_nascimento,
+            data_cadastro_cadunico: person.data_cadastro_cadunico,
+            observacoes: person.observacoes,
           }
         : undefined,
       alert,
+      papeis: person.papeis ?? [],
       current_dogs: currentDogs.map((dog) => ({
         _id: dog._id,
         nome: dog.nome,
@@ -398,8 +407,8 @@ export const get = query({
         status_atual: dog.status_atual,
       })),
       history: history.sort((left, right) => right.inicio - left.inicio),
-      criado_em: tutor.criado_em,
-      atualizado_em: tutor.atualizado_em,
+      criado_em: person.criado_em,
+      atualizado_em: person.atualizado_em,
     };
   },
 });
@@ -411,25 +420,25 @@ export const list = query({
     bairro_id: v.optional(v.id("bairros")),
   },
   returns: v.object({
-    page: v.array(tutorSummaryValidator),
+    page: v.array(personSummaryValidator),
     isDone: v.boolean(),
     continueCursor: v.string(),
   }),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
-    if (!hasPermission(actor.permissions, "tutors.read")) {
+    if (!hasPermission(actor.permissions, "people.read")) {
       throw forbidden();
     }
 
-    const canSeeSensitive = canReadSensitiveTutorData(actor.permissions);
+    const canSeeSensitive = canReadSensitivePersonData(actor.permissions);
     const search = args.search?.trim();
     const searchLower = search?.toLowerCase();
     const cpfSearch = canSeeSensitive && search ? search.replace(/\D/g, "") : "";
 
     const bairroFilter = args.bairro_id;
     const baseQuery = bairroFilter
-      ? ctx.db.query("tutors").withIndex("by_bairro", (q) => q.eq("bairro_id", bairroFilter))
-      : ctx.db.query("tutors");
+      ? ctx.db.query("people").withIndex("by_bairro", (q) => q.eq("bairro_id", bairroFilter))
+      : ctx.db.query("people");
 
     const result = await baseQuery
       .order("desc")
@@ -437,27 +446,27 @@ export const list = query({
 
     const page = (
       await Promise.all(
-        result.page.map(async (tutor) => {
+        result.page.map(async (person) => {
           if (searchLower) {
-            const matchesNome = tutor.nome_completo.toLowerCase().includes(searchLower);
+            const matchesNome = person.nome_completo.toLowerCase().includes(searchLower);
             const matchesCpf =
-              canSeeSensitive && cpfSearch.length > 0 && tutor.cpf?.includes(cpfSearch);
+              canSeeSensitive && cpfSearch.length > 0 && person.cpf?.includes(cpfSearch);
             if (!matchesNome && !matchesCpf) {
               return null;
             }
           }
 
-          const bairroNome = await getBairroNome(ctx, tutor.bairro_id);
+          const bairroNome = await getBairroNome(ctx, person.bairro_id);
           let alert_level: "none" | "yellow" | "red" | undefined;
 
           if (canSeeSensitive) {
-            const alert = await computeTutorAlert(ctx, tutor._id);
+            const alert = await computePersonAlert(ctx, person._id);
             alert_level = alert.level;
           }
 
           return {
-            _id: tutor._id,
-            nome_completo: tutor.nome_completo,
+            _id: person._id,
+            nome_completo: person.nome_completo,
             bairro_nome: bairroNome,
             alert_level,
           };
@@ -473,10 +482,10 @@ export const list = query({
   },
 });
 
-const tutorDogHistoryItemValidator = v.object({
-  _id: v.id("tutor_dog_history"),
-  tutor_id: v.id("tutors"),
-  tutor_nome: v.string(),
+const personDogHistoryItemValidator = v.object({
+  _id: v.id("person_dog_history"),
+  pessoa_id: v.id("people"),
+  pessoa_nome: v.string(),
   inicio: v.number(),
   fim: v.optional(v.number()),
   tipo_inicio: v.string(),
@@ -487,7 +496,7 @@ export const listHistoryByDog = query({
   args: {
     dogId: v.id("dogs"),
   },
-  returns: v.array(tutorDogHistoryItemValidator),
+  returns: v.array(personDogHistoryItemValidator),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
     if (!hasPermission(actor.permissions, "dogs.read")) {
@@ -500,18 +509,18 @@ export const listHistoryByDog = query({
     }
 
     const entries = await ctx.db
-      .query("tutor_dog_history")
+      .query("person_dog_history")
       .withIndex("by_dog", (q) => q.eq("dog_id", args.dogId))
       .order("desc")
       .take(100);
 
     const history = await Promise.all(
       entries.map(async (entry) => {
-        const tutor = await ctx.db.get("tutors", entry.tutor_id);
+        const person = await ctx.db.get("people", entry.pessoa_id);
         return {
           _id: entry._id,
-          tutor_id: entry.tutor_id,
-          tutor_nome: tutor?.nome_completo ?? "Tutor removido",
+          pessoa_id: entry.pessoa_id,
+          pessoa_nome: person?.nome_completo ?? "Pessoa removida",
           inicio: entry.inicio,
           fim: entry.fim,
           tipo_inicio: entry.tipo_inicio,

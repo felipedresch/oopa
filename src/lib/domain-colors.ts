@@ -33,9 +33,10 @@ export type DogStatus =
   | "adotado"
   | "desaparecido"
   | "falecido"
-  | "transferido";
+  | "transferido"
+  | "comunitario";
 
-export type TutorAlertLevel = "none" | "yellow" | "red";
+export type PersonAlertLevel = "none" | "yellow" | "red";
 
 export const SEVERITY_LABELS: Record<Severity, string> = {
   info: "Informativa",
@@ -50,6 +51,7 @@ export const DOG_STATUS_LABELS: Record<DogStatus, string> = {
   desaparecido: "Desaparecido",
   falecido: "Falecido",
   transferido: "Transferido",
+  comunitario: "Comunitário",
 };
 
 export const severityBadgeClass: Record<Severity, string> = {
@@ -65,9 +67,10 @@ export const dogStatusBadgeClass: Record<DogStatus, string> = {
   desaparecido: "bg-warning/14 text-warning",
   falecido: "bg-muted text-muted-foreground",
   transferido: "bg-alert/12 text-alert",
+  comunitario: "bg-accent text-accent-foreground",
 };
 
-export const tutorAlertBadgeClass: Record<Exclude<TutorAlertLevel, "none">, string> = {
+export const personAlertBadgeClass: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "bg-warning/14 text-warning",
   red: "bg-destructive/12 text-destructive",
 };

@@ -102,8 +102,8 @@ export async function resolveNotificationHref(
     return `/dogs/${notification.entidade_id}`;
   }
 
-  if (notification.entidade_tipo === "tutor" && notification.entidade_id) {
-    return `/tutors/${notification.entidade_id}`;
+  if (notification.entidade_tipo === "person" && notification.entidade_id) {
+    return `/people/${notification.entidade_id}`;
   }
 
   if (notification.entidade_tipo === "occurrence" && notification.entidade_id) {

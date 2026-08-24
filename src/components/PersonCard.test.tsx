@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-import { TutorCard } from "@/components/TutorCard";
+import { PersonCard } from "@/components/PersonCard";
 
-describe("TutorCard", () => {
+describe("PersonCard", () => {
   it("renderiza nome e bairro", () => {
     render(
       <MemoryRouter>
-        <TutorCard bairroNome="Centro" nome="Maria Tutora" tutorId="tutor1" />
+        <PersonCard bairroNome="Centro" nome="Maria Tutora" personId="person1" />
       </MemoryRouter>,
     );
 
@@ -18,7 +18,7 @@ describe("TutorCard", () => {
   it("mostra badge apenas com alerta", () => {
     render(
       <MemoryRouter>
-        <TutorCard alertLevel="red" bairroNome={null} nome="Joao" tutorId="tutor2" />
+        <PersonCard alertLevel="red" bairroNome={null} nome="Joao" personId="person2" />
       </MemoryRouter>,
     );
 

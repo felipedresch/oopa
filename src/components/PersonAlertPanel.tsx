@@ -1,22 +1,22 @@
 import { useMemo, useState } from "react";
 
 import { SeverityBadge } from "@/components/SeverityBadge";
-import { TutorAlertBadge } from "@/components/TutorAlertBadge";
+import { PersonAlertBadge } from "@/components/PersonAlertBadge";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/formatters";
-import type { Severity, TutorAlertLevel } from "@/lib/domain-colors";
+import type { Severity, PersonAlertLevel } from "@/lib/domain-colors";
 
 type AlertOccurrence = {
   _id: string;
   gravidade: Severity;
   data_ocorrencia: number;
   descricao: string;
-  dog_id: string;
+  dog_id?: string;
   dog_nome: string;
 };
 
-type TutorAlertPanelProps = {
-  level: TutorAlertLevel;
+type PersonAlertPanelProps = {
+  level: PersonAlertLevel;
   altaCount: number;
   mediaCount: number;
   occurrences: AlertOccurrence[];
@@ -28,12 +28,12 @@ const FILTER_OPTIONS = [
   { value: "media", label: "Média" },
 ] as const;
 
-export function TutorAlertPanel({
+export function PersonAlertPanel({
   level,
   altaCount,
   mediaCount,
   occurrences,
-}: TutorAlertPanelProps) {
+}: PersonAlertPanelProps) {
   const [filter, setFilter] = useState<(typeof FILTER_OPTIONS)[number]["value"]>("all");
 
   const filtered = useMemo(() => {
@@ -48,7 +48,7 @@ export function TutorAlertPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold">Alertas do tutor</h3>
-          <TutorAlertBadge level={level} />
+          <PersonAlertBadge level={level} />
         </div>
         <div className="flex gap-4 text-sm text-muted-foreground">
           <span>Alta: {altaCount}</span>

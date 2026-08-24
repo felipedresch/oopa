@@ -9,7 +9,7 @@ import { ESPECIE_EMOJI, ESPECIE_LABELS } from "@/lib/domain-colors";
 type DogCardProps = {
   dogId: string;
   nome: string;
-  microchip: string;
+  microchip?: string;
   status: DogStatus;
   especie?: DogEspecie;
   fotoUrl?: string | null;
@@ -59,7 +59,13 @@ export function DogCard({
               <span className="truncate">{nome}</span>
             </p>
             <p className="text-sm tabular-nums text-muted-foreground">
-              {formatMicrochip(microchip)}
+              {microchip ? (
+                formatMicrochip(microchip)
+              ) : (
+                <span className="rounded-full bg-warning/14 px-2 py-0.5 text-xs font-medium text-warning">
+                  Sem microchip
+                </span>
+              )}
             </p>
           </div>
           {graveAlert ? (

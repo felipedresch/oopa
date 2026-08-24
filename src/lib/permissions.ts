@@ -3,10 +3,10 @@ export const PERMISSION_CATALOG = [
   "dogs.create",
   "dogs.edit",
   "dogs.change_status",
-  "tutors.read",
-  "tutors.read_sensitive",
-  "tutors.create",
-  "tutors.edit",
+  "people.read",
+  "people.read_sensitive",
+  "people.create",
+  "people.edit",
   "occurrences.read",
   "occurrences.read_legal",
   "occurrences.create_rotina",
@@ -28,7 +28,7 @@ export type Permission = (typeof PERMISSION_CATALOG)[number];
 
 export const UI_MODULES = [
   "dogs",
-  "tutors",
+  "people",
   "occurrences",
   "adoptions",
   "team",
@@ -46,7 +46,7 @@ export type ModulePermissionMap = Record<UiModule, PermissionLevel>;
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
   dogs: "Cães",
-  tutors: "Tutores",
+  people: "Pessoas",
   occurrences: "Ocorrências",
   adoptions: "Adocoes e devoluções",
   team: "Equipe",
@@ -71,7 +71,7 @@ export const PERMISSION_LEVEL_DESCRIPTIONS: Record<PermissionLevel, string> = {
 export function createEmptyModuleMap(): ModulePermissionMap {
   return {
     dogs: "none",
-    tutors: "none",
+    people: "none",
     occurrences: "none",
     adoptions: "none",
     team: "none",

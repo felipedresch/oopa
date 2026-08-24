@@ -18,6 +18,7 @@ export const dogStatusValidator = v.union(
   v.literal("desaparecido"),
   v.literal("falecido"),
   v.literal("transferido"),
+  v.literal("comunitario"),
 );
 
 export const severityValidator = v.union(
@@ -34,6 +35,14 @@ export const occurrenceCategoryValidator = v.union(
   v.literal("legal"),
   v.literal("adocao"),
   v.literal("outro"),
+  v.literal("denuncia_externa"),
+);
+
+export const personPapelValidator = v.union(
+  v.literal("tutor"),
+  v.literal("denunciante"),
+  v.literal("solicitante_castracao"),
+  v.literal("solicitante_resgate"),
 );
 
 export const notificationTypeValidator = v.union(
@@ -45,7 +54,7 @@ export const notificationTypeValidator = v.union(
 export const entityTypeValidator = v.union(
   v.literal("user"),
   v.literal("dog"),
-  v.literal("tutor"),
+  v.literal("person"),
   v.literal("occurrence"),
   v.literal("permission_template"),
   v.literal("bairro"),
@@ -60,9 +69,10 @@ export const adoptionPayloadValidator = v.object({
   observacoes_adocao: v.optional(v.string()),
   confirmou_documentos: v.boolean(),
   confirmou_orientacoes: v.boolean(),
+  termo_adocao_storage_id: v.optional(v.id("_storage")),
 });
 
-export const tutorSnapshotValidator = v.object({
+export const personSnapshotValidator = v.object({
   nome_completo: v.string(),
   cpf: v.optional(v.string()),
   rg: v.optional(v.string()),

@@ -23,7 +23,7 @@ import { mutation, query } from "./_generated/server";
 
 const dogSummaryValidator = v.object({
   _id: v.id("dogs"),
-  microchip: v.string(),
+  microchip: v.optional(v.string()),
   nome: v.string(),
   especie: dogSpeciesValidator,
   porte: dogSizeValidator,
@@ -34,7 +34,7 @@ const dogSummaryValidator = v.object({
 
 const dogDetailValidator = v.object({
   _id: v.id("dogs"),
-  microchip: v.string(),
+  microchip: v.optional(v.string()),
   nome: v.string(),
   especie: dogSpeciesValidator,
   sexo: dogSexValidator,
@@ -50,7 +50,7 @@ const dogDetailValidator = v.object({
   foto_perfil_storage_id: v.optional(v.id("_storage")),
   foto_perfil_url: v.union(v.string(), v.null()),
   status_atual: dogStatusValidator,
-  tutor_atual_id: v.optional(v.id("tutors")),
+  pessoa_atual_id: v.optional(v.id("people")),
   observacoes: v.optional(v.string()),
   criado_em: v.number(),
   criado_por: v.optional(v.id("users")),
@@ -60,7 +60,7 @@ const dogDetailValidator = v.object({
 });
 
 const dogInputFields = {
-  microchip: v.string(),
+  microchip: v.optional(v.string()),
   nome: v.string(),
   especie: dogSpeciesValidator,
   sexo: dogSexValidator,
@@ -84,7 +84,7 @@ export const create = mutation({
     const actor = await getCurrentUser(ctx);
     requirePermission(actor, "dogs.create");
 
-    const microchip = assertValidMicrochip(args.microchip);
+    const microchip = args.microchip ? assertValidMicrochip(args.microchip) : undefined;
     const nome = args.nome.trim();
     if (!nome) {
       throw validationError("Nome obrigatório.");
@@ -96,12 +96,14 @@ export const create = mutation({
 
     await validateImageStorage(ctx, args.foto_perfil_storage_id);
 
-    const existing = await ctx.db
-      .query("dogs")
-      .withIndex("by_microchip", (q) => q.eq("microchip", microchip))
-      .unique();
-    if (existing) {
-      throw conflict("Já existe um animal com este microchip.");
+    if (microchip) {
+      const existing = await ctx.db
+        .query("dogs")
+        .withIndex("by_microchip", (q) => q.eq("microchip", microchip))
+        .unique();
+      if (existing) {
+        throw conflict("Já existe um animal com este microchip.");
+      }
     }
 
     const now = Date.now();
@@ -315,7 +317,7 @@ export const list = query({
           }
 
           if (search) {
-            const haystack = `${dog.nome} ${dog.microchip}`.toLowerCase();
+            const haystack = `${dog.nome} ${dog.microchip ?? ""}`.toLowerCase();
             if (!haystack.includes(search)) {
               return null;
             }

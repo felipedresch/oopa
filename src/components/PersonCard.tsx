@@ -1,23 +1,23 @@
 import { Link } from "react-router-dom";
 
-import { TutorAlertBadge } from "@/components/TutorAlertBadge";
-import type { TutorAlertLevel } from "@/lib/domain-colors";
+import { PersonAlertBadge } from "@/components/PersonAlertBadge";
+import type { PersonAlertLevel } from "@/lib/domain-colors";
 
-type TutorCardProps = {
-  tutorId: string;
+type PersonCardProps = {
+  personId: string;
   nome: string;
   bairroNome?: string | null;
-  alertLevel?: TutorAlertLevel | "none";
+  alertLevel?: PersonAlertLevel | "none";
   selectable?: boolean;
 };
 
-export function TutorCard({
-  tutorId,
+export function PersonCard({
+  personId,
   nome,
   bairroNome,
   alertLevel,
   selectable = false,
-}: TutorCardProps) {
+}: PersonCardProps) {
   const className =
     "flex items-center gap-3.5 rounded-xl border bg-card p-3.5 shadow-xs transition-colors hover:border-ring/40 hover:bg-accent/30";
 
@@ -35,7 +35,7 @@ export function TutorCard({
           {bairroNome ?? "Bairro não informado"}
         </p>
       </div>
-      {alertLevel && alertLevel !== "none" ? <TutorAlertBadge level={alertLevel} /> : null}
+      {alertLevel && alertLevel !== "none" ? <PersonAlertBadge level={alertLevel} /> : null}
     </>
   );
 
@@ -44,7 +44,7 @@ export function TutorCard({
   }
 
   return (
-    <Link className={className} to={`/tutors/${tutorId}`}>
+    <Link className={className} to={`/people/${personId}`}>
       {content}
     </Link>
   );

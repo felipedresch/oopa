@@ -11,9 +11,10 @@ import { DogCard } from "@/components/DogCard";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
+import { PdfUpload } from "@/components/PdfUpload";
 import { StepperForm } from "@/components/StepperForm";
-import { TutorAssessmentPanel } from "@/components/TutorAssessmentPanel";
-import { TutorCard } from "@/components/TutorCard";
+import { PersonAssessmentPanel } from "@/components/PersonAssessmentPanel";
+import { PersonCard } from "@/components/PersonCard";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -35,15 +36,16 @@ export function AdoptionNewPage() {
   const [dogSearch, setDogSearch] = useState("");
   const [selectedDogId, setSelectedDogId] = useState<Id<"dogs"> | null>(null);
 
-  const [tutorSearch, setTutorSearch] = useState("");
-  const [selectedTutorId, setSelectedTutorId] = useState<Id<"tutors"> | null>(null);
-  const [showMiniTutorForm, setShowMiniTutorForm] = useState(false);
-  const [miniTutorNome, setMiniTutorNome] = useState("");
-  const [miniTutorCpf, setMiniTutorCpf] = useState("");
-  const [miniTutorBairroId, setMiniTutorBairroId] = useState<Id<"bairros"> | undefined>();
-  const [miniTutorBairroLabel, setMiniTutorBairroLabel] = useState("");
+  const [personSearch, setPersonSearch] = useState("");
+  const [selectedPersonId, setSelectedPersonId] = useState<Id<"people"> | null>(null);
+  const [showMiniPersonForm, setShowMiniPersonForm] = useState(false);
+  const [miniPersonNome, setMiniPersonNome] = useState("");
+  const [miniPersonCpf, setMiniPersonCpf] = useState("");
+  const [miniPersonBairroId, setMiniPersonBairroId] = useState<Id<"bairros"> | undefined>();
+  const [miniPersonBairroLabel, setMiniPersonBairroLabel] = useState("");
 
   const [numeroTermo, setNumeroTermo] = useState("");
+  const [termoStorageId, setTermoStorageId] = useState<Id<"_storage"> | undefined>();
   const [dataAdocao, setDataAdocao] = useState(new Date(now).toISOString().slice(0, 10));
   const [responsavelId, setResponsavelId] = useState<Id<"users"> | "">("");
   const [condicoes, setCondicoes] = useState("");
@@ -56,7 +58,7 @@ export function AdoptionNewPage() {
   const [success, setSuccess] = useState<{ occurrenceId: Id<"occurrences"> } | null>(null);
 
   const createAdoption = useMutation(api.adoptions.create);
-  const createTutor = useMutation(api.tutors.create);
+  const createPerson = useMutation(api.people.create);
 
   const dogResults = usePaginatedQuery(
     api.dogs.list,
@@ -66,10 +68,10 @@ export function AdoptionNewPage() {
     { initialNumItems: 8 },
   );
 
-  const tutorResults = usePaginatedQuery(
-    api.tutors.list,
-    can("tutors.read") && step === 1 && !showMiniTutorForm
-      ? { search: tutorSearch || undefined }
+  const personResults = usePaginatedQuery(
+    api.people.list,
+    can("people.read") && step === 1 && !showMiniPersonForm
+      ? { search: personSearch || undefined }
       : "skip",
     { initialNumItems: 8 },
   );
@@ -80,9 +82,9 @@ export function AdoptionNewPage() {
   );
 
   const evaluation = useQuery(
-    api.adoptions.evaluateTutor,
-    selectedDogId && selectedTutorId && step >= 2
-      ? { dogId: selectedDogId, tutorId: selectedTutorId }
+    api.adoptions.evaluatePerson,
+    selectedDogId && selectedPersonId && step >= 2
+      ? { dogId: selectedDogId, personId: selectedPersonId }
       : "skip",
   );
 
@@ -103,7 +105,7 @@ export function AdoptionNewPage() {
     return <PermissionDenied />;
   }
 
-  if (success && selectedDogId && selectedTutorId) {
+  if (success && selectedDogId && selectedPersonId) {
     return (
       <section className="flex flex-col gap-6">
         <PageHeader
@@ -122,7 +124,7 @@ export function AdoptionNewPage() {
               <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cão</Link>
             </Button>
             <Button asChild className="min-h-11" variant="outline">
-              <Link to={`/tutors/${selectedTutorId}`}>Ver ficha do tutor</Link>
+              <Link to={`/people/${selectedPersonId}`}>Ver ficha do tutor</Link>
             </Button>
             <Button asChild className="min-h-11" variant="outline">
               <Link to={`/dogs/${selectedDogId}/occurrences/${success.occurrenceId}`}>
@@ -136,22 +138,22 @@ export function AdoptionNewPage() {
   }
 
   const canAdvanceDog = Boolean(selectedDogId);
-  const canAdvanceTutor = Boolean(selectedTutorId);
+  const canAdvancePerson = Boolean(selectedPersonId);
   const canAdvanceDados =
     Boolean(numeroTermo.trim() && condicoes.trim() && dataAdocao) &&
     Boolean(responsavelDefault || responsavelId) &&
     confirmouDocumentos &&
     confirmouOrientacoes;
 
-  const handleCreateMiniTutor = async () => {
+  const handleCreateMiniPerson = async () => {
     setError(null);
-    const nomeError = validateRequired(miniTutorNome);
+    const nomeError = validateRequired(miniPersonNome);
     if (nomeError) {
       setError(nomeError);
       return;
     }
-    if (miniTutorCpf) {
-      const cpfError = validateCpf(miniTutorCpf);
+    if (miniPersonCpf) {
+      const cpfError = validateCpf(miniPersonCpf);
       if (cpfError) {
         setError(cpfError);
         return;
@@ -160,13 +162,13 @@ export function AdoptionNewPage() {
 
     setSubmitting(true);
     try {
-      const tutorId = await createTutor({
-        nome_completo: miniTutorNome.trim(),
-        cpf: miniTutorCpf.replace(/\D/g, "") || undefined,
-        bairro_id: miniTutorBairroId,
+      const personId = await createPerson({
+        nome_completo: miniPersonNome.trim(),
+        cpf: miniPersonCpf.replace(/\D/g, "") || undefined,
+        bairro_id: miniPersonBairroId,
       });
-      setSelectedTutorId(tutorId);
-      setShowMiniTutorForm(false);
+      setSelectedPersonId(personId);
+      setShowMiniPersonForm(false);
       setStep(2);
     } catch (cause) {
       setError(getErrorMessage(cause, "Não foi possível cadastrar o tutor."));
@@ -176,7 +178,7 @@ export function AdoptionNewPage() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedDogId || !selectedTutorId) {
+    if (!selectedDogId || !selectedPersonId) {
       return;
     }
 
@@ -187,7 +189,7 @@ export function AdoptionNewPage() {
     try {
       const occurrenceId = await createAdoption({
         dogId: selectedDogId,
-        tutorId: selectedTutorId,
+        personId: selectedPersonId,
         data_adocao: new Date(dataAdocao).getTime(),
         numero_termo_adocao: numeroTermo.trim(),
         responsavel_ong_user_id: staffId,
@@ -195,6 +197,7 @@ export function AdoptionNewPage() {
         observacoes_adocao: observacoes.trim() || undefined,
         confirmou_documentos: true,
         confirmou_orientacoes: true,
+        termo_adocao_storage_id: termoStorageId,
       });
       setSuccess({ occurrenceId });
     } catch (cause) {
@@ -216,9 +219,9 @@ export function AdoptionNewPage() {
           step === 0
             ? canAdvanceDog
             : step === 1
-              ? showMiniTutorForm
-                ? Boolean(miniTutorNome.trim())
-                : canAdvanceTutor
+              ? showMiniPersonForm
+                ? Boolean(miniPersonNome.trim())
+                : canAdvancePerson
               : step === 2
                 ? true
                 : step === 3
@@ -226,7 +229,7 @@ export function AdoptionNewPage() {
                   : true
         }
         continueLabel={
-          step === 1 && showMiniTutorForm
+          step === 1 && showMiniPersonForm
             ? "Cadastrar tutor"
             : step === 4
               ? submitting
@@ -239,8 +242,8 @@ export function AdoptionNewPage() {
           step > 0
             ? () => {
                 setError(null);
-                if (step === 1 && showMiniTutorForm) {
-                  setShowMiniTutorForm(false);
+                if (step === 1 && showMiniPersonForm) {
+                  setShowMiniPersonForm(false);
                   return;
                 }
                 setStep(step - 1);
@@ -248,8 +251,8 @@ export function AdoptionNewPage() {
             : undefined
         }
         onContinue={
-          step === 1 && showMiniTutorForm
-            ? () => void handleCreateMiniTutor()
+          step === 1 && showMiniPersonForm
+            ? () => void handleCreateMiniPerson()
             : step < 4
               ? () => {
                   setError(null);
@@ -312,7 +315,7 @@ export function AdoptionNewPage() {
             {selectedDog ? (
               <p className="text-sm text-muted-foreground">
                 Selecionado: <strong>{selectedDog.nome}</strong> (
-                {formatMicrochip(selectedDog.microchip)})
+                {selectedDog.microchip ? formatMicrochip(selectedDog.microchip) : "sem microchip"})
               </p>
             ) : null}
           </div>
@@ -320,22 +323,22 @@ export function AdoptionNewPage() {
 
         {step === 1 ? (
           <div className="flex flex-col gap-4">
-            {!showMiniTutorForm ? (
+            {!showMiniPersonForm ? (
               <>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                   <div className="flex flex-1 flex-col gap-2">
                     <Label htmlFor="tutor-search-adoption">Buscar tutor</Label>
                     <Input
                       id="tutor-search-adoption"
-                      onChange={(event) => setTutorSearch(event.target.value)}
+                      onChange={(event) => setPersonSearch(event.target.value)}
                       placeholder="Nome do tutor"
-                      value={tutorSearch}
+                      value={personSearch}
                     />
                   </div>
-                  {can("tutors.create") ? (
+                  {can("people.create") ? (
                     <Button
                       className="min-h-11"
-                      onClick={() => setShowMiniTutorForm(true)}
+                      onClick={() => setShowMiniPersonForm(true)}
                       type="button"
                       variant="outline"
                     >
@@ -344,26 +347,26 @@ export function AdoptionNewPage() {
                   ) : null}
                 </div>
 
-                {tutorResults.status === "LoadingFirstPage" ? (
+                {personResults.status === "LoadingFirstPage" ? (
                   <LoadingSkeleton rows={3} />
                 ) : (
                   <ul className="flex flex-col gap-2">
-                    {tutorResults.results.map((tutor) => (
-                      <li key={tutor._id}>
+                    {personResults.results.map((person) => (
+                      <li key={person._id}>
                         <button
                           className={cn(
                             "w-full rounded-xl text-left ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                            selectedTutorId === tutor._id && "ring-2 ring-primary",
+                            selectedPersonId === person._id && "ring-2 ring-primary",
                           )}
-                          onClick={() => setSelectedTutorId(tutor._id)}
+                          onClick={() => setSelectedPersonId(person._id)}
                           type="button"
                         >
-                          <TutorCard
-                            alertLevel={tutor.alert_level}
-                            bairroNome={tutor.bairro_nome}
-                            nome={tutor.nome_completo}
+                          <PersonCard
+                            alertLevel={person.alert_level}
+                            bairroNome={person.bairro_nome}
+                            nome={person.nome_completo}
+                            personId={person._id}
                             selectable
-                            tutorId={tutor._id}
                           />
                         </button>
                       </li>
@@ -380,26 +383,26 @@ export function AdoptionNewPage() {
                   <Label htmlFor="mini-tutor-nome">Nome completo</Label>
                   <Input
                     id="mini-tutor-nome"
-                    onChange={(event) => setMiniTutorNome(event.target.value)}
-                    value={miniTutorNome}
+                    onChange={(event) => setMiniPersonNome(event.target.value)}
+                    value={miniPersonNome}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="mini-tutor-cpf">CPF</Label>
                   <Input
                     id="mini-tutor-cpf"
-                    onChange={(event) => setMiniTutorCpf(maskCpf(event.target.value))}
+                    onChange={(event) => setMiniPersonCpf(maskCpf(event.target.value))}
                     placeholder="Opcional"
-                    value={miniTutorCpf}
+                    value={miniPersonCpf}
                   />
                 </div>
                 <BairroAutocomplete
-                  initialLabel={miniTutorBairroLabel}
+                  initialLabel={miniPersonBairroLabel}
                   onChange={(id, label) => {
-                    setMiniTutorBairroId(id);
-                    setMiniTutorBairroLabel(label);
+                    setMiniPersonBairroId(id);
+                    setMiniPersonBairroLabel(label);
                   }}
-                  value={miniTutorBairroId}
+                  value={miniPersonBairroId}
                 />
               </div>
             )}
@@ -412,10 +415,10 @@ export function AdoptionNewPage() {
               <LoadingSkeleton rows={4} />
             ) : (
               <>
-                <TutorAssessmentPanel
-                  alert={evaluation.tutor.alert}
-                  bairroNome={evaluation.tutor.bairro_nome}
-                  tutorNome={evaluation.tutor.tutor_nome}
+                <PersonAssessmentPanel
+                  alert={evaluation.pessoa.alert}
+                  bairroNome={evaluation.pessoa.bairro_nome}
+                  pessoaNome={evaluation.pessoa.pessoa_nome}
                 />
                 {evaluation.bairro_warning.has_warning &&
                 evaluation.bairro_warning.message ? (
@@ -473,6 +476,13 @@ export function AdoptionNewPage() {
               />
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
+              <PdfUpload
+                label="Termo de adoção assinado (opcional)"
+                onChange={(storageId) => setTermoStorageId(storageId)}
+                storageId={termoStorageId}
+              />
+            </div>
+            <div className="flex flex-col gap-2 md:col-span-2">
               <Label htmlFor="observacoes-adocao">Observações (opcional)</Label>
               <textarea
                 className="min-h-20 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -508,24 +518,24 @@ export function AdoptionNewPage() {
               <h3 className="mb-2 font-semibold">Cao</h3>
               <p>{selectedDog?.nome}</p>
               <p className="text-muted-foreground">
-                {selectedDog ? formatMicrochip(selectedDog.microchip) : ""}
+                {selectedDog?.microchip ? formatMicrochip(selectedDog.microchip) : "Sem microchip"}
               </p>
             </div>
             <div className="rounded-xl border bg-card p-4 shadow-xs">
               <h3 className="mb-2 font-semibold">Tutor</h3>
-              <p>{evaluation?.tutor.tutor_nome}</p>
-              {evaluation?.tutor.bairro_nome ? (
-                <p className="text-muted-foreground">{evaluation.tutor.bairro_nome}</p>
+              <p>{evaluation?.pessoa.pessoa_nome}</p>
+              {evaluation?.pessoa.bairro_nome ? (
+                <p className="text-muted-foreground">{evaluation.pessoa.bairro_nome}</p>
               ) : null}
             </div>
             {evaluation?.bairro_warning.has_warning && evaluation.bairro_warning.message ? (
               <BairroWarningBanner message={evaluation.bairro_warning.message} />
             ) : null}
-            {evaluation?.tutor.alert ? (
-              <TutorAssessmentPanel
-                alert={evaluation.tutor.alert}
-                bairroNome={evaluation.tutor.bairro_nome}
-                tutorNome={evaluation.tutor.tutor_nome}
+            {evaluation?.pessoa.alert ? (
+              <PersonAssessmentPanel
+                alert={evaluation.pessoa.alert}
+                bairroNome={evaluation.pessoa.bairro_nome}
+                pessoaNome={evaluation.pessoa.pessoa_nome}
               />
             ) : null}
             <div className="rounded-xl border bg-card p-4 shadow-xs">
