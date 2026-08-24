@@ -713,3 +713,10 @@ Direcao registrada em `PRODUCT.md` e `DESIGN.md` na raiz do repositorio.
       `field.test.tsx`, `date-picker.test.tsx`, `DogCard.test.tsx` (ícone de
       espécie); fixtures de `dogs.create` ajustadas com `especie`.
 - [x] `npm run quality` verde (lint, typecheck, testes, build).
+
+## Continuação
+
+A partir daqui, ver `docs/implementation-backlog-v2.md` (Fase 12 em diante) —
+segunda onda de módulos pedida pela ONG em 2026-08-22, especificada em
+`docs/ajustes-cliente-modulos.md`. Este arquivo (Fases 0-11) fica congelado
+como está.
