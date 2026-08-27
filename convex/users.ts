@@ -87,6 +87,12 @@ const userSummaryValidator = v.object({
       v.literal("write"),
       v.literal("manage"),
     ),
+    public_reports: v.union(
+      v.literal("none"),
+      v.literal("read"),
+      v.literal("write"),
+      v.literal("manage"),
+    ),
   }),
   ultimo_acesso_em: v.optional(v.number()),
   criado_em: v.number(),

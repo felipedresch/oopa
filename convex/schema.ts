@@ -14,6 +14,7 @@ import {
   permissionStringValidator,
   personPapelValidator,
   personSnapshotValidator,
+  publicReportStatusValidator,
   severityValidator,
 } from "./domainValidators";
 import { permissionValidator } from "./permissions";
@@ -228,4 +229,19 @@ export default defineSchema({
     failure_message: v.optional(v.string()),
     created_at: v.number(),
   }).index("by_created_at", ["created_at"]),
+
+  public_reports: defineTable({
+    nome_denunciante: v.optional(v.string()),
+    contato: v.optional(v.string()),
+    tipo_denuncia: v.string(),
+    descricao: v.string(),
+    bairro_id: v.optional(v.id("bairros")),
+    local_descricao: v.optional(v.string()),
+    fotos: v.array(v.id("_storage")),
+    status: publicReportStatusValidator,
+    occurrence_id_gerada: v.optional(v.id("occurrences")),
+    criado_em: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_bairro", ["bairro_id"]),
 });

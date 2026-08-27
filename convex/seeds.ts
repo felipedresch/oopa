@@ -94,6 +94,12 @@ const SEED_OCCURRENCE_TYPES = [
     requer_foto: false,
     gravidade_padrao: "info" as const,
   },
+  {
+    nome: "Denúncia Externa",
+    categoria: "denuncia_externa" as const,
+    requer_foto: false,
+    gravidade_padrao: "media" as const,
+  },
 ] as const;
 
 // Bairros de Alegrete/RS (fontes públicas: cepbrasil.org / ruacep.com.br),
@@ -276,8 +282,8 @@ export const getSeedSummary = query({
       occurrenceTypeCount: occurrenceTypes.length,
       bairroCount: bairros.length,
       permissionTemplateCount: permissionTemplates.length,
-      permissionCatalogSize: 23,
-      uiModuleCount: 7,
+      permissionCatalogSize: 24,
+      uiModuleCount: 8,
     };
   },
 });
@@ -325,6 +331,12 @@ export const getPermissionTemplateMaps = query({
           v.literal("manage"),
         ),
         system: v.union(
+          v.literal("none"),
+          v.literal("read"),
+          v.literal("write"),
+          v.literal("manage"),
+        ),
+        public_reports: v.union(
           v.literal("none"),
           v.literal("read"),
           v.literal("write"),

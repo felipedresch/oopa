@@ -59,6 +59,14 @@ export const entityTypeValidator = v.union(
   v.literal("permission_template"),
   v.literal("bairro"),
   v.literal("occurrence_type"),
+  v.literal("public_report"),
+);
+
+export const publicReportStatusValidator = v.union(
+  v.literal("novo"),
+  v.literal("em_analise"),
+  v.literal("convertido"),
+  v.literal("arquivado"),
 );
 
 export const adoptionPayloadValidator = v.object({

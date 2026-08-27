@@ -93,6 +93,27 @@ export const search = query({
   },
 });
 
+/**
+ * Lista de bairros ativos para formulários públicos (sem autenticação),
+ * como a denúncia externa em `/denuncia`. Não aceita busca por prefixo:
+ * o volume de bairros é pequeno o suficiente para um select simples.
+ */
+export const listPublicOptions = query({
+  args: {},
+  returns: v.array(bairroOptionValidator),
+  handler: async (ctx) => {
+    const bairros = await ctx.db.query("bairros").collect();
+
+    return bairros
+      .filter((bairro) => bairro.ativo)
+      .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR"))
+      .map((bairro) => ({
+        _id: bairro._id,
+        nome: bairro.nome,
+      }));
+  },
+});
+
 export const create = mutation({
   args: {
     nome: v.string(),

@@ -17,7 +17,7 @@ test("seeds occurrence types, bairros and permission templates", async () => {
     client.mutation(api.seeds.seedAll, {}),
   );
   expect(firstRun).toEqual({
-    occurrenceTypes: 14,
+    occurrenceTypes: 15,
     bairros: 48,
     permissionTemplates: 5,
   });
@@ -33,10 +33,10 @@ test("seeds occurrence types, bairros and permission templates", async () => {
 
   const summary = await t.query(api.seeds.getSeedSummary, {});
   expect(summary).toMatchObject({
-    occurrenceTypeCount: 14,
+    occurrenceTypeCount: 15,
     bairroCount: 48,
     permissionTemplateCount: 5,
-    uiModuleCount: 7,
+    uiModuleCount: 8,
   });
 });
 
@@ -80,6 +80,7 @@ test("permission templates round-trip through module maps", async () => {
     team: "manage",
     settings: "manage",
     system: "manage",
+    public_reports: "manage",
   });
 
   for (const template of SEED_PERMISSION_TEMPLATES) {
@@ -155,6 +156,6 @@ test("schema indexes support lookups used by the domain", async () => {
   });
 
   const summary = await t.query(api.seeds.getSeedSummary, {});
-  expect(summary.occurrenceTypeCount).toBe(14);
+  expect(summary.occurrenceTypeCount).toBe(15);
   expect(bairroId).toBeDefined();
 });
