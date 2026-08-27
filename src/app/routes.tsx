@@ -4,6 +4,8 @@ import { AppLayout } from "@/app/layouts/AppLayout";
 import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { AcceptInvitePage } from "@/app/pages/AcceptInvitePage";
 import { LoginPage } from "@/app/pages/LoginPage";
+import { PublicReportConfirmationPage } from "@/app/pages/PublicReportConfirmationPage";
+import { PublicReportPage } from "@/app/pages/PublicReportPage";
 import { PermissionTemplatesPage } from "@/app/pages/PermissionTemplatesPage";
 import { AuditPage } from "@/app/pages/AuditPage";
 import { NotificationsPage } from "@/app/pages/NotificationsPage";
@@ -39,6 +41,8 @@ export const appRoutes: RouteObject[] = [
       { path: "/reset-password", element: <RequestResetPage /> },
       { path: "/reset-password/:token", element: <ResetPasswordPage /> },
       { path: "/accept-invite/:token", element: <AcceptInvitePage /> },
+      { path: "/denuncia", element: <PublicReportPage /> },
+      { path: "/denuncia/:id/confirmacao", element: <PublicReportConfirmationPage /> },
     ],
   },
   {

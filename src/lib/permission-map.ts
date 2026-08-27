@@ -72,6 +72,12 @@ const MODULE_LEVEL_PERMISSIONS: Record<
     write: [],
     manage: ["system.audit_log"],
   },
+  public_reports: {
+    none: [],
+    read: [],
+    write: [],
+    manage: ["public_reports.triage"],
+  },
 };
 
 export function moduleMapToPermissions(map: ModulePermissionMap): Permission[] {
