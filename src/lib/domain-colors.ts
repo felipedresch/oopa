@@ -70,6 +70,22 @@ export const dogStatusBadgeClass: Record<DogStatus, string> = {
   comunitario: "bg-accent text-accent-foreground",
 };
 
+export type RescueStatus = "aberta" | "em_atendimento" | "concluida" | "cancelada";
+
+export const RESCUE_STATUS_LABELS: Record<RescueStatus, string> = {
+  aberta: "Aberta",
+  em_atendimento: "Em atendimento",
+  concluida: "Concluída",
+  cancelada: "Cancelada",
+};
+
+export const rescueStatusBadgeClass: Record<RescueStatus, string> = {
+  aberta: "bg-warning/14 text-warning",
+  em_atendimento: "bg-info/12 text-info",
+  concluida: "bg-success/12 text-success",
+  cancelada: "bg-muted text-muted-foreground",
+};
+
 export const personAlertBadgeClass: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "bg-warning/14 text-warning",
   red: "bg-destructive/12 text-destructive",

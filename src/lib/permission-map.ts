@@ -78,6 +78,12 @@ const MODULE_LEVEL_PERMISSIONS: Record<
     write: [],
     manage: ["public_reports.triage"],
   },
+  rescues: {
+    none: [],
+    read: ["rescues.read"],
+    write: ["rescues.read", "rescues.create"],
+    manage: ["rescues.read", "rescues.create", "rescues.manage"],
+  },
 };
 
 export function moduleMapToPermissions(map: ModulePermissionMap): Permission[] {

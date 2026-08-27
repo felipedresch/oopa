@@ -5,6 +5,7 @@ import {
   ClipboardListIcon,
   DogIcon,
   HomeIcon,
+  LifeBuoyIcon,
   ListChecksIcon,
   LogOutIcon,
   ScanLineIcon,
@@ -60,6 +61,12 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Ocorrências",
     icon: ListChecksIcon,
     canAccess: ({ canAny }) => canAny(["occurrences.read", "occurrences.read_legal"]),
+  },
+  {
+    to: "/rescues",
+    label: "Resgates",
+    icon: LifeBuoyIcon,
+    canAccess: ({ can }) => can("rescues.read"),
   },
   {
     to: "/team",

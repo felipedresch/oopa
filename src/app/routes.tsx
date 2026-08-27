@@ -32,6 +32,9 @@ import { OccurrencesListPage } from "@/app/pages/OccurrencesListPage";
 import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
 import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
 import { ProfilePage } from "@/app/pages/ProfilePage";
+import { RescueDetailPage } from "@/app/pages/RescueDetailPage";
+import { RescueNewPage } from "@/app/pages/RescueNewPage";
+import { RescuesListPage } from "@/app/pages/RescuesListPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -67,6 +70,9 @@ export const appRoutes: RouteObject[] = [
       { path: "people/:personId/edit", element: <PersonFormPage /> },
       { path: "adoptions/new", element: <AdoptionNewPage /> },
       { path: "returns/new", element: <ReturnNewPage /> },
+      { path: "rescues", element: <RescuesListPage /> },
+      { path: "rescues/new", element: <RescueNewPage /> },
+      { path: "rescues/:id", element: <RescueDetailPage /> },
       { path: "team", element: <TeamPage /> },
       { path: "team/invite", element: <TeamInvitePage /> },
       { path: "team/:userId", element: <TeamUserPage /> },

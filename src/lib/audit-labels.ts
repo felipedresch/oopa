@@ -5,6 +5,7 @@ import {
   CameraIcon,
   HeartIcon,
   KeyRoundIcon,
+  LifeBuoyIcon,
   MapPinIcon,
   PawPrintIcon,
   PencilIcon,
@@ -115,6 +116,18 @@ const ACTION_LABELS: Record<string, AuditActionInfo> = {
     icon: ShieldOffIcon,
     tone: "neutral",
   },
+
+  "rescues.create": { label: "Resgate solicitado", icon: LifeBuoyIcon, tone: "create" },
+  "rescues.update_status": {
+    label: "Status do resgate alterado",
+    icon: TagIcon,
+    tone: "status",
+  },
+  "rescues.set_ong_description": {
+    label: "Descrição da ONG registrada no resgate",
+    icon: PencilIcon,
+    tone: "update",
+  },
 };
 
 /** Rótulo + ícone + tom para uma ação de auditoria; fallback neutro para ações não mapeadas. */
@@ -131,6 +144,7 @@ const ENTITY_LABELS: Record<string, string> = {
   bairro: "Bairro",
   occurrence_type: "Tipo de ocorrência",
   public_report: "Denúncia externa",
+  rescue_request: "Solicitação de resgate",
 };
 
 export function getEntityLabel(entityType: string): string {
@@ -146,6 +160,7 @@ const ENTITY_ID_LABELS: Record<string, string> = {
   bairro: "ID do bairro",
   occurrence_type: "ID do tipo de ocorrência",
   public_report: "ID da denúncia",
+  rescue_request: "ID do resgate",
 };
 
 export function getEntityIdLabel(entityType: string): string {

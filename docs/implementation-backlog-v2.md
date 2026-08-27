@@ -355,25 +355,53 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.2.
 
 ### Backend
 
-- [ ] Criar tabela `rescue_requests`.
-- [ ] Implementar mutation `rescues.create` protegida por `rescues.create`.
-- [ ] Implementar mutation `rescues.updateStatus`/`rescues.setOngDescription`
+- [x] Criar tabela `rescue_requests`.
+- [x] Implementar mutation `rescues.create` protegida por `rescues.create`.
+- [x] Implementar mutation `rescues.updateStatus`/`rescues.setOngDescription`
       protegida por `rescues.manage`.
-- [ ] Implementar fan-out de notificação para `gravidade === "alta"`,
+- [x] Implementar fan-out de notificação para `gravidade === "alta"`,
       filtrando por `rescues.manage` **e** `receber_alertas_resgate !== false`.
-- [ ] Implementar query `rescues.list` ordenada por gravidade e depois
+- [x] Implementar query `rescues.list` ordenada por gravidade e depois
       data.
-- [ ] Auditar criação e mudança de status/descrição.
-- [ ] Testar alerta de gravidade alta, preferência de usuário desativada,
+- [x] Auditar criação e mudança de status/descrição.
+- [x] Testar alerta de gravidade alta, preferência de usuário desativada,
       transições de status e permissões.
 
 ### Frontend
 
-- [ ] Criar `/rescues` com destaque visual para gravidade alta.
-- [ ] Criar `/rescues/new`.
-- [ ] Criar `/rescues/:id` com campo "O que aconteceu" (`descricao_ong`) e
+- [x] Criar `/rescues` com destaque visual para gravidade alta.
+- [x] Criar `/rescues/new`.
+- [x] Criar `/rescues/:id` com campo "O que aconteceu" (`descricao_ong`) e
       mudança de status.
-- [ ] Testar lista, criação, detalhe e recebimento do alerta.
+- [x] Testar lista, criação, detalhe e recebimento do alerta.
+
+**Notas:**
+- `users.receber_alertas_resgate` e o toggle em `/profile` já existiam
+  desde a Fase 13 — não precisou de trabalho novo, só o fan-out em
+  `rescues.create` passou a consumi-los. `undefined` é tratado como "quer
+  receber" (`!== false`), então não foi preciso setar um valor padrão na
+  criação de usuário.
+- Novo módulo de permissão completo `rescues` (`read`/`create`/`manage`,
+  mesmo padrão de `dogs`/`occurrences`) — diferente de `public_reports`
+  (Fase 16), que só tinha uma permissão binária. Nos templates seed:
+  Admin = manage; Agente Prefeitura e Voluntário de Campo = write (já
+  registram ocorrências em campo); Pet Shop Parceiro = none; Leitura
+  Restrita = read. Perfis novos podem ser ajustados depois pela ONG via
+  `/settings/permission-templates`, não é uma decisão travada.
+- `tipo` do resgate é `v.string()` livre no schema, como `tipo_denuncia`
+  da Fase 16 — o formulário oferece um `<select>` com as categorias do
+  pedido do cliente (atropelado, preso, agressivo, ferido, filhotes
+  abandonados, outro) e pré-seleciona a gravidade sugerida por tipo
+  (`atropelado` → alta), editável antes de enviar.
+- `rescues.list` não pagina: usa `.collect()` bounded pela escala real da
+  tabela (fila operacional de resgates abertos, não um histórico
+  ilimitado) e ordena em memória por gravidade (rank alta > media > baixa
+  > info) e depois `criado_em` desc — mesmo padrão pragmático já usado em
+  `bairros.list`/`occurrence_types` para tabelas operacionais pequenas.
+  Se o volume crescer muito no futuro, revisar para paginação com um
+  campo de rank persistido.
+- `storage.createSignedUploadUrl` passou a aceitar `rescues.create` na
+  lista de permissões que autorizam upload de foto.
 
 ## Fase 18 - Castração
 

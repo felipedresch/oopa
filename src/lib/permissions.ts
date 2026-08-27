@@ -23,6 +23,9 @@ export const PERMISSION_CATALOG = [
   "bairros.manage",
   "system.audit_log",
   "public_reports.triage",
+  "rescues.read",
+  "rescues.create",
+  "rescues.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSION_CATALOG)[number];
@@ -36,6 +39,7 @@ export const UI_MODULES = [
   "settings",
   "system",
   "public_reports",
+  "rescues",
 ] as const;
 
 export type UiModule = (typeof UI_MODULES)[number];
@@ -55,6 +59,7 @@ export const UI_MODULE_LABELS: Record<UiModule, string> = {
   settings: "Configurações",
   system: "Sistema",
   public_reports: "Denúncias externas",
+  rescues: "Resgates",
 };
 
 export const PERMISSION_LEVEL_LABELS: Record<PermissionLevel, string> = {
@@ -81,6 +86,7 @@ export function createEmptyModuleMap(): ModulePermissionMap {
     settings: "none",
     system: "none",
     public_reports: "none",
+    rescues: "none",
   };
 }
 
