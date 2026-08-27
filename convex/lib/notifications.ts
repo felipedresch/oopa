@@ -98,6 +98,10 @@ export async function resolveNotificationHref(
     return `/identify?microchip=${notification.entidade_id}`;
   }
 
+  if (notification.entidade_tipo === "rescue_request" && notification.entidade_id) {
+    return `/rescues/${notification.entidade_id}`;
+  }
+
   if (notification.entidade_tipo === "dog" && notification.entidade_id) {
     return `/dogs/${notification.entidade_id}`;
   }

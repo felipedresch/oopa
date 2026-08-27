@@ -22,6 +22,7 @@ export const createSignedUploadUrl = mutation({
       "occurrences.create_legal",
       "occurrences.create_adocao",
       "occurrences.create_outro",
+      "rescues.create",
     ]);
     return await ctx.storage.generateUploadUrl();
   },

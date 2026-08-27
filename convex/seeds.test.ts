@@ -36,7 +36,7 @@ test("seeds occurrence types, bairros and permission templates", async () => {
     occurrenceTypeCount: 15,
     bairroCount: 48,
     permissionTemplateCount: 5,
-    uiModuleCount: 8,
+    uiModuleCount: 9,
   });
 });
 
@@ -81,6 +81,7 @@ test("permission templates round-trip through module maps", async () => {
     settings: "manage",
     system: "manage",
     public_reports: "manage",
+    rescues: "manage",
   });
 
   for (const template of SEED_PERMISSION_TEMPLATES) {

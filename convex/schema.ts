@@ -15,6 +15,7 @@ import {
   personPapelValidator,
   personSnapshotValidator,
   publicReportStatusValidator,
+  rescueStatusValidator,
   severityValidator,
 } from "./domainValidators";
 import { permissionValidator } from "./permissions";
@@ -244,4 +245,24 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_bairro", ["bairro_id"]),
+
+  rescue_requests: defineTable({
+    solicitante_id: v.optional(v.id("people")),
+    tipo: v.string(),
+    gravidade: severityValidator,
+    descricao_solicitante: v.string(),
+    bairro_id: v.optional(v.id("bairros")),
+    local_descricao: v.optional(v.string()),
+    status: rescueStatusValidator,
+    descricao_ong: v.optional(v.string()),
+    dog_id: v.optional(v.id("dogs")),
+    fotos: v.array(v.id("_storage")),
+    criado_por: v.id("users"),
+    criado_em: v.number(),
+    atualizado_em: v.optional(v.number()),
+  })
+    .index("by_status", ["status"])
+    .index("by_gravity", ["gravidade"])
+    .index("by_bairro", ["bairro_id"])
+    .index("by_dog", ["dog_id"]),
 });

@@ -16,7 +16,8 @@ type AuditEntityType =
   | "permission_template"
   | "bairro"
   | "occurrence_type"
-  | "public_report";
+  | "public_report"
+  | "rescue_request";
 
 const auditLogValidator = v.object({
   _id: v.id("audit_logs"),

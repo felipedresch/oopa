@@ -49,6 +49,7 @@ export const notificationTypeValidator = v.union(
   v.literal("legal_occurrence"),
   v.literal("dog_not_found"),
   v.literal("system"),
+  v.literal("rescue_alert"),
 );
 
 export const entityTypeValidator = v.union(
@@ -60,6 +61,7 @@ export const entityTypeValidator = v.union(
   v.literal("bairro"),
   v.literal("occurrence_type"),
   v.literal("public_report"),
+  v.literal("rescue_request"),
 );
 
 export const publicReportStatusValidator = v.union(
@@ -67,6 +69,13 @@ export const publicReportStatusValidator = v.union(
   v.literal("em_analise"),
   v.literal("convertido"),
   v.literal("arquivado"),
+);
+
+export const rescueStatusValidator = v.union(
+  v.literal("aberta"),
+  v.literal("em_atendimento"),
+  v.literal("concluida"),
+  v.literal("cancelada"),
 );
 
 export const adoptionPayloadValidator = v.object({
