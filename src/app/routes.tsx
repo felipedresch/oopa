@@ -26,6 +26,7 @@ import { OccurrenceDetailPage } from "@/app/pages/OccurrenceDetailPage";
 import { OccurrenceFormPage } from "@/app/pages/OccurrenceFormPage";
 import { OccurrenceRectifyPage } from "@/app/pages/OccurrenceRectifyPage";
 import { OccurrenceTypesSettingsPage } from "@/app/pages/OccurrenceTypesSettingsPage";
+import { OccurrencesListPage } from "@/app/pages/OccurrencesListPage";
 import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
 import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
 import { ProfilePage } from "@/app/pages/ProfilePage";
@@ -50,6 +51,7 @@ export const appRoutes: RouteObject[] = [
       { path: "dogs/:dogId", element: <DogDetailPage /> },
       { path: "dogs/:dogId/edit", element: <DogFormPage /> },
       { path: "dogs/:dogId/occurrences/new", element: <OccurrenceFormPage /> },
+      { path: "occurrences", element: <OccurrencesListPage /> },
       { path: "dogs/:dogId/occurrences/:occurrenceId", element: <OccurrenceDetailPage /> },
       {
         path: "dogs/:dogId/occurrences/:occurrenceId/rectify",

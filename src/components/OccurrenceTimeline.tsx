@@ -3,11 +3,8 @@ import { useState } from "react";
 
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { EmptyState } from "@/components/EmptyState";
 import { FilterBar } from "@/components/FilterBar";
-import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { OccurrenceCard } from "@/components/OccurrenceCard";
-import { Button } from "@/components/ui/button";
+import { OccurrenceCardList } from "@/components/OccurrenceCardList";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import type { Severity } from "@/lib/domain-colors";
@@ -52,10 +49,6 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
     },
     { initialNumItems: 25 },
   );
-
-  if (results === undefined) {
-    return <LoadingSkeleton rows={4} />;
-  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -105,34 +98,12 @@ export function OccurrenceTimeline({ dogId }: OccurrenceTimelineProps) {
         </div>
       </FilterBar>
 
-      {results.length === 0 ? (
-        <EmptyState
-          description="Nenhuma ocorrência visivel com os filtros atuais."
-          title="Sem ocorrências"
-        />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {results.map((occurrence) => (
-            <OccurrenceCard
-              atribuivel={occurrence.atribuivel_a_pessoa}
-              bairroNome={occurrence.bairro_nome}
-              dataOcorrencia={occurrence.data_ocorrencia}
-              descricao={occurrence.descricao}
-              dogId={dogId}
-              gravidade={occurrence.gravidade}
-              key={occurrence._id}
-              occurrenceId={occurrence._id}
-              typeNome={occurrence.type_nome}
-            />
-          ))}
-          {status === "CanLoadMore" ? (
-            <Button className="min-h-11 self-start" onClick={() => loadMore(25)} variant="outline">
-              Carregar mais
-            </Button>
-          ) : null}
-          {status === "LoadingMore" ? <LoadingSkeleton rows={2} /> : null}
-        </div>
-      )}
+      <OccurrenceCardList
+        emptyDescription="Nenhuma ocorrência visivel com os filtros atuais."
+        occurrences={results?.map((occurrence) => ({ ...occurrence, dog_id: dogId }))}
+        onLoadMore={() => loadMore(25)}
+        paginationStatus={status}
+      />
     </div>
   );
 }

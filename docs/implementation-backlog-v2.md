@@ -233,21 +233,46 @@ Ver `docs/ajustes-cliente-modulos.md` seção 3.5. Pré-requisito da Fase 16
 
 ### Backend
 
-- [ ] Implementar query `occurrences.listAll` paginada, sem exigir
+- [x] Implementar query `occurrences.listAll` paginada, sem exigir
       `dog_id`, com filtros por categoria, gravidade, status, bairro e
       período, respeitando `occurrences.read`/`occurrences.read_legal`.
-- [ ] Garantir formato de retorno comum para ocorrências com e sem
+- [x] Garantir formato de retorno comum para ocorrências com e sem
       `dog_id` (nome do animal opcional, nome/snapshot de pessoa opcional).
-- [ ] Testar listagem geral com ocorrências mistas, filtros e permissão.
+- [x] Testar listagem geral com ocorrências mistas, filtros e permissão.
 
 ### Frontend
 
-- [ ] Criar `/occurrences` com `FilterBar` (categoria, gravidade, status,
+- [x] Criar `/occurrences` com `FilterBar` (categoria, gravidade, status,
       bairro, período) e paginação.
-- [ ] Extrair componente de listagem compartilhado entre `/occurrences` e a
+- [x] Extrair componente de listagem compartilhado entre `/occurrences` e a
       timeline de ocorrências em `DogDetailPage`, para não duplicar código.
-- [ ] Testar listagem geral, filtros e navegação para o detalhe da
+- [x] Testar listagem geral, filtros e navegação para o detalhe da
       ocorrência.
+
+**Notas:**
+- `occurrences` ainda não tem campo `status` no schema (não fazia parte do
+  escopo desta fase) — o filtro "status" citado em
+  `docs/ajustes-cliente-modulos.md` seção 3.5 refere-se ao `status` de
+  `public_reports` (novo/em_analise/convertido/arquivado), que só existe a
+  partir da Fase 16, quando a triagem de denúncias externas entra dentro
+  desta mesma tela. Filtro implementado nesta fase: categoria, gravidade,
+  bairro e período.
+- `occurrences.listAll` usa um único índice por chamada (prioridade:
+  período > bairro > gravidade > `by_date`), com os demais filtros e a
+  checagem de permissão por categoria aplicados em memória sobre a página
+  retornada — mesmo padrão pragmático já usado em `dogs.list`/
+  `occurrences.listByDog`.
+- Componente compartilhado: `OccurrenceCardList` (novo), consumido por
+  `OccurrenceTimeline` (timeline por animal) e pela nova
+  `OccurrencesListPage` (`/occurrences`). `OccurrenceCard` passou a aceitar
+  `dogId` opcional: quando ausente, renderiza sem link e com selo "Sem
+  animal vinculado" (caso hoje só alcançável quando a Fase 16 permitir
+  ocorrências sem animal).
+- Adicionado item de navegação "Ocorrências" na sidebar desktop
+  (`AppLayout.tsx`), visível para quem tem `occurrences.read` ou
+  `occurrences.read_legal`. Não adicionado à navegação mobile para manter o
+  limite de 5 itens já estabelecido (reorganização completa do menu é
+  Fase 26).
 
 ## Fase 16 - Denúncias externas e portal público
 
