@@ -566,6 +566,104 @@ export const listByPerson = query({
   },
 });
 
+const occurrenceListItemValidator = occurrenceSummaryValidator.extend({
+  dog_nome: v.optional(v.string()),
+  pessoa_id: v.optional(v.id("people")),
+  pessoa_nome: v.optional(v.string()),
+});
+
+export const listAll = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    categoria: v.optional(occurrenceCategoryValidator),
+    gravidade: v.optional(severityValidator),
+    bairro_id: v.optional(v.id("bairros")),
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+  },
+  returns: v.object({
+    page: v.array(occurrenceListItemValidator),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const actor = await getCurrentUser(ctx);
+    const paginationOpts = normalizePaginationOpts(args.paginationOpts);
+    const { categoria, gravidade, bairro_id: bairroId, from, to } = args;
+
+    const baseQuery =
+      from !== undefined || to !== undefined
+        ? ctx.db.query("occurrences").withIndex("by_date", (q) => {
+            if (from !== undefined && to !== undefined) {
+              return q.gte("data_ocorrencia", from).lte("data_ocorrencia", to);
+            }
+            if (from !== undefined) {
+              return q.gte("data_ocorrencia", from);
+            }
+            return q.lte("data_ocorrencia", to!);
+          })
+        : bairroId !== undefined
+          ? ctx.db.query("occurrences").withIndex("by_bairro", (q) => q.eq("bairro_id", bairroId))
+          : gravidade !== undefined
+            ? ctx.db.query("occurrences").withIndex("by_gravity", (q) => q.eq("gravidade", gravidade))
+            : ctx.db.query("occurrences").withIndex("by_date");
+
+    const result = await baseQuery.order("desc").paginate(paginationOpts);
+
+    const page = (
+      await Promise.all(
+        result.page.map(async (occurrence) => {
+          const type = await ctx.db.get("occurrence_types", occurrence.occurrence_type_id);
+          if (!type) {
+            return null;
+          }
+
+          if (!canReadOccurrenceCategory(actor.permissions, type.categoria)) {
+            return null;
+          }
+          if (categoria && type.categoria !== categoria) {
+            return null;
+          }
+          if (gravidade && occurrence.gravidade !== gravidade) {
+            return null;
+          }
+          if (bairroId && occurrence.bairro_id !== bairroId) {
+            return null;
+          }
+
+          const dog = occurrence.dog_id ? await ctx.db.get("dogs", occurrence.dog_id) : null;
+          const bairro = occurrence.bairro_id
+            ? await ctx.db.get("bairros", occurrence.bairro_id)
+            : null;
+
+          return {
+            _id: occurrence._id,
+            dog_id: occurrence.dog_id,
+            dog_nome: occurrence.dog_id ? (dog?.nome ?? "Cão removido") : undefined,
+            pessoa_id: occurrence.pessoa_id,
+            pessoa_nome: occurrence.pessoa_snapshot?.nome_completo,
+            occurrence_type_id: occurrence.occurrence_type_id,
+            type_nome: type.nome,
+            categoria: type.categoria,
+            gravidade: occurrence.gravidade,
+            data_ocorrencia: occurrence.data_ocorrencia,
+            descricao: occurrence.descricao,
+            atribuivel_a_pessoa: occurrence.atribuivel_a_pessoa,
+            original_id: occurrence.original_id,
+            bairro_nome: bairro?.nome ?? null,
+          };
+        }),
+      )
+    ).filter((item): item is NonNullable<typeof item> => item !== null);
+
+    return {
+      page,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
+  },
+});
+
 export const isSensitiveType = query({
   args: {
     occurrenceTypeId: v.id("occurrence_types"),

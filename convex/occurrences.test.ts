@@ -240,3 +240,115 @@ test("get oculta snapshot sensivel da pessoa sem people.read_sensitive", async (
   );
   expect(asAdmin?.pessoa_snapshot?.cpf).toBeDefined();
 });
+
+test("listAll retorna ocorrencias com filtros e nome do cao/pessoa", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const dogId = await seedDog(t, adminId);
+  const personId = await seedPerson(t, adminId);
+  const bairroId = await seedBairro(t, "Centro");
+  const outroBairroId = await seedBairro(t, "Norte");
+  const rotinaTypeId = await getTypeId(t, adminId, "Consulta/Visualização");
+  const resgateTypeId = await getTypeId(t, adminId, "Resgate na Rua");
+
+  await t.run(async (ctx) => {
+    await ctx.db.patch(dogId, { pessoa_atual_id: personId });
+  });
+
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.occurrences.create, {
+      dogId,
+      occurrenceTypeId: rotinaTypeId,
+      descricao: "Consulta de rotina",
+      data_ocorrencia: Date.now(),
+      bairro_id: bairroId,
+      photo_storage_ids: [],
+    }),
+  );
+
+  const storageId = await storeTestImage(t);
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.occurrences.create, {
+      dogId,
+      occurrenceTypeId: resgateTypeId,
+      descricao: "Resgate com risco",
+      data_ocorrencia: Date.now(),
+      bairro_id: outroBairroId,
+      photo_storage_ids: [storageId],
+    }),
+  );
+
+  const all = await asUser(t, adminId, async (client) =>
+    client.query(api.occurrences.listAll, { paginationOpts: { numItems: 10, cursor: null } }),
+  );
+  expect(all.page).toHaveLength(2);
+  const rotina = all.page.find((item) => item.type_nome === "Consulta/Visualização");
+  expect(rotina?.dog_nome).toBe("Luna");
+  expect(rotina?.pessoa_nome).toBe("Paula Tutora");
+  expect(rotina?.bairro_nome).toBe("Centro");
+
+  const filteredByCategoria = await asUser(t, adminId, async (client) =>
+    client.query(api.occurrences.listAll, {
+      paginationOpts: { numItems: 10, cursor: null },
+      categoria: "risco",
+    }),
+  );
+  expect(filteredByCategoria.page).toHaveLength(1);
+  expect(filteredByCategoria.page[0]?.type_nome).toBe("Resgate na Rua");
+
+  const filteredByBairro = await asUser(t, adminId, async (client) =>
+    client.query(api.occurrences.listAll, {
+      paginationOpts: { numItems: 10, cursor: null },
+      bairro_id: bairroId,
+    }),
+  );
+  expect(filteredByBairro.page).toHaveLength(1);
+  expect(filteredByBairro.page[0]?.bairro_nome).toBe("Centro");
+});
+
+test("listAll oculta categoria de risco de quem nao tem read_legal", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const readerId = await seedUser(t, {
+    nome: "Leitor",
+    email: "occ-listall-reader@ong.local",
+    permissions: ["dogs.read", "occurrences.read", "occurrences.create_rotina"],
+  });
+  const dogId = await seedDog(t, adminId);
+  const rotinaTypeId = await getTypeId(t, adminId, "Consulta/Visualização");
+  const resgateTypeId = await getTypeId(t, adminId, "Resgate na Rua");
+  const storageId = await storeTestImage(t);
+
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.occurrences.create, {
+      dogId,
+      occurrenceTypeId: rotinaTypeId,
+      descricao: "Consulta de rotina",
+      data_ocorrencia: Date.now(),
+      photo_storage_ids: [],
+    }),
+  );
+
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.occurrences.create, {
+      dogId,
+      occurrenceTypeId: resgateTypeId,
+      descricao: "Resgate com risco",
+      data_ocorrencia: Date.now(),
+      photo_storage_ids: [storageId],
+    }),
+  );
+
+  const asReader = await asUser(t, readerId, async (client) =>
+    client.query(api.occurrences.listAll, { paginationOpts: { numItems: 10, cursor: null } }),
+  );
+  expect(asReader.page).toHaveLength(1);
+  expect(asReader.page[0]?.type_nome).toBe("Consulta/Visualização");
+
+  const asAdmin = await asUser(t, adminId, async (client) =>
+    client.query(api.occurrences.listAll, { paginationOpts: { numItems: 10, cursor: null } }),
+  );
+  expect(asAdmin.page).toHaveLength(2);
+});
