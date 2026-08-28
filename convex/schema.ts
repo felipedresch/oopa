@@ -283,4 +283,21 @@ export default defineSchema({
     .index("by_data_solicitacao", ["data_solicitacao"])
     .index("by_pessoa", ["pessoa_id"])
     .index("by_dog", ["dog_id"]),
+
+  organization_settings: defineTable({
+    razao_social: v.string(),
+    nome_fantasia: v.optional(v.string()),
+    cnpj: v.string(),
+    inscricao_estadual: v.optional(v.string()),
+    endereco_logradouro: v.optional(v.string()),
+    endereco_numero: v.optional(v.string()),
+    endereco_complemento: v.optional(v.string()),
+    endereco_cep: v.optional(v.string()),
+    bairro_id: v.optional(v.id("bairros")),
+    telefone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    logo_storage_id: v.optional(v.id("_storage")),
+    atualizado_em: v.optional(v.number()),
+    atualizado_por: v.optional(v.id("users")),
+  }),
 });

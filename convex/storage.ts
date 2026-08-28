@@ -23,6 +23,7 @@ export const createSignedUploadUrl = mutation({
       "occurrences.create_adocao",
       "occurrences.create_outro",
       "rescues.create",
+      "organization.manage",
     ]);
     return await ctx.storage.generateUploadUrl();
   },

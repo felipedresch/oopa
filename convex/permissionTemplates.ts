@@ -73,6 +73,12 @@ const moduleMapValidator = v.object({
       v.literal("write"),
       v.literal("manage"),
     ),
+    organization: v.union(
+      v.literal("none"),
+      v.literal("read"),
+      v.literal("write"),
+      v.literal("manage"),
+    ),
 });
 
 const templateValidator = v.object({

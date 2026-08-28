@@ -18,7 +18,8 @@ type AuditEntityType =
   | "occurrence_type"
   | "public_report"
   | "rescue_request"
-  | "castration_request";
+  | "castration_request"
+  | "organization_settings";
 
 const auditLogValidator = v.object({
   _id: v.id("audit_logs"),
