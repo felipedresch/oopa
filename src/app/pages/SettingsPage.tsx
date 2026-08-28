@@ -30,6 +30,18 @@ const settingsLinks = [
     description: "Razão social, CNPJ, endereço, contato e logo.",
     permission: "organization.manage",
   },
+  {
+    to: "/catalog/services",
+    title: "Serviços",
+    description: "Catálogo de serviços reutilizado nos atendimentos.",
+    permission: "services.manage",
+  },
+  {
+    to: "/catalog/supplies",
+    title: "Insumos",
+    description: "Catálogo de medicamentos e materiais.",
+    permission: "supplies.manage",
+  },
 ] as const;
 
 export function SettingsPage() {

@@ -511,20 +511,48 @@ menu, não em Atendimentos.
 
 ### Backend
 
-- [ ] Criar tabela `services`.
-- [ ] Criar tabela `supplies`.
-- [ ] Implementar CRUD `services.*` protegido por `services.manage`
+- [x] Criar tabela `services`.
+- [x] Criar tabela `supplies`.
+- [x] Implementar CRUD `services.*` protegido por `services.manage`
       (desativar em vez de excluir, mesmo padrão de `occurrence_types`/
       `bairros`).
-- [ ] Implementar CRUD `supplies.*` protegido por `supplies.manage`.
-- [ ] Testar CRUD dos dois catálogos, desativação e permissões.
+- [x] Implementar CRUD `supplies.*` protegido por `supplies.manage`.
+- [x] Testar CRUD dos dois catálogos, desativação e permissões.
 
 ### Frontend
 
-- [ ] Criar `/catalog/services` dentro de Cadastros (lista, criar, editar,
+- [x] Criar `/catalog/services` dentro de Cadastros (lista, criar, editar,
       ativar/desativar).
-- [ ] Criar `/catalog/supplies` dentro de Cadastros (mesmo padrão).
-- [ ] Testar CRUD dos dois catálogos na UI.
+- [x] Criar `/catalog/supplies` dentro de Cadastros (mesmo padrão).
+- [x] Testar CRUD dos dois catálogos na UI.
+
+**Notas:**
+- Decisão de permissão: em vez de dois `UI_MODULES` novos com níveis
+  read/write/manage próprios, `services.manage` e `supplies.manage`
+  entraram no módulo `settings` já existente (mesmo grupo de
+  `bairros.manage`/`occurrence_types.manage`/`templates.manage`), já que
+  são catálogos de configuração como bairros e tipos de ocorrência — não
+  justificam granularidade própria. Isso evitou o ripple que os módulos
+  das Fases 17-19 precisaram nos três validadores que enumeram módulos
+  por nome (`seeds.getPermissionTemplateMaps`, `users.list`,
+  `permissionTemplates.list`); só o `PERMISSION_CATALOG` cresceu.
+- Correção de raiz: `AuditEntityType` em `convex/audit.ts` passou a ser
+  derivado via `Infer<typeof entityTypeValidator>` em vez de uma lista
+  literal duplicada — a lista manual já tinha sido esquecida de
+  sincronizar duas vezes (Fase 19 e nesta fase), então a duplicação foi
+  eliminada na raiz.
+- `/catalog/services` e `/catalog/supplies` ainda vivem dentro da tela
+  `/settings` (mesmo padrão de `/settings/bairros` e
+  `/settings/occurrence-types`), não em um menu "Cadastros" dedicado —
+  esse agrupamento só existe a partir da Fase 26 (reorganização do menu).
+  As rotas em si já seguem o caminho `/catalog/*` pedido no backlog.
+- Como o checklist desta fase pede "editar" explicitamente (diferente do
+  padrão original de `OccurrenceTypesSettingsPage`, que só tem criar e
+  ativar/desativar), as duas telas novas ganharam edição inline: o botão
+  "Editar" carrega os campos do item no mesmo formulário de criação, que
+  alterna para "Salvar alterações" com opção de cancelar.
+- Novo `formatCurrency` em `src/lib/formatters.ts` (primeiro valor
+  monetário exibido no app) usando `Intl.NumberFormat` com `BRL`.
 
 ## Fase 21 - Atendimentos, prontuário médico e notas fiscais
 

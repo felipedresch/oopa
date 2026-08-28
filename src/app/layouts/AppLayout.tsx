@@ -103,6 +103,8 @@ const desktopNavItems: NavItemConfig[] = [
         "occurrence_types.manage",
         "bairros.manage",
         "organization.manage",
+        "services.manage",
+        "supplies.manage",
       ]),
   },
 ];

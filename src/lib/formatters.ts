@@ -37,6 +37,13 @@ export function formatCep(value: string): string {
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
 export function formatDate(timestamp: number): string {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",

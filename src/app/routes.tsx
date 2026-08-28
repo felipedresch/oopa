@@ -39,6 +39,8 @@ import { CastrationDetailPage } from "@/app/pages/CastrationDetailPage";
 import { CastrationNewPage } from "@/app/pages/CastrationNewPage";
 import { CastrationsListPage } from "@/app/pages/CastrationsListPage";
 import { OrganizationSettingsPage } from "@/app/pages/OrganizationSettingsPage";
+import { ServicesCatalogPage } from "@/app/pages/ServicesCatalogPage";
+import { SuppliesCatalogPage } from "@/app/pages/SuppliesCatalogPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -91,6 +93,8 @@ export const appRoutes: RouteObject[] = [
       { path: "settings/occurrence-types", element: <OccurrenceTypesSettingsPage /> },
       { path: "settings/bairros", element: <BairrosSettingsPage /> },
       { path: "settings/organization", element: <OrganizationSettingsPage /> },
+      { path: "catalog/services", element: <ServicesCatalogPage /> },
+      { path: "catalog/supplies", element: <SuppliesCatalogPage /> },
       { path: "audit", element: <AuditPage /> },
       { path: "notifications", element: <NotificationsPage /> },
       { path: "profile", element: <ProfilePage /> },
