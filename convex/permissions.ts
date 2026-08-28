@@ -32,6 +32,8 @@ export const PERMISSION_CATALOG = [
   "castration.create",
   "castration.manage",
   "organization.manage",
+  "services.manage",
+  "supplies.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSION_CATALOG)[number];
@@ -109,6 +111,8 @@ export const permissionValidator = v.union(
   v.literal("castration.create"),
   v.literal("castration.manage"),
   v.literal("organization.manage"),
+  v.literal("services.manage"),
+  v.literal("supplies.manage"),
 );
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
@@ -186,8 +190,14 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
   settings: {
     none: [],
     read: [],
-    write: ["bairros.manage"],
-    manage: ["templates.manage", "occurrence_types.manage", "bairros.manage"],
+    write: ["bairros.manage", "services.manage", "supplies.manage"],
+    manage: [
+      "templates.manage",
+      "occurrence_types.manage",
+      "bairros.manage",
+      "services.manage",
+      "supplies.manage",
+    ],
   },
   system: {
     none: [],

@@ -282,7 +282,7 @@ export const getSeedSummary = query({
       occurrenceTypeCount: occurrenceTypes.length,
       bairroCount: bairros.length,
       permissionTemplateCount: permissionTemplates.length,
-      permissionCatalogSize: 31,
+      permissionCatalogSize: 33,
       uiModuleCount: 11,
     };
   },

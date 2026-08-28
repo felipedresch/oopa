@@ -1,5 +1,5 @@
 import { paginationOptsValidator } from "convex/server";
-import { v } from "convex/values";
+import { v, type Infer } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
@@ -8,18 +8,7 @@ import { entityTypeValidator } from "./domainValidators";
 import { getCurrentUser, requirePermission } from "./lib/auth";
 import { normalizePaginationOpts } from "./lib/pagination";
 
-type AuditEntityType =
-  | "user"
-  | "dog"
-  | "person"
-  | "occurrence"
-  | "permission_template"
-  | "bairro"
-  | "occurrence_type"
-  | "public_report"
-  | "rescue_request"
-  | "castration_request"
-  | "organization_settings";
+type AuditEntityType = Infer<typeof entityTypeValidator>;
 
 const auditLogValidator = v.object({
   _id: v.id("audit_logs"),

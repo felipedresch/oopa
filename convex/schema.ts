@@ -18,7 +18,9 @@ import {
   personSnapshotValidator,
   publicReportStatusValidator,
   rescueStatusValidator,
+  serviceCategoryValidator,
   severityValidator,
+  supplyCategoryValidator,
 } from "./domainValidators";
 import { permissionValidator } from "./permissions";
 
@@ -299,5 +301,24 @@ export default defineSchema({
     logo_storage_id: v.optional(v.id("_storage")),
     atualizado_em: v.optional(v.number()),
     atualizado_por: v.optional(v.id("users")),
+  }),
+
+  services: defineTable({
+    nome: v.string(),
+    descricao: v.optional(v.string()),
+    categoria: serviceCategoryValidator,
+    valor_padrao: v.number(),
+    ativo: v.boolean(),
+    ...timestampFields,
+  }),
+
+  supplies: defineTable({
+    nome: v.string(),
+    descricao: v.optional(v.string()),
+    categoria: supplyCategoryValidator,
+    unidade_medida: v.optional(v.string()),
+    valor_padrao: v.number(),
+    ativo: v.boolean(),
+    ...timestampFields,
   }),
 });

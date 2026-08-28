@@ -11,7 +11,7 @@ import {
 } from "./permissions";
 
 test("catalogo granular contem todas as permissoes de dominio", () => {
-  expect(PERMISSION_CATALOG).toHaveLength(31);
+  expect(PERMISSION_CATALOG).toHaveLength(33);
   expect(UI_MODULES).toHaveLength(11);
 });
 
@@ -37,6 +37,11 @@ test("traduz modulo e nivel para permissoes granulares", () => {
   ]);
   expect(moduleLevelToPermissions("organization", "manage")).toEqual([
     "organization.manage",
+  ]);
+  expect(moduleLevelToPermissions("settings", "write")).toEqual([
+    "bairros.manage",
+    "services.manage",
+    "supplies.manage",
   ]);
   expect(moduleLevelToPermissions("team", "none")).toEqual([]);
 });
@@ -83,6 +88,8 @@ test("helpers de permissao avaliam conjuntos esperados", () => {
   expect(hasPermission(permissions, "rescues.manage")).toBe(true);
   expect(hasPermission(permissions, "castration.manage")).toBe(true);
   expect(hasPermission(permissions, "organization.manage")).toBe(true);
+  expect(hasPermission(permissions, "services.manage")).toBe(true);
+  expect(hasPermission(permissions, "supplies.manage")).toBe(true);
   expect(
     hasAllPermissions(permissions, ["dogs.read", "templates.manage"]),
   ).toBe(true);
