@@ -86,6 +86,29 @@ export const rescueStatusBadgeClass: Record<RescueStatus, string> = {
   cancelada: "bg-muted text-muted-foreground",
 };
 
+export type CastrationStatus =
+  | "aguardando"
+  | "agendada"
+  | "realizada"
+  | "cancelada"
+  | "nao_compareceu";
+
+export const CASTRATION_STATUS_LABELS: Record<CastrationStatus, string> = {
+  aguardando: "Aguardando",
+  agendada: "Agendada",
+  realizada: "Realizada",
+  cancelada: "Cancelada",
+  nao_compareceu: "Não compareceu",
+};
+
+export const castrationStatusBadgeClass: Record<CastrationStatus, string> = {
+  aguardando: "bg-warning/14 text-warning",
+  agendada: "bg-info/12 text-info",
+  realizada: "bg-success/12 text-success",
+  cancelada: "bg-muted text-muted-foreground",
+  nao_compareceu: "bg-destructive/12 text-destructive",
+};
+
 export const personAlertBadgeClass: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "bg-warning/14 text-warning",
   red: "bg-destructive/12 text-destructive",

@@ -9,6 +9,7 @@ import {
   ListChecksIcon,
   LogOutIcon,
   ScanLineIcon,
+  ScissorsIcon,
   SettingsIcon,
   UserIcon,
   UsersIcon,
@@ -67,6 +68,12 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Resgates",
     icon: LifeBuoyIcon,
     canAccess: ({ can }) => can("rescues.read"),
+  },
+  {
+    to: "/castration",
+    label: "Castração",
+    icon: ScissorsIcon,
+    canAccess: ({ can }) => can("castration.read"),
   },
   {
     to: "/team",

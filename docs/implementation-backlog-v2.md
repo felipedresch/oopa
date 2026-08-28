@@ -409,25 +409,56 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.3.
 
 ### Backend
 
-- [ ] Criar tabela `castration_requests`.
-- [ ] Implementar mutation `castration.create` protegida por
+- [x] Criar tabela `castration_requests`.
+- [x] Implementar mutation `castration.create` protegida por
       `castration.create`.
-- [ ] Implementar mutation `castration.updateDataSolicitacao` protegida
+- [x] Implementar mutation `castration.updateDataSolicitacao` protegida
       por `castration.manage`, auditando quem reordenou a fila.
-- [ ] Implementar mutation `castration.markRealizada`, oferecendo criar
+- [x] Implementar mutation `castration.markRealizada`, oferecendo criar
       `dogs` sem microchip quando `dog_id` estiver vazio, vinculando o
       `castration_request` ao novo animal.
-- [ ] Implementar query `castration.list` ordenada por `data_solicitacao`.
-- [ ] Testar fila FIFO, reordenação manual auditada, conclusão com criação
+- [x] Implementar query `castration.list` ordenada por `data_solicitacao`.
+- [x] Testar fila FIFO, reordenação manual auditada, conclusão com criação
       de animal e permissões.
 
 ### Frontend
 
-- [ ] Criar `/castration` (fila ordenada).
-- [ ] Criar `/castration/new` com descrição leve do animal, sem exigir
+- [x] Criar `/castration` (fila ordenada).
+- [x] Criar `/castration/new` com descrição leve do animal, sem exigir
       cadastro completo.
-- [ ] Criar `/castration/:id` com mudança de status e reordenação de data.
-- [ ] Testar fila, criação, reordenação e conclusão.
+- [x] Criar `/castration/:id` com mudança de status e reordenação de data.
+- [x] Testar fila, criação, reordenação e conclusão.
+
+**Notas:**
+- Novo módulo de permissão completo `castration` (read/create/manage),
+  mesmo padrão de `rescues` (Fase 17). Nos templates seed: Admin = manage;
+  Agente Prefeitura e Voluntário de Campo = write; Pet Shop Parceiro =
+  none; Leitura Restrita = read — mesma lógica já aplicada em `rescues`.
+- `castration.list` pagina de verdade via índice `by_data_solicitacao`
+  (`order("asc")`), diferente do `collect()` + sort em memória usado em
+  `rescues.list` — aqui a ordenação pedida (FIFO por data de solicitação)
+  já corresponde a um índice real, então não há necessidade do atalho
+  pragmático. Filtro de status é aplicado sobre a página já buscada
+  (mesmo padrão de outros `list` que combinam um índice principal com
+  predicados secundários em memória).
+- `castration.create` sempre usa `Date.now()` como `data_solicitacao`
+  (fila por ordem de chegada); a data só muda depois, explicitamente, via
+  `castration.updateDataSolicitacao` — não expusemos um campo de data na
+  tela de criação para não confundir "quando foi pedido" com "prioridade
+  na fila".
+- `updateStatus` é uma mutation nova, não pedida explicitamente na lista
+  de itens de backend do backlog original, mas necessária para cobrir
+  "mudança de status" citada no checklist do frontend — bloqueia
+  transição direta para `realizada` (que só acontece via `markRealizada`,
+  que tem o efeito colateral de vincular/criar o animal).
+- Ao criar o animal automaticamente em `markRealizada` (quando nenhum
+  `dogId` é informado), o cadastro é feito por `ctx.db.insert` direto na
+  tabela `dogs`, não pela mutation pública `dogs.create` — que exige foto
+  de perfil obrigatória. Isso preserva a promessa de "sem exigir cadastro
+  completo" also para a conclusão, não só para a criação da solicitação;
+  o animal fica sem foto até alguém completar a ficha depois. `castrado`
+  é sempre `true` (acabou de ser castrado) e `vacinas_em_dia` sempre
+  `false` (desconhecido, default seguro exigindo revisão).
 
 ## Fase 19 - Dados da ONG
 

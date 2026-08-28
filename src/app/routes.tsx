@@ -35,6 +35,9 @@ import { ProfilePage } from "@/app/pages/ProfilePage";
 import { RescueDetailPage } from "@/app/pages/RescueDetailPage";
 import { RescueNewPage } from "@/app/pages/RescueNewPage";
 import { RescuesListPage } from "@/app/pages/RescuesListPage";
+import { CastrationDetailPage } from "@/app/pages/CastrationDetailPage";
+import { CastrationNewPage } from "@/app/pages/CastrationNewPage";
+import { CastrationsListPage } from "@/app/pages/CastrationsListPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -73,6 +76,9 @@ export const appRoutes: RouteObject[] = [
       { path: "rescues", element: <RescuesListPage /> },
       { path: "rescues/new", element: <RescueNewPage /> },
       { path: "rescues/:id", element: <RescueDetailPage /> },
+      { path: "castration", element: <CastrationsListPage /> },
+      { path: "castration/new", element: <CastrationNewPage /> },
+      { path: "castration/:id", element: <CastrationDetailPage /> },
       { path: "team", element: <TeamPage /> },
       { path: "team/invite", element: <TeamInvitePage /> },
       { path: "team/:userId", element: <TeamUserPage /> },
