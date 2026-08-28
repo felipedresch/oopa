@@ -24,6 +24,12 @@ const settingsLinks = [
     description: "Manter a lista de bairros usada nos cadastros.",
     permission: "bairros.manage",
   },
+  {
+    to: "/settings/organization",
+    title: "Dados da ONG",
+    description: "Razão social, CNPJ, endereço, contato e logo.",
+    permission: "organization.manage",
+  },
 ] as const;
 
 export function SettingsPage() {

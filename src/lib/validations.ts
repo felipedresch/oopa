@@ -1,6 +1,7 @@
 export const VALIDATION_MESSAGES = {
   microchip: "Microchip deve ter exatamente 15 dígitos numéricos.",
   cpf: "CPF inválido.",
+  cnpj: "CNPJ inválido.",
   rg: "RG deve ter entre 5 e 9 caracteres.",
   phone: "Telefone deve ter 10 ou 11 dígitos.",
   email: "Email inválido.",
@@ -35,6 +36,33 @@ export function validateCpf(value: string): string | null {
   const secondDigit = calculateDigit(digits.slice(0, 10), 11);
   if (firstDigit !== Number(digits[9]) || secondDigit !== Number(digits[10])) {
     return VALIDATION_MESSAGES.cpf;
+  }
+
+  return null;
+}
+
+export function validateCnpj(value: string): string | null {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) {
+    return VALIDATION_MESSAGES.cnpj;
+  }
+
+  const calculateDigit = (slice: string, weights: number[]) => {
+    let total = 0;
+    for (let i = 0; i < slice.length; i++) {
+      total += Number(slice[i]) * weights[i];
+    }
+    const remainder = total % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+
+  const firstDigit = calculateDigit(digits.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  const secondDigit = calculateDigit(
+    digits.slice(0, 13),
+    [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
+  );
+  if (firstDigit !== Number(digits[12]) || secondDigit !== Number(digits[13])) {
+    return VALIDATION_MESSAGES.cnpj;
   }
 
   return null;

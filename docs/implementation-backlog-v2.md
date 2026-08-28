@@ -467,18 +467,42 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.4e. Pré-requisito da Fase 21
 
 ### Backend
 
-- [ ] Criar tabela `organization_settings` (linha única).
-- [ ] Implementar query `organization.get` e mutation `organization.update`
+- [x] Criar tabela `organization_settings` (linha única).
+- [x] Implementar query `organization.get` e mutation `organization.update`
       protegida por `organization.manage`.
-- [ ] Aceitar upload de logo reaproveitando `storage.createSignedUploadUrl`.
-- [ ] Auditar atualização dos dados da ONG.
-- [ ] Testar leitura, atualização e upload de logo.
+- [x] Aceitar upload de logo reaproveitando `storage.createSignedUploadUrl`.
+- [x] Auditar atualização dos dados da ONG.
+- [x] Testar leitura, atualização e upload de logo.
 
 ### Frontend
 
-- [ ] Criar `/settings/organization` com razão social, nome fantasia,
+- [x] Criar `/settings/organization` com razão social, nome fantasia,
       CNPJ, inscrição estadual, endereço, telefone, email e logo.
-- [ ] Testar preenchimento, validação de CNPJ e upload de logo.
+- [x] Testar preenchimento, validação de CNPJ e upload de logo.
+
+**Notas:**
+- Novo módulo de permissão `organization` com uma única permissão
+  (`organization.manage`, só nível `manage`), mesmo padrão de
+  `public_reports` (Fase 16). Só o template "Administrador ONG" recebe a
+  permissão por padrão nos seeds.
+- `organization.get` é liberada para qualquer usuário autenticado, sem
+  exigir `organization.manage` — são dados institucionais não sensíveis
+  (razão social, CNPJ, endereço, contato) que a Fase 21 vai precisar ler
+  livremente para montar o cabeçalho do comprovante de venda. Só
+  `organization.update` exige a permissão.
+- Novo `isValidCnpj`/`normalizeCnpj` em `convex/domainValidators.ts`
+  (backend) e `validateCnpj` em `src/lib/validations.ts` (frontend, com
+  mensagem própria) usando o mesmo algoritmo de dígito verificador do
+  CPF já existente — não havia validação de CNPJ no projeto antes desta
+  fase. Novo `maskCnpj` em `src/lib/masks.ts`, mesmo padrão dos demais
+  campos mascarados (CPF, telefone, CEP).
+- `organization.update` faz upsert manual na linha única (busca com
+  `.first()`, `patch` se existir, `insert` na primeira vez) — não há uma
+  mutation `create` separada, já que só existe uma linha de configuração.
+- Reaproveita o componente `PhotoUpload` (single-file) já usado em fotos
+  de perfil de animal, e o padrão de formulário com `Field`, `CEP`
+  autopreenchido via ViaCEP e `BairroAutocomplete` já usado em
+  `PersonFormPage`.
 
 ## Fase 20 - Catálogos: Serviços e Insumos
 

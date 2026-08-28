@@ -98,7 +98,12 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Configurações",
     icon: SettingsIcon,
     canAccess: ({ canAny }) =>
-      canAny(["templates.manage", "occurrence_types.manage", "bairros.manage"]),
+      canAny([
+        "templates.manage",
+        "occurrence_types.manage",
+        "bairros.manage",
+        "organization.manage",
+      ]),
   },
 ];
 
