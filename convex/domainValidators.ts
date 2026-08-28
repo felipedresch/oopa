@@ -62,6 +62,7 @@ export const entityTypeValidator = v.union(
   v.literal("occurrence_type"),
   v.literal("public_report"),
   v.literal("rescue_request"),
+  v.literal("castration_request"),
 );
 
 export const publicReportStatusValidator = v.union(
@@ -77,6 +78,22 @@ export const rescueStatusValidator = v.union(
   v.literal("concluida"),
   v.literal("cancelada"),
 );
+
+export const castrationStatusValidator = v.union(
+  v.literal("aguardando"),
+  v.literal("agendada"),
+  v.literal("realizada"),
+  v.literal("cancelada"),
+  v.literal("nao_compareceu"),
+);
+
+export const castrationAnimalDescricaoValidator = v.object({
+  nome: v.optional(v.string()),
+  especie: dogSpeciesValidator,
+  porte: dogSizeValidator,
+  sexo: dogSexValidator,
+  cor: v.optional(v.string()),
+});
 
 export const adoptionPayloadValidator = v.object({
   data_adocao: v.number(),

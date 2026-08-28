@@ -282,8 +282,8 @@ export const getSeedSummary = query({
       occurrenceTypeCount: occurrenceTypes.length,
       bairroCount: bairros.length,
       permissionTemplateCount: permissionTemplates.length,
-      permissionCatalogSize: 27,
-      uiModuleCount: 9,
+      permissionCatalogSize: 30,
+      uiModuleCount: 10,
     };
   },
 });
@@ -343,6 +343,12 @@ export const getPermissionTemplateMaps = query({
           v.literal("manage"),
         ),
         rescues: v.union(
+          v.literal("none"),
+          v.literal("read"),
+          v.literal("write"),
+          v.literal("manage"),
+        ),
+        castration: v.union(
           v.literal("none"),
           v.literal("read"),
           v.literal("write"),

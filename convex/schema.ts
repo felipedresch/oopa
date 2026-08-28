@@ -4,6 +4,8 @@ import { v } from "convex/values";
 
 import {
   adoptionPayloadValidator,
+  castrationAnimalDescricaoValidator,
+  castrationStatusValidator,
   dogSexValidator,
   dogSizeValidator,
   dogSpeciesValidator,
@@ -264,5 +266,21 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_gravity", ["gravidade"])
     .index("by_bairro", ["bairro_id"])
+    .index("by_dog", ["dog_id"]),
+
+  castration_requests: defineTable({
+    pessoa_id: v.id("people"),
+    dog_id: v.optional(v.id("dogs")),
+    animal_descricao: castrationAnimalDescricaoValidator,
+    data_solicitacao: v.number(),
+    data_agendada: v.optional(v.number()),
+    status: castrationStatusValidator,
+    observacoes: v.optional(v.string()),
+    criado_por: v.id("users"),
+    criado_em: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_data_solicitacao", ["data_solicitacao"])
+    .index("by_pessoa", ["pessoa_id"])
     .index("by_dog", ["dog_id"]),
 });

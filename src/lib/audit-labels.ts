@@ -11,6 +11,7 @@ import {
   PencilIcon,
   PlusIcon,
   RotateCcwIcon,
+  ScissorsIcon,
   ShieldCheckIcon,
   ShieldOffIcon,
   TagIcon,
@@ -128,6 +129,27 @@ const ACTION_LABELS: Record<string, AuditActionInfo> = {
     icon: PencilIcon,
     tone: "update",
   },
+
+  "castration.create": {
+    label: "Solicitação de castração registrada",
+    icon: ScissorsIcon,
+    tone: "create",
+  },
+  "castration.update_data_solicitacao": {
+    label: "Fila de castração reordenada",
+    icon: RotateCcwIcon,
+    tone: "update",
+  },
+  "castration.update_status": {
+    label: "Status da castração alterado",
+    icon: TagIcon,
+    tone: "status",
+  },
+  "castration.mark_realizada": {
+    label: "Castração marcada como realizada",
+    icon: ScissorsIcon,
+    tone: "create",
+  },
 };
 
 /** Rótulo + ícone + tom para uma ação de auditoria; fallback neutro para ações não mapeadas. */
@@ -145,6 +167,7 @@ const ENTITY_LABELS: Record<string, string> = {
   occurrence_type: "Tipo de ocorrência",
   public_report: "Denúncia externa",
   rescue_request: "Solicitação de resgate",
+  castration_request: "Solicitação de castração",
 };
 
 export function getEntityLabel(entityType: string): string {
@@ -161,6 +184,7 @@ const ENTITY_ID_LABELS: Record<string, string> = {
   occurrence_type: "ID do tipo de ocorrência",
   public_report: "ID da denúncia",
   rescue_request: "ID do resgate",
+  castration_request: "ID da castração",
 };
 
 export function getEntityIdLabel(entityType: string): string {

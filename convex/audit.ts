@@ -17,7 +17,8 @@ type AuditEntityType =
   | "bairro"
   | "occurrence_type"
   | "public_report"
-  | "rescue_request";
+  | "rescue_request"
+  | "castration_request";
 
 const auditLogValidator = v.object({
   _id: v.id("audit_logs"),

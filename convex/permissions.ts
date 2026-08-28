@@ -28,6 +28,9 @@ export const PERMISSION_CATALOG = [
   "rescues.read",
   "rescues.create",
   "rescues.manage",
+  "castration.read",
+  "castration.create",
+  "castration.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSION_CATALOG)[number];
@@ -42,6 +45,7 @@ export const UI_MODULES = [
   "system",
   "public_reports",
   "rescues",
+  "castration",
 ] as const;
 
 export type UiModule = (typeof UI_MODULES)[number];
@@ -60,6 +64,7 @@ export const uiModuleValidator = v.union(
   v.literal("system"),
   v.literal("public_reports"),
   v.literal("rescues"),
+  v.literal("castration"),
 );
 
 export const permissionLevelValidator = v.union(
@@ -97,6 +102,9 @@ export const permissionValidator = v.union(
   v.literal("rescues.read"),
   v.literal("rescues.create"),
   v.literal("rescues.manage"),
+  v.literal("castration.read"),
+  v.literal("castration.create"),
+  v.literal("castration.manage"),
 );
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
@@ -109,6 +117,7 @@ export const UI_MODULE_LABELS: Record<UiModule, string> = {
   system: "Sistema",
   public_reports: "Denuncias externas",
   rescues: "Resgates",
+  castration: "Castracao",
 };
 
 export const PERMISSION_LEVEL_LABELS: Record<PermissionLevel, string> = {
@@ -193,6 +202,12 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
     write: ["rescues.read", "rescues.create"],
     manage: ["rescues.read", "rescues.create", "rescues.manage"],
   },
+  castration: {
+    none: [],
+    read: ["castration.read"],
+    write: ["castration.read", "castration.create"],
+    manage: ["castration.read", "castration.create", "castration.manage"],
+  },
 };
 
 export type ModulePermissionMap = Record<UiModule, PermissionLevel>;
@@ -270,6 +285,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       system: "manage",
       public_reports: "manage",
       rescues: "manage",
+      castration: "manage",
     } satisfies ModulePermissionMap,
   },
   {
@@ -285,6 +301,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       system: "none",
       public_reports: "none",
       rescues: "write",
+      castration: "write",
     } satisfies ModulePermissionMap,
   },
   {
@@ -300,6 +317,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       system: "none",
       public_reports: "none",
       rescues: "write",
+      castration: "write",
     } satisfies ModulePermissionMap,
   },
   {
@@ -315,6 +333,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       system: "none",
       public_reports: "none",
       rescues: "none",
+      castration: "none",
     } satisfies ModulePermissionMap,
   },
   {
@@ -330,6 +349,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       system: "none",
       public_reports: "none",
       rescues: "read",
+      castration: "read",
     } satisfies ModulePermissionMap,
   },
 ] as const;
