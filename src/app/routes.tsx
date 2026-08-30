@@ -32,6 +32,15 @@ import { OccurrencesListPage } from "@/app/pages/OccurrencesListPage";
 import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
 import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
 import { ProfilePage } from "@/app/pages/ProfilePage";
+import { RescueDetailPage } from "@/app/pages/RescueDetailPage";
+import { RescueNewPage } from "@/app/pages/RescueNewPage";
+import { RescuesListPage } from "@/app/pages/RescuesListPage";
+import { CastrationDetailPage } from "@/app/pages/CastrationDetailPage";
+import { CastrationNewPage } from "@/app/pages/CastrationNewPage";
+import { CastrationsListPage } from "@/app/pages/CastrationsListPage";
+import { OrganizationSettingsPage } from "@/app/pages/OrganizationSettingsPage";
+import { ServicesCatalogPage } from "@/app/pages/ServicesCatalogPage";
+import { SuppliesCatalogPage } from "@/app/pages/SuppliesCatalogPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -67,6 +76,12 @@ export const appRoutes: RouteObject[] = [
       { path: "people/:personId/edit", element: <PersonFormPage /> },
       { path: "adoptions/new", element: <AdoptionNewPage /> },
       { path: "returns/new", element: <ReturnNewPage /> },
+      { path: "rescues", element: <RescuesListPage /> },
+      { path: "rescues/new", element: <RescueNewPage /> },
+      { path: "rescues/:id", element: <RescueDetailPage /> },
+      { path: "castration", element: <CastrationsListPage /> },
+      { path: "castration/new", element: <CastrationNewPage /> },
+      { path: "castration/:id", element: <CastrationDetailPage /> },
       { path: "team", element: <TeamPage /> },
       { path: "team/invite", element: <TeamInvitePage /> },
       { path: "team/:userId", element: <TeamUserPage /> },
@@ -77,6 +92,9 @@ export const appRoutes: RouteObject[] = [
       },
       { path: "settings/occurrence-types", element: <OccurrenceTypesSettingsPage /> },
       { path: "settings/bairros", element: <BairrosSettingsPage /> },
+      { path: "settings/organization", element: <OrganizationSettingsPage /> },
+      { path: "catalog/services", element: <ServicesCatalogPage /> },
+      { path: "catalog/supplies", element: <SuppliesCatalogPage /> },
       { path: "audit", element: <AuditPage /> },
       { path: "notifications", element: <NotificationsPage /> },
       { path: "profile", element: <ProfilePage /> },

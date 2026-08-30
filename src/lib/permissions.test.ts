@@ -6,9 +6,9 @@ import {
 import { fixtureModuleMap } from "@/test/fixtures";
 
 describe("permissions ui map", () => {
-  it("cria mapa vazio com 8 módulos", () => {
+  it("cria mapa vazio com 10 módulos", () => {
     const map = createEmptyModuleMap();
-    expect(UI_MODULES).toHaveLength(8);
+    expect(UI_MODULES).toHaveLength(10);
     expect(Object.values(map).every((level) => level === "none")).toBe(true);
   });
 

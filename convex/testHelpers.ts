@@ -75,6 +75,7 @@ export async function seedUser(
     nome: string;
     email: string;
     permissions: string[];
+    receber_alertas_resgate?: boolean;
   },
 ): Promise<Id<"users">> {
   const now = Date.now();
@@ -86,6 +87,7 @@ export async function seedUser(
       organizacao: "ONG OOPA",
       ativo: true,
       permissions: args.permissions,
+      receber_alertas_resgate: args.receber_alertas_resgate,
       criado_em: now,
     });
   });

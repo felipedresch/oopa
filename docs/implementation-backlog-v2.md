@@ -355,25 +355,53 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.2.
 
 ### Backend
 
-- [ ] Criar tabela `rescue_requests`.
-- [ ] Implementar mutation `rescues.create` protegida por `rescues.create`.
-- [ ] Implementar mutation `rescues.updateStatus`/`rescues.setOngDescription`
+- [x] Criar tabela `rescue_requests`.
+- [x] Implementar mutation `rescues.create` protegida por `rescues.create`.
+- [x] Implementar mutation `rescues.updateStatus`/`rescues.setOngDescription`
       protegida por `rescues.manage`.
-- [ ] Implementar fan-out de notificação para `gravidade === "alta"`,
+- [x] Implementar fan-out de notificação para `gravidade === "alta"`,
       filtrando por `rescues.manage` **e** `receber_alertas_resgate !== false`.
-- [ ] Implementar query `rescues.list` ordenada por gravidade e depois
+- [x] Implementar query `rescues.list` ordenada por gravidade e depois
       data.
-- [ ] Auditar criação e mudança de status/descrição.
-- [ ] Testar alerta de gravidade alta, preferência de usuário desativada,
+- [x] Auditar criação e mudança de status/descrição.
+- [x] Testar alerta de gravidade alta, preferência de usuário desativada,
       transições de status e permissões.
 
 ### Frontend
 
-- [ ] Criar `/rescues` com destaque visual para gravidade alta.
-- [ ] Criar `/rescues/new`.
-- [ ] Criar `/rescues/:id` com campo "O que aconteceu" (`descricao_ong`) e
+- [x] Criar `/rescues` com destaque visual para gravidade alta.
+- [x] Criar `/rescues/new`.
+- [x] Criar `/rescues/:id` com campo "O que aconteceu" (`descricao_ong`) e
       mudança de status.
-- [ ] Testar lista, criação, detalhe e recebimento do alerta.
+- [x] Testar lista, criação, detalhe e recebimento do alerta.
+
+**Notas:**
+- `users.receber_alertas_resgate` e o toggle em `/profile` já existiam
+  desde a Fase 13 — não precisou de trabalho novo, só o fan-out em
+  `rescues.create` passou a consumi-los. `undefined` é tratado como "quer
+  receber" (`!== false`), então não foi preciso setar um valor padrão na
+  criação de usuário.
+- Novo módulo de permissão completo `rescues` (`read`/`create`/`manage`,
+  mesmo padrão de `dogs`/`occurrences`) — diferente de `public_reports`
+  (Fase 16), que só tinha uma permissão binária. Nos templates seed:
+  Admin = manage; Agente Prefeitura e Voluntário de Campo = write (já
+  registram ocorrências em campo); Pet Shop Parceiro = none; Leitura
+  Restrita = read. Perfis novos podem ser ajustados depois pela ONG via
+  `/settings/permission-templates`, não é uma decisão travada.
+- `tipo` do resgate é `v.string()` livre no schema, como `tipo_denuncia`
+  da Fase 16 — o formulário oferece um `<select>` com as categorias do
+  pedido do cliente (atropelado, preso, agressivo, ferido, filhotes
+  abandonados, outro) e pré-seleciona a gravidade sugerida por tipo
+  (`atropelado` → alta), editável antes de enviar.
+- `rescues.list` não pagina: usa `.collect()` bounded pela escala real da
+  tabela (fila operacional de resgates abertos, não um histórico
+  ilimitado) e ordena em memória por gravidade (rank alta > media > baixa
+  > info) e depois `criado_em` desc — mesmo padrão pragmático já usado em
+  `bairros.list`/`occurrence_types` para tabelas operacionais pequenas.
+  Se o volume crescer muito no futuro, revisar para paginação com um
+  campo de rank persistido.
+- `storage.createSignedUploadUrl` passou a aceitar `rescues.create` na
+  lista de permissões que autorizam upload de foto.
 
 ## Fase 18 - Castração
 
@@ -381,25 +409,56 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.3.
 
 ### Backend
 
-- [ ] Criar tabela `castration_requests`.
-- [ ] Implementar mutation `castration.create` protegida por
+- [x] Criar tabela `castration_requests`.
+- [x] Implementar mutation `castration.create` protegida por
       `castration.create`.
-- [ ] Implementar mutation `castration.updateDataSolicitacao` protegida
+- [x] Implementar mutation `castration.updateDataSolicitacao` protegida
       por `castration.manage`, auditando quem reordenou a fila.
-- [ ] Implementar mutation `castration.markRealizada`, oferecendo criar
+- [x] Implementar mutation `castration.markRealizada`, oferecendo criar
       `dogs` sem microchip quando `dog_id` estiver vazio, vinculando o
       `castration_request` ao novo animal.
-- [ ] Implementar query `castration.list` ordenada por `data_solicitacao`.
-- [ ] Testar fila FIFO, reordenação manual auditada, conclusão com criação
+- [x] Implementar query `castration.list` ordenada por `data_solicitacao`.
+- [x] Testar fila FIFO, reordenação manual auditada, conclusão com criação
       de animal e permissões.
 
 ### Frontend
 
-- [ ] Criar `/castration` (fila ordenada).
-- [ ] Criar `/castration/new` com descrição leve do animal, sem exigir
+- [x] Criar `/castration` (fila ordenada).
+- [x] Criar `/castration/new` com descrição leve do animal, sem exigir
       cadastro completo.
-- [ ] Criar `/castration/:id` com mudança de status e reordenação de data.
-- [ ] Testar fila, criação, reordenação e conclusão.
+- [x] Criar `/castration/:id` com mudança de status e reordenação de data.
+- [x] Testar fila, criação, reordenação e conclusão.
+
+**Notas:**
+- Novo módulo de permissão completo `castration` (read/create/manage),
+  mesmo padrão de `rescues` (Fase 17). Nos templates seed: Admin = manage;
+  Agente Prefeitura e Voluntário de Campo = write; Pet Shop Parceiro =
+  none; Leitura Restrita = read — mesma lógica já aplicada em `rescues`.
+- `castration.list` pagina de verdade via índice `by_data_solicitacao`
+  (`order("asc")`), diferente do `collect()` + sort em memória usado em
+  `rescues.list` — aqui a ordenação pedida (FIFO por data de solicitação)
+  já corresponde a um índice real, então não há necessidade do atalho
+  pragmático. Filtro de status é aplicado sobre a página já buscada
+  (mesmo padrão de outros `list` que combinam um índice principal com
+  predicados secundários em memória).
+- `castration.create` sempre usa `Date.now()` como `data_solicitacao`
+  (fila por ordem de chegada); a data só muda depois, explicitamente, via
+  `castration.updateDataSolicitacao` — não expusemos um campo de data na
+  tela de criação para não confundir "quando foi pedido" com "prioridade
+  na fila".
+- `updateStatus` é uma mutation nova, não pedida explicitamente na lista
+  de itens de backend do backlog original, mas necessária para cobrir
+  "mudança de status" citada no checklist do frontend — bloqueia
+  transição direta para `realizada` (que só acontece via `markRealizada`,
+  que tem o efeito colateral de vincular/criar o animal).
+- Ao criar o animal automaticamente em `markRealizada` (quando nenhum
+  `dogId` é informado), o cadastro é feito por `ctx.db.insert` direto na
+  tabela `dogs`, não pela mutation pública `dogs.create` — que exige foto
+  de perfil obrigatória. Isso preserva a promessa de "sem exigir cadastro
+  completo" also para a conclusão, não só para a criação da solicitação;
+  o animal fica sem foto até alguém completar a ficha depois. `castrado`
+  é sempre `true` (acabou de ser castrado) e `vacinas_em_dia` sempre
+  `false` (desconhecido, default seguro exigindo revisão).
 
 ## Fase 19 - Dados da ONG
 
@@ -408,18 +467,42 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.4e. Pré-requisito da Fase 21
 
 ### Backend
 
-- [ ] Criar tabela `organization_settings` (linha única).
-- [ ] Implementar query `organization.get` e mutation `organization.update`
+- [x] Criar tabela `organization_settings` (linha única).
+- [x] Implementar query `organization.get` e mutation `organization.update`
       protegida por `organization.manage`.
-- [ ] Aceitar upload de logo reaproveitando `storage.createSignedUploadUrl`.
-- [ ] Auditar atualização dos dados da ONG.
-- [ ] Testar leitura, atualização e upload de logo.
+- [x] Aceitar upload de logo reaproveitando `storage.createSignedUploadUrl`.
+- [x] Auditar atualização dos dados da ONG.
+- [x] Testar leitura, atualização e upload de logo.
 
 ### Frontend
 
-- [ ] Criar `/settings/organization` com razão social, nome fantasia,
+- [x] Criar `/settings/organization` com razão social, nome fantasia,
       CNPJ, inscrição estadual, endereço, telefone, email e logo.
-- [ ] Testar preenchimento, validação de CNPJ e upload de logo.
+- [x] Testar preenchimento, validação de CNPJ e upload de logo.
+
+**Notas:**
+- Novo módulo de permissão `organization` com uma única permissão
+  (`organization.manage`, só nível `manage`), mesmo padrão de
+  `public_reports` (Fase 16). Só o template "Administrador ONG" recebe a
+  permissão por padrão nos seeds.
+- `organization.get` é liberada para qualquer usuário autenticado, sem
+  exigir `organization.manage` — são dados institucionais não sensíveis
+  (razão social, CNPJ, endereço, contato) que a Fase 21 vai precisar ler
+  livremente para montar o cabeçalho do comprovante de venda. Só
+  `organization.update` exige a permissão.
+- Novo `isValidCnpj`/`normalizeCnpj` em `convex/domainValidators.ts`
+  (backend) e `validateCnpj` em `src/lib/validations.ts` (frontend, com
+  mensagem própria) usando o mesmo algoritmo de dígito verificador do
+  CPF já existente — não havia validação de CNPJ no projeto antes desta
+  fase. Novo `maskCnpj` em `src/lib/masks.ts`, mesmo padrão dos demais
+  campos mascarados (CPF, telefone, CEP).
+- `organization.update` faz upsert manual na linha única (busca com
+  `.first()`, `patch` se existir, `insert` na primeira vez) — não há uma
+  mutation `create` separada, já que só existe uma linha de configuração.
+- Reaproveita o componente `PhotoUpload` (single-file) já usado em fotos
+  de perfil de animal, e o padrão de formulário com `Field`, `CEP`
+  autopreenchido via ViaCEP e `BairroAutocomplete` já usado em
+  `PersonFormPage`.
 
 ## Fase 20 - Catálogos: Serviços e Insumos
 
@@ -428,20 +511,48 @@ menu, não em Atendimentos.
 
 ### Backend
 
-- [ ] Criar tabela `services`.
-- [ ] Criar tabela `supplies`.
-- [ ] Implementar CRUD `services.*` protegido por `services.manage`
+- [x] Criar tabela `services`.
+- [x] Criar tabela `supplies`.
+- [x] Implementar CRUD `services.*` protegido por `services.manage`
       (desativar em vez de excluir, mesmo padrão de `occurrence_types`/
       `bairros`).
-- [ ] Implementar CRUD `supplies.*` protegido por `supplies.manage`.
-- [ ] Testar CRUD dos dois catálogos, desativação e permissões.
+- [x] Implementar CRUD `supplies.*` protegido por `supplies.manage`.
+- [x] Testar CRUD dos dois catálogos, desativação e permissões.
 
 ### Frontend
 
-- [ ] Criar `/catalog/services` dentro de Cadastros (lista, criar, editar,
+- [x] Criar `/catalog/services` dentro de Cadastros (lista, criar, editar,
       ativar/desativar).
-- [ ] Criar `/catalog/supplies` dentro de Cadastros (mesmo padrão).
-- [ ] Testar CRUD dos dois catálogos na UI.
+- [x] Criar `/catalog/supplies` dentro de Cadastros (mesmo padrão).
+- [x] Testar CRUD dos dois catálogos na UI.
+
+**Notas:**
+- Decisão de permissão: em vez de dois `UI_MODULES` novos com níveis
+  read/write/manage próprios, `services.manage` e `supplies.manage`
+  entraram no módulo `settings` já existente (mesmo grupo de
+  `bairros.manage`/`occurrence_types.manage`/`templates.manage`), já que
+  são catálogos de configuração como bairros e tipos de ocorrência — não
+  justificam granularidade própria. Isso evitou o ripple que os módulos
+  das Fases 17-19 precisaram nos três validadores que enumeram módulos
+  por nome (`seeds.getPermissionTemplateMaps`, `users.list`,
+  `permissionTemplates.list`); só o `PERMISSION_CATALOG` cresceu.
+- Correção de raiz: `AuditEntityType` em `convex/audit.ts` passou a ser
+  derivado via `Infer<typeof entityTypeValidator>` em vez de uma lista
+  literal duplicada — a lista manual já tinha sido esquecida de
+  sincronizar duas vezes (Fase 19 e nesta fase), então a duplicação foi
+  eliminada na raiz.
+- `/catalog/services` e `/catalog/supplies` ainda vivem dentro da tela
+  `/settings` (mesmo padrão de `/settings/bairros` e
+  `/settings/occurrence-types`), não em um menu "Cadastros" dedicado —
+  esse agrupamento só existe a partir da Fase 26 (reorganização do menu).
+  As rotas em si já seguem o caminho `/catalog/*` pedido no backlog.
+- Como o checklist desta fase pede "editar" explicitamente (diferente do
+  padrão original de `OccurrenceTypesSettingsPage`, que só tem criar e
+  ativar/desativar), as duas telas novas ganharam edição inline: o botão
+  "Editar" carrega os campos do item no mesmo formulário de criação, que
+  alterna para "Salvar alterações" com opção de cancelar.
+- Novo `formatCurrency` em `src/lib/formatters.ts` (primeiro valor
+  monetário exibido no app) usando `Intl.NumberFormat` com `BRL`.
 
 ## Fase 21 - Atendimentos, prontuário médico e notas fiscais
 

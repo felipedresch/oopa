@@ -4,6 +4,8 @@ import { v } from "convex/values";
 
 import {
   adoptionPayloadValidator,
+  castrationAnimalDescricaoValidator,
+  castrationStatusValidator,
   dogSexValidator,
   dogSizeValidator,
   dogSpeciesValidator,
@@ -15,7 +17,10 @@ import {
   personPapelValidator,
   personSnapshotValidator,
   publicReportStatusValidator,
+  rescueStatusValidator,
+  serviceCategoryValidator,
   severityValidator,
+  supplyCategoryValidator,
 } from "./domainValidators";
 import { permissionValidator } from "./permissions";
 
@@ -244,4 +249,76 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_bairro", ["bairro_id"]),
+
+  rescue_requests: defineTable({
+    solicitante_id: v.optional(v.id("people")),
+    tipo: v.string(),
+    gravidade: severityValidator,
+    descricao_solicitante: v.string(),
+    bairro_id: v.optional(v.id("bairros")),
+    local_descricao: v.optional(v.string()),
+    status: rescueStatusValidator,
+    descricao_ong: v.optional(v.string()),
+    dog_id: v.optional(v.id("dogs")),
+    fotos: v.array(v.id("_storage")),
+    criado_por: v.id("users"),
+    criado_em: v.number(),
+    atualizado_em: v.optional(v.number()),
+  })
+    .index("by_status", ["status"])
+    .index("by_gravity", ["gravidade"])
+    .index("by_bairro", ["bairro_id"])
+    .index("by_dog", ["dog_id"]),
+
+  castration_requests: defineTable({
+    pessoa_id: v.id("people"),
+    dog_id: v.optional(v.id("dogs")),
+    animal_descricao: castrationAnimalDescricaoValidator,
+    data_solicitacao: v.number(),
+    data_agendada: v.optional(v.number()),
+    status: castrationStatusValidator,
+    observacoes: v.optional(v.string()),
+    criado_por: v.id("users"),
+    criado_em: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_data_solicitacao", ["data_solicitacao"])
+    .index("by_pessoa", ["pessoa_id"])
+    .index("by_dog", ["dog_id"]),
+
+  organization_settings: defineTable({
+    razao_social: v.string(),
+    nome_fantasia: v.optional(v.string()),
+    cnpj: v.string(),
+    inscricao_estadual: v.optional(v.string()),
+    endereco_logradouro: v.optional(v.string()),
+    endereco_numero: v.optional(v.string()),
+    endereco_complemento: v.optional(v.string()),
+    endereco_cep: v.optional(v.string()),
+    bairro_id: v.optional(v.id("bairros")),
+    telefone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    logo_storage_id: v.optional(v.id("_storage")),
+    atualizado_em: v.optional(v.number()),
+    atualizado_por: v.optional(v.id("users")),
+  }),
+
+  services: defineTable({
+    nome: v.string(),
+    descricao: v.optional(v.string()),
+    categoria: serviceCategoryValidator,
+    valor_padrao: v.number(),
+    ativo: v.boolean(),
+    ...timestampFields,
+  }),
+
+  supplies: defineTable({
+    nome: v.string(),
+    descricao: v.optional(v.string()),
+    categoria: supplyCategoryValidator,
+    unidade_medida: v.optional(v.string()),
+    valor_padrao: v.number(),
+    ativo: v.boolean(),
+    ...timestampFields,
+  }),
 });

@@ -49,6 +49,7 @@ export const notificationTypeValidator = v.union(
   v.literal("legal_occurrence"),
   v.literal("dog_not_found"),
   v.literal("system"),
+  v.literal("rescue_alert"),
 );
 
 export const entityTypeValidator = v.union(
@@ -60,6 +61,11 @@ export const entityTypeValidator = v.union(
   v.literal("bairro"),
   v.literal("occurrence_type"),
   v.literal("public_report"),
+  v.literal("rescue_request"),
+  v.literal("castration_request"),
+  v.literal("organization_settings"),
+  v.literal("service"),
+  v.literal("supply"),
 );
 
 export const publicReportStatusValidator = v.union(
@@ -67,6 +73,45 @@ export const publicReportStatusValidator = v.union(
   v.literal("em_analise"),
   v.literal("convertido"),
   v.literal("arquivado"),
+);
+
+export const rescueStatusValidator = v.union(
+  v.literal("aberta"),
+  v.literal("em_atendimento"),
+  v.literal("concluida"),
+  v.literal("cancelada"),
+);
+
+export const castrationStatusValidator = v.union(
+  v.literal("aguardando"),
+  v.literal("agendada"),
+  v.literal("realizada"),
+  v.literal("cancelada"),
+  v.literal("nao_compareceu"),
+);
+
+export const castrationAnimalDescricaoValidator = v.object({
+  nome: v.optional(v.string()),
+  especie: dogSpeciesValidator,
+  porte: dogSizeValidator,
+  sexo: dogSexValidator,
+  cor: v.optional(v.string()),
+});
+
+export const serviceCategoryValidator = v.union(
+  v.literal("consulta"),
+  v.literal("vacina"),
+  v.literal("cirurgia"),
+  v.literal("castracao"),
+  v.literal("exame"),
+  v.literal("outro"),
+);
+
+export const supplyCategoryValidator = v.union(
+  v.literal("medicamento"),
+  v.literal("material"),
+  v.literal("vacina"),
+  v.literal("outro"),
 );
 
 export const adoptionPayloadValidator = v.object({
@@ -135,6 +180,33 @@ export function normalizeCpf(value: string): string {
   return value.replace(/\D/g, "");
 }
 
+export function isValidCnpj(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) {
+    return false;
+  }
+
+  const calculateDigit = (slice: string, weights: number[]) => {
+    let total = 0;
+    for (let i = 0; i < slice.length; i++) {
+      total += Number(slice[i]) * weights[i];
+    }
+    const remainder = total % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+
+  const firstDigit = calculateDigit(digits.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  const secondDigit = calculateDigit(
+    digits.slice(0, 13),
+    [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
+  );
+  return firstDigit === Number(digits[12]) && secondDigit === Number(digits[13]);
+}
+
+export function normalizeCnpj(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
 export function isValidPhone(value: string): boolean {
   const digits = value.replace(/\D/g, "");
   return digits.length >= 10 && digits.length <= 11;
@@ -172,6 +244,7 @@ export function isValidRg(value: string): boolean {
 export const VALIDATION_MESSAGES = {
   microchip: "Microchip deve ter exatamente 15 dígitos numéricos.",
   cpf: "CPF inválido.",
+  cnpj: "CNPJ inválido.",
   rg: "RG deve ter entre 5 e 9 caracteres.",
   phone: "Telefone deve ter 10 ou 11 dígitos.",
   email: "Email inválido.",

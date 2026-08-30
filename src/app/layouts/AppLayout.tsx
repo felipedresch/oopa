@@ -5,9 +5,11 @@ import {
   ClipboardListIcon,
   DogIcon,
   HomeIcon,
+  LifeBuoyIcon,
   ListChecksIcon,
   LogOutIcon,
   ScanLineIcon,
+  ScissorsIcon,
   SettingsIcon,
   UserIcon,
   UsersIcon,
@@ -62,6 +64,18 @@ const desktopNavItems: NavItemConfig[] = [
     canAccess: ({ canAny }) => canAny(["occurrences.read", "occurrences.read_legal"]),
   },
   {
+    to: "/rescues",
+    label: "Resgates",
+    icon: LifeBuoyIcon,
+    canAccess: ({ can }) => can("rescues.read"),
+  },
+  {
+    to: "/castration",
+    label: "Castração",
+    icon: ScissorsIcon,
+    canAccess: ({ can }) => can("castration.read"),
+  },
+  {
     to: "/team",
     label: "Equipe",
     icon: UsersIcon,
@@ -84,7 +98,14 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Configurações",
     icon: SettingsIcon,
     canAccess: ({ canAny }) =>
-      canAny(["templates.manage", "occurrence_types.manage", "bairros.manage"]),
+      canAny([
+        "templates.manage",
+        "occurrence_types.manage",
+        "bairros.manage",
+        "organization.manage",
+        "services.manage",
+        "supplies.manage",
+      ]),
   },
 ];
 

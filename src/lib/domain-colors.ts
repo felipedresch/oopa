@@ -70,6 +70,45 @@ export const dogStatusBadgeClass: Record<DogStatus, string> = {
   comunitario: "bg-accent text-accent-foreground",
 };
 
+export type RescueStatus = "aberta" | "em_atendimento" | "concluida" | "cancelada";
+
+export const RESCUE_STATUS_LABELS: Record<RescueStatus, string> = {
+  aberta: "Aberta",
+  em_atendimento: "Em atendimento",
+  concluida: "Concluída",
+  cancelada: "Cancelada",
+};
+
+export const rescueStatusBadgeClass: Record<RescueStatus, string> = {
+  aberta: "bg-warning/14 text-warning",
+  em_atendimento: "bg-info/12 text-info",
+  concluida: "bg-success/12 text-success",
+  cancelada: "bg-muted text-muted-foreground",
+};
+
+export type CastrationStatus =
+  | "aguardando"
+  | "agendada"
+  | "realizada"
+  | "cancelada"
+  | "nao_compareceu";
+
+export const CASTRATION_STATUS_LABELS: Record<CastrationStatus, string> = {
+  aguardando: "Aguardando",
+  agendada: "Agendada",
+  realizada: "Realizada",
+  cancelada: "Cancelada",
+  nao_compareceu: "Não compareceu",
+};
+
+export const castrationStatusBadgeClass: Record<CastrationStatus, string> = {
+  aguardando: "bg-warning/14 text-warning",
+  agendada: "bg-info/12 text-info",
+  realizada: "bg-success/12 text-success",
+  cancelada: "bg-muted text-muted-foreground",
+  nao_compareceu: "bg-destructive/12 text-destructive",
+};
+
 export const personAlertBadgeClass: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "bg-warning/14 text-warning",
   red: "bg-destructive/12 text-destructive",

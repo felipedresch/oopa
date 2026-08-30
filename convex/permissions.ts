@@ -25,6 +25,15 @@ export const PERMISSION_CATALOG = [
   "bairros.manage",
   "system.audit_log",
   "public_reports.triage",
+  "rescues.read",
+  "rescues.create",
+  "rescues.manage",
+  "castration.read",
+  "castration.create",
+  "castration.manage",
+  "organization.manage",
+  "services.manage",
+  "supplies.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSION_CATALOG)[number];
@@ -38,6 +47,9 @@ export const UI_MODULES = [
   "settings",
   "system",
   "public_reports",
+  "rescues",
+  "castration",
+  "organization",
 ] as const;
 
 export type UiModule = (typeof UI_MODULES)[number];
@@ -55,6 +67,9 @@ export const uiModuleValidator = v.union(
   v.literal("settings"),
   v.literal("system"),
   v.literal("public_reports"),
+  v.literal("rescues"),
+  v.literal("castration"),
+  v.literal("organization"),
 );
 
 export const permissionLevelValidator = v.union(
@@ -89,6 +104,15 @@ export const permissionValidator = v.union(
   v.literal("bairros.manage"),
   v.literal("system.audit_log"),
   v.literal("public_reports.triage"),
+  v.literal("rescues.read"),
+  v.literal("rescues.create"),
+  v.literal("rescues.manage"),
+  v.literal("castration.read"),
+  v.literal("castration.create"),
+  v.literal("castration.manage"),
+  v.literal("organization.manage"),
+  v.literal("services.manage"),
+  v.literal("supplies.manage"),
 );
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
@@ -100,6 +124,9 @@ export const UI_MODULE_LABELS: Record<UiModule, string> = {
   settings: "Configuracoes",
   system: "Sistema",
   public_reports: "Denuncias externas",
+  rescues: "Resgates",
+  castration: "Castracao",
+  organization: "Dados da ONG",
 };
 
 export const PERMISSION_LEVEL_LABELS: Record<PermissionLevel, string> = {
@@ -163,8 +190,14 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
   settings: {
     none: [],
     read: [],
-    write: ["bairros.manage"],
-    manage: ["templates.manage", "occurrence_types.manage", "bairros.manage"],
+    write: ["bairros.manage", "services.manage", "supplies.manage"],
+    manage: [
+      "templates.manage",
+      "occurrence_types.manage",
+      "bairros.manage",
+      "services.manage",
+      "supplies.manage",
+    ],
   },
   system: {
     none: [],
@@ -177,6 +210,24 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
     read: [],
     write: [],
     manage: ["public_reports.triage"],
+  },
+  rescues: {
+    none: [],
+    read: ["rescues.read"],
+    write: ["rescues.read", "rescues.create"],
+    manage: ["rescues.read", "rescues.create", "rescues.manage"],
+  },
+  castration: {
+    none: [],
+    read: ["castration.read"],
+    write: ["castration.read", "castration.create"],
+    manage: ["castration.read", "castration.create", "castration.manage"],
+  },
+  organization: {
+    none: [],
+    read: [],
+    write: [],
+    manage: ["organization.manage"],
   },
 };
 
@@ -254,6 +305,9 @@ export const SEED_PERMISSION_TEMPLATES = [
       settings: "manage",
       system: "manage",
       public_reports: "manage",
+      rescues: "manage",
+      castration: "manage",
+      organization: "manage",
     } satisfies ModulePermissionMap,
   },
   {
@@ -268,6 +322,9 @@ export const SEED_PERMISSION_TEMPLATES = [
       settings: "none",
       system: "none",
       public_reports: "none",
+      rescues: "write",
+      castration: "write",
+      organization: "none",
     } satisfies ModulePermissionMap,
   },
   {
@@ -282,6 +339,9 @@ export const SEED_PERMISSION_TEMPLATES = [
       settings: "none",
       system: "none",
       public_reports: "none",
+      rescues: "write",
+      castration: "write",
+      organization: "none",
     } satisfies ModulePermissionMap,
   },
   {
@@ -296,6 +356,9 @@ export const SEED_PERMISSION_TEMPLATES = [
       settings: "none",
       system: "none",
       public_reports: "none",
+      rescues: "none",
+      castration: "none",
+      organization: "none",
     } satisfies ModulePermissionMap,
   },
   {
@@ -310,6 +373,9 @@ export const SEED_PERMISSION_TEMPLATES = [
       settings: "none",
       system: "none",
       public_reports: "none",
+      rescues: "read",
+      castration: "read",
+      organization: "none",
     } satisfies ModulePermissionMap,
   },
 ] as const;
