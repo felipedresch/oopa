@@ -79,7 +79,13 @@ const moduleMapValidator = v.object({
       v.literal("write"),
       v.literal("manage"),
     ),
-});
+    appointments: v.union(
+      v.literal("none"),
+      v.literal("read"),
+      v.literal("write"),
+      v.literal("manage"),
+    ),
+  });
 
 const templateValidator = v.object({
   _id: v.id("permission_templates"),
@@ -345,4 +351,3 @@ export const setActive = mutation({
     return null;
   },
 });
-

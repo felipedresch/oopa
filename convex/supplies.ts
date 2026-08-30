@@ -69,6 +69,32 @@ export const list = query({
   },
 });
 
+/** Catálogo ativo consumido pelo lançamento de atendimentos. */
+export const listActiveForAppointments = query({
+  args: {},
+  returns: v.array(supplyValidator),
+  handler: async (ctx) => {
+    const actor = await getCurrentUser(ctx);
+    requirePermission(actor, "appointments.create");
+
+    const supplies = await ctx.db.query("supplies").take(500);
+    return supplies
+      .filter((supply) => supply.ativo)
+      .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR"))
+      .map((supply) => ({
+        _id: supply._id,
+        nome: supply.nome,
+        descricao: supply.descricao,
+        categoria: supply.categoria,
+        unidade_medida: supply.unidade_medida,
+        valor_padrao: supply.valor_padrao,
+        ativo: supply.ativo,
+        criado_em: supply.criado_em,
+        atualizado_em: supply.atualizado_em,
+      }));
+  },
+});
+
 export const create = mutation({
   args: {
     nome: v.string(),

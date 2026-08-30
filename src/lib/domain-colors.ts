@@ -109,6 +109,39 @@ export const castrationStatusBadgeClass: Record<CastrationStatus, string> = {
   nao_compareceu: "bg-destructive/12 text-destructive",
 };
 
+export type AppointmentType =
+  | "consulta"
+  | "vacina"
+  | "cirurgia"
+  | "exame"
+  | "castracao"
+  | "emergencia"
+  | "outro";
+
+export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
+  consulta: "Consulta",
+  vacina: "Vacina",
+  cirurgia: "Cirurgia",
+  exame: "Exame",
+  castracao: "Castração",
+  emergencia: "Emergência",
+  outro: "Outro",
+};
+
+export type AppointmentStatus = "agendado" | "realizado" | "cancelado";
+
+export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
+  agendado: "Agendado",
+  realizado: "Realizado",
+  cancelado: "Cancelado",
+};
+
+export const appointmentStatusBadgeClass: Record<AppointmentStatus, string> = {
+  agendado: "bg-info/12 text-info",
+  realizado: "bg-success/12 text-success",
+  cancelado: "bg-muted text-muted-foreground",
+};
+
 export const personAlertBadgeClass: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "bg-warning/14 text-warning",
   red: "bg-destructive/12 text-destructive",

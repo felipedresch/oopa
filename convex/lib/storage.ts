@@ -13,8 +13,14 @@ export const ALLOWED_IMAGE_CONTENT_TYPES = new Set([
 ]);
 
 export const MAX_PDF_BYTES = 8 * 1024 * 1024;
+export const MAX_NOTA_FISCAL_BYTES = 8 * 1024 * 1024;
 
 export const ALLOWED_PDF_CONTENT_TYPES = new Set(["application/pdf"]);
+export const ALLOWED_NOTA_FISCAL_CONTENT_TYPES = new Set([
+  "application/xml",
+  "text/xml",
+  "application/pdf",
+]);
 
 type StorageCtx = Pick<MutationCtx, "db"> | Pick<QueryCtx, "db">;
 
@@ -53,5 +59,24 @@ export async function validatePdfStorage(
   const contentType = metadata.contentType ?? "";
   if (contentType && !ALLOWED_PDF_CONTENT_TYPES.has(contentType)) {
     throw uploadRejected("Formato inválido. Envie um arquivo PDF.");
+  }
+}
+
+export async function validateNotaFiscalStorage(
+  ctx: StorageCtx,
+  storageId: Id<"_storage">,
+): Promise<void> {
+  const metadata = await ctx.db.system.get("_storage", storageId);
+  if (!metadata) {
+    throw notFound("Nota fiscal");
+  }
+
+  if (metadata.size > MAX_NOTA_FISCAL_BYTES) {
+    throw uploadRejected("A nota fiscal deve ter no maximo 8 MB.");
+  }
+
+  const contentType = metadata.contentType ?? "";
+  if (contentType && !ALLOWED_NOTA_FISCAL_CONTENT_TYPES.has(contentType)) {
+    throw uploadRejected("Formato inválido. Envie um XML ou PDF de nota fiscal.");
   }
 }

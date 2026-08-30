@@ -56,6 +56,16 @@ export async function storeTestPdf(t: ConvexTestClient): Promise<Id<"_storage">>
   });
 }
 
+export async function storeTestXml(
+  t: ConvexTestClient,
+  content: string,
+): Promise<Id<"_storage">> {
+  return await t.run(async (ctx) => {
+    const file = new File([content], "nota.xml", { type: "application/xml" });
+    return await ctx.storage.store(file);
+  });
+}
+
 export async function seedBairro(
   t: ConvexTestClient,
   nome = "Centro",
@@ -76,6 +86,7 @@ export async function seedUser(
     email: string;
     permissions: string[];
     receber_alertas_resgate?: boolean;
+    veterinario?: boolean;
   },
 ): Promise<Id<"users">> {
   const now = Date.now();
@@ -88,6 +99,7 @@ export async function seedUser(
       ativo: true,
       permissions: args.permissions,
       receber_alertas_resgate: args.receber_alertas_resgate,
+      veterinario: args.veterinario,
       criado_em: now,
     });
   });

@@ -3,6 +3,7 @@ import {
   ArrowRightLeftIcon,
   BellIcon,
   CameraIcon,
+  FileTextIcon,
   HeartIcon,
   KeyRoundIcon,
   LifeBuoyIcon,
@@ -12,6 +13,7 @@ import {
   PlusIcon,
   RotateCcwIcon,
   ScissorsIcon,
+  StethoscopeIcon,
   ShieldCheckIcon,
   ShieldOffIcon,
   TagIcon,
@@ -150,6 +152,26 @@ const ACTION_LABELS: Record<string, AuditActionInfo> = {
     icon: ScissorsIcon,
     tone: "create",
   },
+  "appointments.create": {
+    label: "Atendimento criado",
+    icon: StethoscopeIcon,
+    tone: "create",
+  },
+  "appointments.complete": {
+    label: "Atendimento concluído",
+    icon: StethoscopeIcon,
+    tone: "status",
+  },
+  "appointments.cancel": {
+    label: "Atendimento cancelado",
+    icon: TagIcon,
+    tone: "danger",
+  },
+  "appointments.nota_fiscal_upload": {
+    label: "Nota fiscal anexada",
+    icon: FileTextIcon,
+    tone: "create",
+  },
 };
 
 /** Rótulo + ícone + tom para uma ação de auditoria; fallback neutro para ações não mapeadas. */
@@ -168,6 +190,8 @@ const ENTITY_LABELS: Record<string, string> = {
   public_report: "Denúncia externa",
   rescue_request: "Solicitação de resgate",
   castration_request: "Solicitação de castração",
+  appointment: "Atendimento",
+  medical_record: "Prontuário médico",
 };
 
 export function getEntityLabel(entityType: string): string {
@@ -185,6 +209,8 @@ const ENTITY_ID_LABELS: Record<string, string> = {
   public_report: "ID da denúncia",
   rescue_request: "ID do resgate",
   castration_request: "ID da castração",
+  appointment: "ID do atendimento",
+  medical_record: "ID do prontuário",
 };
 
 export function getEntityIdLabel(entityType: string): string {

@@ -11,6 +11,8 @@ export const fixtureModuleMap: ModulePermissionMap = {
   public_reports: "none",
   rescues: "none",
   castration: "none",
+  organization: "none",
+  appointments: "none",
 };
 
 export const fixtureUser = {
@@ -75,5 +77,7 @@ export const fixturePermissionTemplate = {
     public_reports: "none",
     rescues: "none",
     castration: "none",
+    organization: "none",
+    appointments: "none",
   } satisfies ModulePermissionMap,
 };

@@ -63,8 +63,14 @@ const MODULE_LEVEL_PERMISSIONS: Record<
   settings: {
     none: [],
     read: [],
-    write: ["bairros.manage"],
-    manage: ["templates.manage", "occurrence_types.manage", "bairros.manage"],
+    write: ["bairros.manage", "services.manage", "supplies.manage"],
+    manage: [
+      "templates.manage",
+      "occurrence_types.manage",
+      "bairros.manage",
+      "services.manage",
+      "supplies.manage",
+    ],
   },
   system: {
     none: [],
@@ -89,6 +95,24 @@ const MODULE_LEVEL_PERMISSIONS: Record<
     read: ["castration.read"],
     write: ["castration.read", "castration.create"],
     manage: ["castration.read", "castration.create", "castration.manage"],
+  },
+  organization: {
+    none: [],
+    read: [],
+    write: [],
+    manage: ["organization.manage"],
+  },
+  appointments: {
+    none: [],
+    read: ["appointments.read", "dogs.read", "people.read"],
+    write: ["appointments.read", "appointments.create", "dogs.read", "people.read"],
+    manage: [
+      "appointments.read",
+      "appointments.create",
+      "appointments.manage",
+      "dogs.read",
+      "people.read",
+    ],
   },
 };
 

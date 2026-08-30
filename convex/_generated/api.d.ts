@@ -9,6 +9,7 @@
  */
 
 import type * as adoptions from "../adoptions.js";
+import type * as appointments from "../appointments.js";
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as bairros from "../bairros.js";
@@ -25,6 +26,7 @@ import type * as lib_adoptions from "../lib/adoptions.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_csv from "../lib/csv.js";
 import type * as lib_dogs from "../lib/dogs.js";
+import type * as lib_nfe from "../lib/nfe.js";
 import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_occurrences from "../lib/occurrences.js";
 import type * as lib_ocr from "../lib/ocr.js";
@@ -61,6 +63,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   adoptions: typeof adoptions;
+  appointments: typeof appointments;
   audit: typeof audit;
   auth: typeof auth;
   bairros: typeof bairros;
@@ -77,6 +80,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/csv": typeof lib_csv;
   "lib/dogs": typeof lib_dogs;
+  "lib/nfe": typeof lib_nfe;
   "lib/notifications": typeof lib_notifications;
   "lib/occurrences": typeof lib_occurrences;
   "lib/ocr": typeof lib_ocr;

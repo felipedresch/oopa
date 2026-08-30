@@ -36,7 +36,7 @@ test("seeds occurrence types, bairros and permission templates", async () => {
     occurrenceTypeCount: 15,
     bairroCount: 48,
     permissionTemplateCount: 5,
-    uiModuleCount: 11,
+    uiModuleCount: 12,
   });
 });
 

@@ -29,6 +29,12 @@ export const PERMISSION_CATALOG = [
   "castration.read",
   "castration.create",
   "castration.manage",
+  "organization.manage",
+  "services.manage",
+  "supplies.manage",
+  "appointments.read",
+  "appointments.create",
+  "appointments.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSION_CATALOG)[number];
@@ -44,6 +50,8 @@ export const UI_MODULES = [
   "public_reports",
   "rescues",
   "castration",
+  "organization",
+  "appointments",
 ] as const;
 
 export type UiModule = (typeof UI_MODULES)[number];
@@ -65,6 +73,8 @@ export const UI_MODULE_LABELS: Record<UiModule, string> = {
   public_reports: "Denúncias externas",
   rescues: "Resgates",
   castration: "Castração",
+  organization: "Dados da ONG",
+  appointments: "Atendimentos",
 };
 
 export const PERMISSION_LEVEL_LABELS: Record<PermissionLevel, string> = {
@@ -93,6 +103,8 @@ export function createEmptyModuleMap(): ModulePermissionMap {
     public_reports: "none",
     rescues: "none",
     castration: "none",
+    organization: "none",
+    appointments: "none",
   };
 }
 

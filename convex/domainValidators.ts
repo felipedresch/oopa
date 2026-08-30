@@ -50,6 +50,7 @@ export const notificationTypeValidator = v.union(
   v.literal("dog_not_found"),
   v.literal("system"),
   v.literal("rescue_alert"),
+  v.literal("microchip_pendente"),
 );
 
 export const entityTypeValidator = v.union(
@@ -66,6 +67,8 @@ export const entityTypeValidator = v.union(
   v.literal("organization_settings"),
   v.literal("service"),
   v.literal("supply"),
+  v.literal("appointment"),
+  v.literal("medical_record"),
 );
 
 export const publicReportStatusValidator = v.union(
@@ -105,6 +108,22 @@ export const serviceCategoryValidator = v.union(
   v.literal("castracao"),
   v.literal("exame"),
   v.literal("outro"),
+);
+
+export const appointmentTypeValidator = v.union(
+  v.literal("consulta"),
+  v.literal("vacina"),
+  v.literal("cirurgia"),
+  v.literal("exame"),
+  v.literal("castracao"),
+  v.literal("emergencia"),
+  v.literal("outro"),
+);
+
+export const appointmentStatusValidator = v.union(
+  v.literal("agendado"),
+  v.literal("realizado"),
+  v.literal("cancelado"),
 );
 
 export const supplyCategoryValidator = v.union(

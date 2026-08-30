@@ -4,6 +4,8 @@ import { v } from "convex/values";
 
 import {
   adoptionPayloadValidator,
+  appointmentStatusValidator,
+  appointmentTypeValidator,
   castrationAnimalDescricaoValidator,
   castrationStatusValidator,
   dogSexValidator,
@@ -66,7 +68,8 @@ export default defineSchema({
     ...timestampFields,
   })
     .index("email", ["email"])
-    .index("by_active", ["ativo"]),
+    .index("by_active", ["ativo"])
+    .index("by_organization_and_active", ["organizacao", "ativo"]),
 
   user_invites: defineTable({
     user_id: v.id("users"),
@@ -321,4 +324,58 @@ export default defineSchema({
     ativo: v.boolean(),
     ...timestampFields,
   }),
+
+  service_appointments: defineTable({
+    dog_id: v.id("dogs"),
+    solicitante_id: v.optional(v.id("people")),
+    veterinario_user_id: v.id("users"),
+    tipo_atendimento: appointmentTypeValidator,
+    data_atendimento: v.number(),
+    historico: v.string(),
+    servicos: v.array(
+      v.object({
+        service_id: v.id("services"),
+        quantidade: v.number(),
+        valor_unitario: v.number(),
+      }),
+    ),
+    insumos: v.array(
+      v.object({
+        supply_id: v.id("supplies"),
+        quantidade: v.number(),
+        valor_unitario: v.number(),
+      }),
+    ),
+    desconto_valor: v.optional(v.number()),
+    valor_total: v.number(),
+    nota_fiscal_storage_id: v.optional(v.id("_storage")),
+    nota_fiscal_numero: v.optional(v.string()),
+    nota_fiscal_valor: v.optional(v.number()),
+    data_emissao_nota_fiscal: v.optional(v.number()),
+    status: appointmentStatusValidator,
+    ...timestampFields,
+  })
+    .index("by_date", ["data_atendimento"])
+    .index("by_status_and_date", ["status", "data_atendimento"])
+    .index("by_dog_and_date", ["dog_id", "data_atendimento"])
+    .index("by_person_and_date", ["solicitante_id", "data_atendimento"]),
+
+  medical_records: defineTable({
+    dog_id: v.id("dogs"),
+    appointment_id: v.optional(v.id("service_appointments")),
+    data_atendimento: v.number(),
+    tipo: appointmentTypeValidator,
+    veterinario_user_id: v.id("users"),
+    anamnese: v.optional(v.string()),
+    diagnostico: v.optional(v.string()),
+    procedimentos: v.optional(v.string()),
+    medicamentos: v.optional(v.string()),
+    peso_kg: v.optional(v.number()),
+    temperatura_c: v.optional(v.number()),
+    anexos: v.array(v.id("_storage")),
+    ...timestampFields,
+  })
+    .index("by_dog_and_date", ["dog_id", "data_atendimento"])
+    .index("by_appointment", ["appointment_id"])
+    .index("by_date", ["data_atendimento"]),
 });

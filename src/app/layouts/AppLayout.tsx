@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import {
   BellIcon,
   ClipboardListIcon,
+  CalendarHeartIcon,
   DogIcon,
   HomeIcon,
   LifeBuoyIcon,
@@ -74,6 +75,12 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Castração",
     icon: ScissorsIcon,
     canAccess: ({ can }) => can("castration.read"),
+  },
+  {
+    to: "/appointments",
+    label: "Atendimentos",
+    icon: CalendarHeartIcon,
+    canAccess: ({ can }) => can("appointments.read"),
   },
   {
     to: "/team",

@@ -30,6 +30,7 @@
     "convex": "^1.41.0",
     "convex-test": "^0.0.53",
     "date-fns": "^4.4.0",
+    "fast-xml-parser": "^5.11.1",
     "lucide-react": "^1.17.0",
     "radix-ui": "^1.5.0",
     "react": "^19.2.6",

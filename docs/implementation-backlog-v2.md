@@ -17,10 +17,11 @@ páginas/testes em `src/` — não contra o texto dos commits.
   que o código cobre de verdade. Itens `[ ]` dentro dessas fases são
   lacunas reais (testes dedicados, editor/derivação de papéis, upload de
   termo na UI).
-- **Fases 21–26:** não iniciadas. Não há tabelas `service_appointments`,
-  `medical_records` nem `adoption_followups`; não há `convex/crons.ts`,
-  `convex/lib/nfe.ts` nem `fast-xml-parser`; não há rotas `/appointments*`,
-  `/adoptions/followups`, `/calendar` nem `/reports`.
+- **Fase 21:** implementada neste conjunto de mudanças, com backend, telas,
+  testes e comprovante de venda.
+- **Fases 22–26:** não iniciadas. Não há tabela `adoption_followups`,
+  `convex/crons.ts` nem rotas `/adoptions/followups`, `/calendar` ou
+  `/reports`.
 
 ## Como usar (fluxo com 3 pessoas)
 
@@ -66,10 +67,8 @@ Já no `src/app/routes.tsx`:
 - `/settings/organization`
 - `/catalog/services`, `/catalog/supplies`
 
-Ainda não existem (Fases 21–24):
+Ainda não existem (Fases 22–24):
 
-- `/appointments`, `/appointments/new`, `/appointments/:id`,
-  `/appointments/:id/receipt`
 - `/adoptions/followups`
 - `/calendar`
 - `/reports` (+ subrotas por relatório, definidas na Fase 24)
@@ -624,46 +623,59 @@ Fases 12, 13, 19 e 20.
 
 ### Backend
 
-- [ ] Criar tabela `service_appointments` (incluindo `servicos`, `insumos`,
+- [x] Criar tabela `service_appointments` (incluindo `servicos`, `insumos`,
       `desconto_valor`, `valor_total` calculado).
-- [ ] Criar tabela `medical_records`.
-- [ ] Implementar mutation `appointments.create` protegida por
+- [x] Criar tabela `medical_records`.
+- [x] Implementar mutation `appointments.create` protegida por
       `appointments.create`, calculando `valor_total` a partir de
       `servicos` + `insumos` - `desconto_valor`.
-- [ ] Implementar mutation `appointments.complete`, criando/atualizando
+- [x] Implementar mutation `appointments.complete`, criando/atualizando
       `medical_records` quando o atendimento for clínico.
-- [ ] Implementar notificação `microchip_pendente` quando o atendimento é
+- [x] Implementar notificação `microchip_pendente` quando o atendimento é
       concluído e o animal ainda não tem microchip (fan-out para
       `dogs.edit`).
-- [ ] Adicionar dependência de parser XML (ex. `fast-xml-parser`) e
+- [x] Adicionar dependência de parser XML (ex. `fast-xml-parser`) e
       implementar `convex/lib/nfe.ts` extraindo número (`ide > nNF`), data
       de emissão (`ide > dhEmi`) e valor total (`total > ICMSTot > vNF`) do
       XML de NFe.
-- [ ] Implementar action `appointments.parseNotaFiscal` recebendo o
+- [x] Implementar action `appointments.parseNotaFiscal` recebendo o
       `storage_id` do XML e devolvendo os campos sugeridos, sem bloquear o
       fluxo se o parse falhar.
-- [ ] Implementar query `appointments.list`/`appointments.get` com os
+- [x] Implementar query `appointments.list`/`appointments.get` com os
       campos do relatório (ordem, data, animal, espécie, solicitante,
       histórico, valor, nota fiscal, data de emissão).
-- [ ] Auditar criação, conclusão e upload de nota fiscal.
-- [ ] Testar cálculo de valor total com desconto, parse de XML válido e
+- [x] Auditar criação, conclusão e upload de nota fiscal.
+- [x] Testar cálculo de valor total com desconto, parse de XML válido e
       inválido, notificação de microchip pendente e permissões.
 
 ### Frontend
 
-- [ ] Criar `/appointments` (agenda/lista) e `/appointments/new` com
+- [x] Criar `/appointments` (agenda/lista) e `/appointments/new` com
       seleção de animal, solicitante, veterinário (usuário do sistema),
       serviços e insumos com quantidade/valor, desconto.
-- [ ] Criar upload de nota fiscal (XML) com preenchimento automático de
+- [x] Criar upload de nota fiscal (XML) com preenchimento automático de
       número/valor/data de emissão, editável antes de salvar.
-- [ ] Criar `/appointments/:id` com histórico, prontuário vinculado e nota
+- [x] Criar `/appointments/:id` com histórico, prontuário vinculado e nota
       fiscal.
-- [ ] Criar aba "Prontuário" em `DogDetailPage` com timeline cronológica.
-- [ ] Criar view de impressão do comprovante de venda
+- [x] Criar aba "Prontuário" em `DogDetailPage` com timeline cronológica.
+- [x] Criar view de impressão do comprovante de venda
       (`/appointments/:id/receipt`) com cabeçalho da ONG (Fase 19), dados
       da venda, serviços/insumos, desconto e total.
-- [ ] Testar criação de atendimento, upload de XML, prontuário na ficha do
+- [x] Testar criação de atendimento, upload de XML, prontuário na ficha do
       animal e impressão do comprovante.
+
+**Notas:**
+- O animal atendido é obrigatório e precisa estar cadastrado; isso mantém
+  prontuário, notificações e histórico sempre vinculados a uma ficha válida.
+- O módulo `appointments` tem `read`/`create`/`manage`; seus níveis também
+  recebem `dogs.read` e `people.read` para a seleção e a leitura dos vínculos.
+  Os catálogos continuam sob `settings`, mas expõem consultas somente de
+  itens ativos para o formulário de atendimento.
+- A nota fiscal aceita XML ou PDF de até 8 MB. XML é interpretado de forma
+  não bloqueante; se o parser falhar, o usuário pode preencher número, valor
+  e emissão manualmente. O valor sugerido da NFe também fica persistido.
+- `appointments.complete` é idempotente: uma conclusão repetida atualiza o
+  prontuário sem duplicar a notificação de microchip pendente.
 
 ## Fase 22 - Acompanhamento pós-adoção
 

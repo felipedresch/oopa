@@ -67,6 +67,31 @@ export const list = query({
   },
 });
 
+/** Catálogo ativo consumido pelo lançamento de atendimentos. */
+export const listActiveForAppointments = query({
+  args: {},
+  returns: v.array(serviceValidator),
+  handler: async (ctx) => {
+    const actor = await getCurrentUser(ctx);
+    requirePermission(actor, "appointments.create");
+
+    const services = await ctx.db.query("services").take(500);
+    return services
+      .filter((service) => service.ativo)
+      .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR"))
+      .map((service) => ({
+        _id: service._id,
+        nome: service.nome,
+        descricao: service.descricao,
+        categoria: service.categoria,
+        valor_padrao: service.valor_padrao,
+        ativo: service.ativo,
+        criado_em: service.criado_em,
+        atualizado_em: service.atualizado_em,
+      }));
+  },
+});
+
 export const create = mutation({
   args: {
     nome: v.string(),

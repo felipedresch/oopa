@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { DogPhotoGallery } from "@/components/DogPhotoGallery";
+import { MedicalRecordTimeline } from "@/components/MedicalRecordTimeline";
 import { OccurrenceTimeline } from "@/components/OccurrenceTimeline";
 import { PersonDogHistoryList } from "@/components/PersonDogHistoryList";
 import { DogStatusBadge } from "@/components/DogStatusBadge";
@@ -23,13 +24,15 @@ import {
 import { formatMicrochip } from "@/lib/formatters";
 
 const TABS = ["Dados", "Histórico de tutores", "Ocorrências", "Fotos"] as const;
+type DogTab = (typeof TABS)[number] | "Prontuário";
 
 export function DogDetailPage() {
   const { dogId } = useParams();
   const { can, canAny } = usePermissions();
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Dados");
+  const [activeTab, setActiveTab] = useState<DogTab>("Dados");
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [now] = useState(() => Date.now());
+  const tabs = can("appointments.read") ? [...TABS, "Prontuário" as const] : TABS;
 
   const dog = useQuery(
     api.dogs.get,
@@ -135,7 +138,7 @@ export function DogDetailPage() {
       </header>
 
       <div className="flex gap-1 overflow-x-auto border-b" role="tablist">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             aria-selected={activeTab === tab}
             className={`min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors ${
@@ -215,6 +218,8 @@ export function DogDetailPage() {
       {activeTab === "Fotos" ? (
         <DogPhotoGallery canEdit={can("dogs.edit")} dogId={dog._id} />
       ) : null}
+
+      {activeTab === "Prontuário" ? <MedicalRecordTimeline dogId={dog._id} /> : null}
 
       {can("dogs.change_status") ? (
         <DogStatusChangeDialog

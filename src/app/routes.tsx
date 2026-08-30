@@ -41,6 +41,10 @@ import { CastrationsListPage } from "@/app/pages/CastrationsListPage";
 import { OrganizationSettingsPage } from "@/app/pages/OrganizationSettingsPage";
 import { ServicesCatalogPage } from "@/app/pages/ServicesCatalogPage";
 import { SuppliesCatalogPage } from "@/app/pages/SuppliesCatalogPage";
+import { AppointmentsListPage } from "@/app/pages/AppointmentsListPage";
+import { AppointmentNewPage } from "@/app/pages/AppointmentNewPage";
+import { AppointmentDetailPage } from "@/app/pages/AppointmentDetailPage";
+import { AppointmentReceiptPage } from "@/app/pages/AppointmentReceiptPage";
 
 export const appRoutes: RouteObject[] = [
   {
@@ -82,6 +86,10 @@ export const appRoutes: RouteObject[] = [
       { path: "castration", element: <CastrationsListPage /> },
       { path: "castration/new", element: <CastrationNewPage /> },
       { path: "castration/:id", element: <CastrationDetailPage /> },
+      { path: "appointments", element: <AppointmentsListPage /> },
+      { path: "appointments/new", element: <AppointmentNewPage /> },
+      { path: "appointments/:id", element: <AppointmentDetailPage /> },
+      { path: "appointments/:id/receipt", element: <AppointmentReceiptPage /> },
       { path: "team", element: <TeamPage /> },
       { path: "team/invite", element: <TeamInvitePage /> },
       { path: "team/:userId", element: <TeamUserPage /> },
