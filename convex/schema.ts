@@ -4,6 +4,7 @@ import { v } from "convex/values";
 
 import {
   adoptionPayloadValidator,
+  adoptionFollowupStatusValidator,
   appointmentStatusValidator,
   appointmentTypeValidator,
   castrationAnimalDescricaoValidator,
@@ -166,7 +167,7 @@ export default defineSchema({
     gravidade_padrao: severityValidator,
     ativo: v.boolean(),
     ...timestampFields,
-  }),
+  }).index("by_nome", ["nome"]),
 
   occurrences: defineTable({
     dog_id: v.optional(v.id("dogs")),
@@ -378,4 +379,23 @@ export default defineSchema({
     .index("by_dog_and_date", ["dog_id", "data_atendimento"])
     .index("by_appointment", ["appointment_id"])
     .index("by_date", ["data_atendimento"]),
+
+  adoption_followups: defineTable({
+    dog_id: v.id("dogs"),
+    pessoa_id: v.id("people"),
+    occurrence_id_adocao: v.id("occurrences"),
+    data_prevista: v.number(),
+    sequencia: v.number(),
+    status: adoptionFollowupStatusValidator,
+    tentativas: v.number(),
+    ultima_tentativa_em: v.optional(v.number()),
+    resultado: v.optional(v.string()),
+    notificado_em: v.optional(v.number()),
+    ocorrencia_visita_id: v.optional(v.id("occurrences")),
+    ...timestampFields,
+  })
+    .index("by_due", ["data_prevista"])
+    .index("by_status_and_due", ["status", "data_prevista"])
+    .index("by_dog_and_due", ["dog_id", "data_prevista"])
+    .index("by_adoption_occurrence", ["occurrence_id_adocao"]),
 });

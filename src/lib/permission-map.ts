@@ -44,9 +44,18 @@ const MODULE_LEVEL_PERMISSIONS: Record<
   },
   adoptions: {
     none: [],
-    read: ["dogs.read", "people.read"],
-    write: ["dogs.read", "people.read", "occurrences.create_adocao"],
+    read: ["adoptions.read", "dogs.read", "people.read"],
+    write: [
+      "adoptions.read",
+      "adoptions.create",
+      "dogs.read",
+      "people.read",
+      "occurrences.create_adocao",
+    ],
     manage: [
+      "adoptions.read",
+      "adoptions.create",
+      "adoptions.manage",
       "dogs.read",
       "people.read",
       "people.read_sensitive",

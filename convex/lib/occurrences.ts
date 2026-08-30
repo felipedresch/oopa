@@ -124,8 +124,10 @@ export async function getOccurrenceTypeByName(
   ctx: Pick<QueryCtx, "db">,
   nome: string,
 ): Promise<Doc<"occurrence_types"> | null> {
-  const types = await ctx.db.query("occurrence_types").collect();
-  return types.find((type) => type.nome === nome) ?? null;
+  return await ctx.db
+    .query("occurrence_types")
+    .withIndex("by_nome", (q) => q.eq("nome", nome))
+    .unique();
 }
 
 export type OccurrenceWithType = Doc<"occurrences"> & {

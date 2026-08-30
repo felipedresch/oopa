@@ -11,7 +11,7 @@ import {
 } from "./permissions";
 
 test("catalogo granular contem todas as permissoes de dominio", () => {
-  expect(PERMISSION_CATALOG).toHaveLength(36);
+  expect(PERMISSION_CATALOG).toHaveLength(39);
   expect(UI_MODULES).toHaveLength(12);
 });
 
@@ -34,6 +34,16 @@ test("traduz modulo e nivel para permissoes granulares", () => {
   expect(moduleLevelToPermissions("castration", "write")).toEqual([
     "castration.read",
     "castration.create",
+  ]);
+  expect(moduleLevelToPermissions("adoptions", "manage")).toEqual([
+    "adoptions.read",
+    "adoptions.create",
+    "adoptions.manage",
+    "dogs.read",
+    "people.read",
+    "people.read_sensitive",
+    "occurrences.create_adocao",
+    "occurrences.create_outro",
   ]);
   expect(moduleLevelToPermissions("organization", "manage")).toEqual([
     "organization.manage",

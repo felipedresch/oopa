@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 const STEPS = ["Cão", "Tutor", "Avaliação", "Dados", "Revisão"] as const;
 
 export function AdoptionNewPage() {
-  const { can, user } = usePermissions();
+  const { can, canAny, user } = usePermissions();
   const [step, setStep] = useState(0);
   const [now] = useState(() => Date.now());
 
@@ -90,7 +90,7 @@ export function AdoptionNewPage() {
 
   const ongStaff = useQuery(
     api.adoptions.listOngStaff,
-    can("occurrences.create_adocao") ? {} : "skip",
+    canAny(["occurrences.create_adocao", "adoptions.create"]) ? {} : "skip",
   );
 
   const responsavelDefault = useMemo(() => {
@@ -101,7 +101,7 @@ export function AdoptionNewPage() {
     return match?._id ?? "";
   }, [ongStaff, responsavelId, user]);
 
-  if (!can("occurrences.create_adocao")) {
+  if (!canAny(["occurrences.create_adocao", "adoptions.create"])) {
     return <PermissionDenied />;
   }
 

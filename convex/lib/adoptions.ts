@@ -33,6 +33,9 @@ export type AdoptionPayloadInput = {
 };
 
 export function validateAdoptionPayload(payload: AdoptionPayloadInput): void {
+  if (!Number.isFinite(payload.data_adocao) || payload.data_adocao <= 0) {
+    throw validationError("Data de adoção inválida.");
+  }
   if (!payload.numero_termo_adocao.trim()) {
     throw validationError("Número do termo de adoção obrigatório.");
   }
@@ -246,4 +249,34 @@ export async function createOccurrenceWithHistory(
   });
 
   return occurrenceId;
+}
+
+export async function createAdoptionFollowupVisit(
+  ctx: MutationCtx,
+  actor: Doc<"users">,
+  args: {
+    dogId: Id<"dogs">;
+    pessoaId: Id<"people">;
+    data_ocorrencia: number;
+    descricao: string;
+  },
+): Promise<Id<"occurrences">> {
+  const dog = await ctx.db.get("dogs", args.dogId);
+  if (!dog) {
+    throw validationError("Cão não encontrado para o acompanhamento.");
+  }
+
+  const person = await ctx.db.get("people", args.pessoaId);
+  if (!person) {
+    throw validationError("Tutor não encontrado para o acompanhamento.");
+  }
+
+  return await createOccurrenceWithHistory(ctx, actor, {
+    dog: { ...dog, pessoa_atual_id: args.pessoaId },
+    typeName: "Visita de acompanhamento",
+    descricao: args.descricao,
+    data_ocorrencia: args.data_ocorrencia,
+    photo_storage_ids: [],
+    atribuivel_a_pessoa: false,
+  });
 }

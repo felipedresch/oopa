@@ -142,6 +142,26 @@ export const appointmentStatusBadgeClass: Record<AppointmentStatus, string> = {
   cancelado: "bg-muted text-muted-foreground",
 };
 
+export type AdoptionFollowupStatus =
+  | "pendente"
+  | "contatado"
+  | "sem_resposta"
+  | "concluido";
+
+export const ADOPTION_FOLLOWUP_STATUS_LABELS: Record<AdoptionFollowupStatus, string> = {
+  pendente: "Pendente",
+  contatado: "Contatado",
+  sem_resposta: "Sem resposta",
+  concluido: "Concluído",
+};
+
+export const adoptionFollowupStatusBadgeClass: Record<AdoptionFollowupStatus, string> = {
+  pendente: "bg-warning/14 text-warning",
+  contatado: "bg-info/12 text-info",
+  sem_resposta: "bg-destructive/12 text-destructive",
+  concluido: "bg-success/12 text-success",
+};
+
 export const personAlertBadgeClass: Record<Exclude<PersonAlertLevel, "none">, string> = {
   yellow: "bg-warning/14 text-warning",
   red: "bg-destructive/12 text-destructive",

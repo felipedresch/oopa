@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { DogPhotoGallery } from "@/components/DogPhotoGallery";
+import { AdoptionFollowupList } from "@/components/AdoptionFollowupList";
 import { MedicalRecordTimeline } from "@/components/MedicalRecordTimeline";
 import { OccurrenceTimeline } from "@/components/OccurrenceTimeline";
 import { PersonDogHistoryList } from "@/components/PersonDogHistoryList";
@@ -24,7 +25,7 @@ import {
 import { formatMicrochip } from "@/lib/formatters";
 
 const TABS = ["Dados", "Histórico de tutores", "Ocorrências", "Fotos"] as const;
-type DogTab = (typeof TABS)[number] | "Prontuário";
+type DogTab = (typeof TABS)[number] | "Prontuário" | "Acompanhamento pós-adoção";
 
 export function DogDetailPage() {
   const { dogId } = useParams();
@@ -32,7 +33,11 @@ export function DogDetailPage() {
   const [activeTab, setActiveTab] = useState<DogTab>("Dados");
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [now] = useState(() => Date.now());
-  const tabs = can("appointments.read") ? [...TABS, "Prontuário" as const] : TABS;
+  const tabs = [
+    ...TABS,
+    ...(can("appointments.read") ? (["Prontuário"] as const) : []),
+    ...(can("adoptions.read") ? (["Acompanhamento pós-adoção"] as const) : []),
+  ];
 
   const dog = useQuery(
     api.dogs.get,
@@ -123,7 +128,7 @@ export function DogDetailPage() {
               Alterar status
             </Button>
           ) : null}
-          {can("occurrences.create_adocao") ? (
+          {canAny(["occurrences.create_adocao", "adoptions.create"]) ? (
             dog.pessoa_atual_id ? (
               <Button asChild className="min-h-11" variant="outline">
                 <Link to="/returns/new">Registrar devolução</Link>
@@ -220,6 +225,10 @@ export function DogDetailPage() {
       ) : null}
 
       {activeTab === "Prontuário" ? <MedicalRecordTimeline dogId={dog._id} /> : null}
+
+      {activeTab === "Acompanhamento pós-adoção" ? (
+        <AdoptionFollowupList dogId={dog._id} />
+      ) : null}
 
       {can("dogs.change_status") ? (
         <DogStatusChangeDialog

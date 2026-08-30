@@ -100,6 +100,12 @@ const SEED_OCCURRENCE_TYPES = [
     requer_foto: false,
     gravidade_padrao: "media" as const,
   },
+  {
+    nome: "Visita de acompanhamento",
+    categoria: "rotina" as const,
+    requer_foto: false,
+    gravidade_padrao: "info" as const,
+  },
 ] as const;
 
 // Bairros de Alegrete/RS (fontes públicas: cepbrasil.org / ruacep.com.br),
@@ -158,20 +164,25 @@ const SEED_BAIRROS = [
 const now = () => Date.now();
 
 async function seedOccurrenceTypes(ctx: Pick<MutationCtx, "db">) {
-  const existing = await ctx.db.query("occurrence_types").first();
-  if (existing) {
-    return 0;
-  }
-
+  let inserted = 0;
   for (const type of SEED_OCCURRENCE_TYPES) {
+    const existing = await ctx.db
+      .query("occurrence_types")
+      .withIndex("by_nome", (q) => q.eq("nome", type.nome))
+      .unique();
+    if (existing) {
+      continue;
+    }
+
     await ctx.db.insert("occurrence_types", {
       ...type,
       ativo: true,
       criado_em: now(),
     });
+    inserted += 1;
   }
 
-  return SEED_OCCURRENCE_TYPES.length;
+  return inserted;
 }
 
 /**
@@ -282,7 +293,7 @@ export const getSeedSummary = query({
       occurrenceTypeCount: occurrenceTypes.length,
       bairroCount: bairros.length,
       permissionTemplateCount: permissionTemplates.length,
-      permissionCatalogSize: 36,
+      permissionCatalogSize: 39,
       uiModuleCount: 12,
     };
   },

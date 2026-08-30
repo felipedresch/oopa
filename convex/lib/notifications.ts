@@ -43,14 +43,16 @@ export async function fanOutNotification(
 ): Promise<number> {
   const users = await ctx.db
     .query("users")
-    .withIndex("by_active", (q) => q.eq("ativo", true))
-    .collect();
+    .withIndex("by_organization_and_active", (q) =>
+      q.eq("organizacao", args.organizacao).eq("ativo", true),
+    )
+    .take(200);
 
   const now = Date.now();
   let count = 0;
 
   for (const user of users) {
-    if (user.organizacao !== args.organizacao || !args.shouldNotify(user)) {
+    if (!args.shouldNotify(user)) {
       continue;
     }
 
@@ -116,6 +118,10 @@ export async function resolveNotificationHref(
       return null;
     }
     return `/dogs/${occurrence.dog_id}/occurrences/${occurrence._id}`;
+  }
+
+  if (notification.entidade_tipo === "adoption_followup" && notification.entidade_id) {
+    return "/adoptions/followups";
   }
 
   return null;

@@ -10,7 +10,8 @@ import {
   validateAdoptionPayload,
   type AdoptionPayloadInput,
 } from "./lib/adoptions";
-import { getCurrentUser, requirePermission } from "./lib/auth";
+import { createInitialAdoptionFollowup } from "./lib/adoptionFollowups";
+import { getCurrentUser, requireAnyPermission, requirePermission } from "./lib/auth";
 import { validatePdfStorage } from "./lib/storage";
 import { hasPermission } from "./permissions";
 import { mutation, query } from "./_generated/server";
@@ -56,9 +57,7 @@ export const listOngStaff = query({
   returns: v.array(ongStaffValidator),
   handler: async (ctx) => {
     const actor = await getCurrentUser(ctx);
-    if (!hasPermission(actor.permissions, "occurrences.create_adocao")) {
-      throw forbidden();
-    }
+    requireAnyPermission(actor, ["occurrences.create_adocao", "adoptions.create"]);
 
     const users = await ctx.db.query("users").withIndex("by_active", (q) => q.eq("ativo", true)).take(200);
     return users
@@ -125,7 +124,7 @@ export const create = mutation({
   returns: v.id("occurrences"),
   handler: async (ctx, args) => {
     const actor = await getCurrentUser(ctx);
-    requirePermission(actor, "occurrences.create_adocao");
+    requireAnyPermission(actor, ["occurrences.create_adocao", "adoptions.create"]);
 
     const dog = await ctx.db.get("dogs", args.dogId);
     if (!dog) {
@@ -176,6 +175,14 @@ export const create = mutation({
       atribuivel_a_pessoa: false,
     });
 
+    const followupId = await createInitialAdoptionFollowup(ctx, {
+      dogId: args.dogId,
+      pessoaId: args.personId,
+      occurrenceIdAdocao: occurrenceId,
+      dataAdocao: args.data_adocao,
+      actorId: actor._id,
+    });
+
     await recordAudit(ctx, {
       actorUserId: actor._id,
       action: "adoptions.create",
@@ -186,7 +193,17 @@ export const create = mutation({
         dog_id: args.dogId,
         pessoa_id: args.personId,
         termo_adocao_anexado: Boolean(args.termo_adocao_storage_id),
+        adoption_followup_id: followupId,
       },
+    });
+
+    await recordAudit(ctx, {
+      actorUserId: actor._id,
+      action: "adoptionFollowups.create",
+      entityType: "adoption_followup",
+      entityId: followupId,
+      summary: `Acompanhamento pós-adoção criado para ${dog.nome}`,
+      metadata: { dog_id: args.dogId, pessoa_id: args.personId, sequencia: 1 },
     });
 
     return occurrenceId;

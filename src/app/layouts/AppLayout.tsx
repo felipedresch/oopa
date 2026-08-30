@@ -2,6 +2,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import {
   BellIcon,
+  HeartHandshakeIcon,
   ClipboardListIcon,
   CalendarHeartIcon,
   DogIcon,
@@ -81,6 +82,12 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Atendimentos",
     icon: CalendarHeartIcon,
     canAccess: ({ can }) => can("appointments.read"),
+  },
+  {
+    to: "/adoptions/followups",
+    label: "Pós-adoção",
+    icon: HeartHandshakeIcon,
+    canAccess: ({ can }) => can("adoptions.read"),
   },
   {
     to: "/team",

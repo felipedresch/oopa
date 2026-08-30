@@ -30,6 +30,7 @@ import { OccurrenceRectifyPage } from "@/app/pages/OccurrenceRectifyPage";
 import { OccurrenceTypesSettingsPage } from "@/app/pages/OccurrenceTypesSettingsPage";
 import { OccurrencesListPage } from "@/app/pages/OccurrencesListPage";
 import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
+import { AdoptionFollowupsPage } from "@/app/pages/AdoptionFollowupsPage";
 import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
 import { ProfilePage } from "@/app/pages/ProfilePage";
 import { RescueDetailPage } from "@/app/pages/RescueDetailPage";
@@ -79,6 +80,7 @@ export const appRoutes: RouteObject[] = [
       { path: "people/:personId", element: <PersonDetailPage /> },
       { path: "people/:personId/edit", element: <PersonFormPage /> },
       { path: "adoptions/new", element: <AdoptionNewPage /> },
+      { path: "adoptions/followups", element: <AdoptionFollowupsPage /> },
       { path: "returns/new", element: <ReturnNewPage /> },
       { path: "rescues", element: <RescuesListPage /> },
       { path: "rescues/new", element: <RescueNewPage /> },

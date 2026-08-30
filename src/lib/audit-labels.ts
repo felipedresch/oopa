@@ -2,6 +2,7 @@ import {
   ActivityIcon,
   ArrowRightLeftIcon,
   BellIcon,
+  CalendarHeartIcon,
   CameraIcon,
   FileTextIcon,
   HeartIcon,
@@ -80,6 +81,26 @@ const ACTION_LABELS: Record<string, AuditActionInfo> = {
   "adoptions.transferTutor": {
     label: "Transferência de tutor",
     icon: ArrowRightLeftIcon,
+    tone: "status",
+  },
+  "adoptionFollowups.create": {
+    label: "Acompanhamento pós-adoção criado",
+    icon: HeartIcon,
+    tone: "create",
+  },
+  "adoptionFollowups.notify": {
+    label: "Lembrete de pós-adoção enviado",
+    icon: BellIcon,
+    tone: "status",
+  },
+  "adoptionFollowups.register_contact": {
+    label: "Contato de pós-adoção registrado",
+    icon: UserCheckIcon,
+    tone: "update",
+  },
+  "adoptionFollowups.auto_visit": {
+    label: "Visita de pós-adoção criada automaticamente",
+    icon: CalendarHeartIcon,
     tone: "status",
   },
 
@@ -192,6 +213,7 @@ const ENTITY_LABELS: Record<string, string> = {
   castration_request: "Solicitação de castração",
   appointment: "Atendimento",
   medical_record: "Prontuário médico",
+  adoption_followup: "Acompanhamento pós-adoção",
 };
 
 export function getEntityLabel(entityType: string): string {
@@ -211,6 +233,7 @@ const ENTITY_ID_LABELS: Record<string, string> = {
   castration_request: "ID da castração",
   appointment: "ID do atendimento",
   medical_record: "ID do prontuário",
+  adoption_followup: "ID do acompanhamento",
 };
 
 export function getEntityIdLabel(entityType: string): string {

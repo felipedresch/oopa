@@ -9,7 +9,7 @@ lá, não repetidos aqui em detalhe).
 
 ## Estado atual (conferido no código em 2026-08-30)
 
-Último merge de produto: Fase 20 (`996564b`). Conferência feita contra
+Última fase de produto conferida no código: Fase 22. Conferência feita contra
 `convex/schema.ts`, funções em `convex/`, rotas em `src/app/routes.tsx` e
 páginas/testes em `src/` — não contra o texto dos commits.
 
@@ -19,8 +19,10 @@ páginas/testes em `src/` — não contra o texto dos commits.
   termo na UI).
 - **Fase 21:** implementada neste conjunto de mudanças, com backend, telas,
   testes e comprovante de venda.
-- **Fases 22–26:** não iniciadas. Não há tabela `adoption_followups`,
-  `convex/crons.ts` nem rotas `/adoptions/followups`, `/calendar` ou
+- **Fase 22:** implementada neste conjunto de mudanças, com ciclo de
+  acompanhamento, cron diário, notificações internas, ocorrência automática,
+  telas e testes.
+- **Fases 23–26:** não iniciadas. Ainda não existem as rotas `/calendar` ou
   `/reports`.
 
 ## Como usar (fluxo com 3 pessoas)
@@ -67,9 +69,8 @@ Já no `src/app/routes.tsx`:
 - `/settings/organization`
 - `/catalog/services`, `/catalog/supplies`
 
-Ainda não existem (Fases 22–24):
+Ainda não existem (Fases 23–24):
 
-- `/adoptions/followups`
 - `/calendar`
 - `/reports` (+ subrotas por relatório, definidas na Fase 24)
 
@@ -683,32 +684,44 @@ Ver `docs/ajustes-cliente-modulos.md` seção 3.4 (segunda parte).
 
 ### Backend
 
-- [ ] Criar tabela `adoption_followups`.
-- [ ] Criar `convex/crons.ts` com job diário (não existe hoje no projeto).
-- [ ] Implementar criação do primeiro follow-up (sequência 1, 3 meses) ao
+- [x] Criar tabela `adoption_followups`.
+- [x] Criar `convex/crons.ts` com job diário (não existe hoje no projeto).
+- [x] Implementar criação do primeiro follow-up (sequência 1, 3 meses) ao
       registrar `adoptions.create`.
-- [ ] Implementar disparo de notificação `adoption_followup_due` quando
+- [x] Implementar disparo de notificação `adoption_followup_due` quando
       `data_prevista` chega.
-- [ ] Implementar transição automática para `sem_resposta` e criação da
+- [x] Implementar transição automática para `sem_resposta` e criação da
       ocorrência "Visita de acompanhamento" após 7 dias corridos sem
       registro de contato.
-- [ ] Implementar mutation `adoptionFollowups.registerContact` (contatado /
+- [x] Implementar mutation `adoptionFollowups.registerContact` (contatado /
       sem resposta + observação), agendando a próxima sequência 6 meses
       depois quando `contatado`/`concluido`.
-- [ ] Criar tipo de ocorrência "Visita de acompanhamento" no seed
+- [x] Criar tipo de ocorrência "Visita de acompanhamento" no seed
       (`convex/seeds.ts`).
-- [ ] Auditar criação de follow-up, notificação e registro de contato.
-- [ ] Testar sequência 3 meses -> 6 em 6 meses, regra dos 7 dias, criação
+- [x] Auditar criação de follow-up, notificação e registro de contato.
+- [x] Testar sequência 3 meses -> 6 em 6 meses, regra dos 7 dias, criação
       automática de ocorrência e notificações.
 
 ### Frontend
 
-- [ ] Criar `/adoptions/followups` com lista de pendentes/atrasados,
+- [x] Criar `/adoptions/followups` com lista de pendentes/atrasados,
       ordenável por atraso.
-- [ ] Criar seção "Acompanhamento pós-adoção" em `DogDetailPage` com os
+- [x] Criar seção "Acompanhamento pós-adoção" em `DogDetailPage` com os
       follow-ups daquele animal.
-- [ ] Criar ação de registrar contato nas duas telas.
-- [ ] Testar as duas telas, registro de contato e reflexo no status.
+- [x] Criar ação de registrar contato nas duas telas.
+- [x] Testar as duas telas, registro de contato e reflexo no status.
+
+**Notas:**
+- O contato marcado como `sem_resposta` encerra o follow-up e cria uma
+  ocorrência "Visita de acompanhamento" imediatamente, preservando a tentativa
+  e a observação. O cron aplica a mesma escalada automaticamente após 7 dias
+  corridos do vencimento.
+- Os lembretes são exclusivamente notificações internas para usuários com
+  `adoptions.manage`; não há envio por e-mail ou SMS. A notificação e a visita
+  automática são idempotentes por follow-up.
+- A próxima sequência é criada seis meses após o contato marcado como
+  `contatado`; o primeiro follow-up é criado três meses após a adoção usando
+  meses-calendário, com ajuste para o último dia do mês quando necessário.
 
 ## Fase 23 - Calendário
 

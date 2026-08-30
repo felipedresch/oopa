@@ -51,6 +51,7 @@ export const notificationTypeValidator = v.union(
   v.literal("system"),
   v.literal("rescue_alert"),
   v.literal("microchip_pendente"),
+  v.literal("adoption_followup_due"),
 );
 
 export const entityTypeValidator = v.union(
@@ -69,6 +70,7 @@ export const entityTypeValidator = v.union(
   v.literal("supply"),
   v.literal("appointment"),
   v.literal("medical_record"),
+  v.literal("adoption_followup"),
 );
 
 export const publicReportStatusValidator = v.union(
@@ -124,6 +126,13 @@ export const appointmentStatusValidator = v.union(
   v.literal("agendado"),
   v.literal("realizado"),
   v.literal("cancelado"),
+);
+
+export const adoptionFollowupStatusValidator = v.union(
+  v.literal("pendente"),
+  v.literal("contatado"),
+  v.literal("sem_resposta"),
+  v.literal("concluido"),
 );
 
 export const supplyCategoryValidator = v.union(

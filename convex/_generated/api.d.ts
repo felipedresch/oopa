@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as adoptionFollowups from "../adoptionFollowups.js";
 import type * as adoptions from "../adoptions.js";
 import type * as appointments from "../appointments.js";
 import type * as audit from "../audit.js";
@@ -15,6 +16,7 @@ import type * as auth from "../auth.js";
 import type * as bairros from "../bairros.js";
 import type * as bootstrap from "../bootstrap.js";
 import type * as castration from "../castration.js";
+import type * as crons from "../crons.js";
 import type * as dogPhotos from "../dogPhotos.js";
 import type * as dogs from "../dogs.js";
 import type * as domainValidators from "../domainValidators.js";
@@ -22,6 +24,7 @@ import type * as emails from "../emails.js";
 import type * as errors from "../errors.js";
 import type * as exports from "../exports.js";
 import type * as http from "../http.js";
+import type * as lib_adoptionFollowups from "../lib/adoptionFollowups.js";
 import type * as lib_adoptions from "../lib/adoptions.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_csv from "../lib/csv.js";
@@ -62,6 +65,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  adoptionFollowups: typeof adoptionFollowups;
   adoptions: typeof adoptions;
   appointments: typeof appointments;
   audit: typeof audit;
@@ -69,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   bairros: typeof bairros;
   bootstrap: typeof bootstrap;
   castration: typeof castration;
+  crons: typeof crons;
   dogPhotos: typeof dogPhotos;
   dogs: typeof dogs;
   domainValidators: typeof domainValidators;
@@ -76,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   errors: typeof errors;
   exports: typeof exports;
   http: typeof http;
+  "lib/adoptionFollowups": typeof lib_adoptionFollowups;
   "lib/adoptions": typeof lib_adoptions;
   "lib/auth": typeof lib_auth;
   "lib/csv": typeof lib_csv;
