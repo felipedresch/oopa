@@ -11,8 +11,8 @@ import {
 } from "./permissions";
 
 test("catalogo granular contem todas as permissoes de dominio", () => {
-  expect(PERMISSION_CATALOG).toHaveLength(23);
-  expect(UI_MODULES).toHaveLength(7);
+  expect(PERMISSION_CATALOG).toHaveLength(24);
+  expect(UI_MODULES).toHaveLength(8);
 });
 
 test("traduz modulo e nivel para permissoes granulares", () => {
@@ -24,6 +24,9 @@ test("traduz modulo e nivel para permissoes granulares", () => {
   ]);
 
   expect(moduleLevelToPermissions("system", "manage")).toEqual(["system.audit_log"]);
+  expect(moduleLevelToPermissions("public_reports", "manage")).toEqual([
+    "public_reports.triage",
+  ]);
   expect(moduleLevelToPermissions("team", "none")).toEqual([]);
 });
 
@@ -36,6 +39,7 @@ test("mapa de modulos e permissoes faz round-trip para modulos independentes", (
     team: "manage",
     settings: "manage",
     system: "manage",
+    public_reports: "manage",
   } as const;
 
   const permissions = moduleMapToPermissions(map);
@@ -53,10 +57,12 @@ test("helpers de permissao avaliam conjuntos esperados", () => {
     team: "manage",
     settings: "manage",
     system: "manage",
+    public_reports: "manage",
   });
 
   expect(hasPermission(permissions, "dogs.change_status")).toBe(true);
   expect(hasPermission(permissions, "system.audit_log")).toBe(true);
+  expect(hasPermission(permissions, "public_reports.triage")).toBe(true);
   expect(
     hasAllPermissions(permissions, ["dogs.read", "templates.manage"]),
   ).toBe(true);

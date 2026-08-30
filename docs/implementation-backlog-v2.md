@@ -280,30 +280,74 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.1.
 
 ### Backend
 
-- [ ] Criar tabela `public_reports`.
-- [ ] Implementar mutation pública `publicReports.create` (sem
+- [x] Criar tabela `public_reports`.
+- [x] Implementar mutation pública `publicReports.create` (sem
       `getCurrentUser`), validando tamanho de texto e limite de fotos —
       sem proteção anti-spam na v1 (decisão confirmada).
-- [ ] Implementar query `publicReports.list` protegida por
+- [x] Implementar query `publicReports.list` protegida por
       `public_reports.triage`, com filtro de status.
-- [ ] Implementar mutation `publicReports.convertToOccurrence`, protegida
+- [x] Implementar mutation `publicReports.convertToOccurrence`, protegida
       por `public_reports.triage`, criando `occurrences` com `dog_id`
       opcional e categoria `denuncia_externa`, marcando `status = "convertido"`
       e `occurrence_id_gerada`.
-- [ ] Implementar mutation `publicReports.archive`.
-- [ ] Auditar conversão e arquivamento.
-- [ ] Testar criação pública, listagem, conversão em ocorrência e
+- [x] Implementar mutation `publicReports.archive`.
+- [x] Auditar conversão e arquivamento.
+- [x] Testar criação pública, listagem, conversão em ocorrência e
       arquivamento.
 
 ### Frontend
 
-- [ ] Criar rota pública `/denuncia` (fora do `ProtectedRoute`) com nome/
+- [x] Criar rota pública `/denuncia` (fora do `ProtectedRoute`) com nome/
       contato opcionais, tipo, descrição, bairro, local e fotos.
-- [ ] Criar `/denuncia/:id/confirmacao`.
-- [ ] Adicionar aba/filtro de denúncias pendentes dentro de `/occurrences`
+- [x] Criar `/denuncia/:id/confirmacao`.
+- [x] Adicionar aba/filtro de denúncias pendentes dentro de `/occurrences`
       (Fase 15), com ações "Converter em ocorrência" e "Arquivar".
-- [ ] Divulgar o link do portal público em local visível fora do login.
-- [ ] Testar envio público, confirmação, triagem, conversão e arquivamento.
+- [x] Divulgar o link do portal público em local visível fora do login.
+- [x] Testar envio público, confirmação, triagem, conversão e arquivamento.
+
+**Notas:**
+- Novo módulo de permissão `public_reports` (única permissão
+  `public_reports.triage`, só nível `manage`, mesmo padrão do módulo
+  `system`) — adicionado a `UI_MODULES`/`MODULE_LEVEL_PERMISSIONS`/
+  `SEED_PERMISSION_TEMPLATES` em `convex/permissions.ts` e no espelho
+  frontend `src/lib/permissions.ts`/`src/lib/permission-map.ts`. Só o
+  template "Administrador ONG" recebe a permissão por padrão; os demais
+  perfis seed ficam com `none` até a ONG pedir acesso de triagem para
+  outro perfil.
+- Novo tipo de ocorrência seedado "Denúncia Externa" (categoria
+  `denuncia_externa`, gravidade padrão `media`), usado por
+  `convertToOccurrence` como o `occurrence_type_id` de toda ocorrência
+  gerada a partir de uma denúncia pública.
+- `tipo_denuncia` é `v.string()` livre no schema (conforme
+  `docs/ajustes-cliente-modulos.md`), não um enum — o formulário público
+  oferece um `<select>` com as categorias sugeridas pelo cliente
+  (maus-tratos, animal ferido, abandono, acúmulo de animais, outro) como
+  valores curados, mas o backend aceita qualquer string.
+- Upload de fotos no portal público usa uma mutation dedicada sem auth
+  (`publicReports.createUploadUrl`), separada de `storage.createSignedUploadUrl`
+  (que exige permissão). `usePhotoUpload`/`MultiPhotoUpload` ganharam um
+  parâmetro opcional de mutation de upload para reaproveitar o mesmo
+  componente nos dois contextos (autenticado e público).
+- `bairros.listPublicOptions`: nova query pública (sem auth) só para o
+  formulário de denúncia — `bairros.search` continua exigindo permissão e
+  não foi alterada.
+- Na triagem (`/occurrences`, aba "Denúncias pendentes"), a ação
+  "Converter em ocorrência" permite vincular um animal já cadastrado
+  (busca por nome/microchip via `dogs.list`) ou converter sem animal.
+  Como uma ocorrência sem `dog_id` ainda não tem rota de detalhe própria
+  (só existe `/dogs/:dogId/occurrences/:occurrenceId`), o link pós-conversão
+  aponta para a listagem geral `/occurrences` em vez de um link direto —
+  reavaliar se/quando existir uma rota de detalhe agnóstica de animal.
+- `convertToOccurrence` copia as fotos anexadas à denúncia para a
+  ocorrência gerada (`occurrence_photos`) e inclui nome/contato do
+  denunciante (quando informados) no corpo da descrição, já que não há
+  campo próprio para isso em `occurrences`.
+- Ajuste colateral: os validadores de retorno que enumeravam os módulos
+  de permissão por nome (`seeds.getPermissionTemplateMaps`, `users.list`,
+  `permissionTemplates.list`) precisaram ganhar o campo `public_reports` —
+  são três cópias independentes do mesmo formato, sem validador
+  compartilhado; ao adicionar um módulo novo no futuro, procurar por
+  `system: v.union(` em `convex/` para achar todos os pontos.
 
 ## Fase 17 - Resgates
 

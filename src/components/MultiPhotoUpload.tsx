@@ -1,10 +1,11 @@
 import { ImagePlusIcon, Trash2Icon } from "lucide-react";
 import { useRef } from "react";
 
+import type { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
-import type { Id } from "../../convex/_generated/dataModel";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -19,6 +20,7 @@ type MultiPhotoUploadProps = {
   photos: UploadedPhoto[];
   required?: boolean;
   onChange: (photos: UploadedPhoto[]) => void;
+  uploadUrlMutation?: typeof api.storage.createSignedUploadUrl;
 };
 
 export function MultiPhotoUpload({
@@ -26,9 +28,10 @@ export function MultiPhotoUpload({
   photos,
   required = false,
   onChange,
+  uploadUrlMutation,
 }: MultiPhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { upload, isUploading, error } = usePhotoUpload();
+  const { upload, isUploading, error } = usePhotoUpload(uploadUrlMutation);
 
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList) {

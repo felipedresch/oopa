@@ -7,11 +7,15 @@ import { FilterBar } from "@/components/FilterBar";
 import { OccurrenceCardList } from "@/components/OccurrenceCardList";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
+import { PublicReportsTriagePanel } from "@/components/PublicReportsTriagePanel";
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { usePermissions } from "@/hooks/usePermissions";
 import type { Severity } from "@/lib/domain-colors";
 import { SEVERITY_LABELS } from "@/lib/domain-colors";
+
+type Tab = "occurrences" | "public_reports";
 
 const CATEGORY_OPTIONS = [
   { value: "", label: "Todas as categorias" },
@@ -30,9 +34,11 @@ const SEVERITY_OPTIONS = [
 ] as const;
 
 export function OccurrencesListPage() {
-  const { canAny } = usePermissions();
+  const { can, canAny } = usePermissions();
   const canRead = canAny(["occurrences.read", "occurrences.read_legal"]);
+  const canTriage = can("public_reports.triage");
 
+  const [tab, setTab] = useState<Tab>("occurrences");
   const [gravidade, setGravidade] = useState<Severity | "">("");
   const [categoria, setCategoria] = useState<(typeof CATEGORY_OPTIONS)[number]["value"]>("");
   const [bairroId, setBairroId] = useState<Id<"bairros"> | "">("");
@@ -46,7 +52,7 @@ export function OccurrencesListPage() {
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.occurrences.listAll,
-    canRead
+    canRead && tab === "occurrences"
       ? {
           gravidade: gravidade || undefined,
           categoria: categoria || undefined,
@@ -58,9 +64,11 @@ export function OccurrencesListPage() {
     { initialNumItems: 25 },
   );
 
-  if (!canRead) {
+  if (!canRead && !canTriage) {
     return <PermissionDenied />;
   }
+
+  const activeTab = canRead ? tab : "public_reports";
 
   return (
     <section className="flex flex-col gap-6">
@@ -69,7 +77,32 @@ export function OccurrencesListPage() {
         title="Ocorrências"
       />
 
-      <FilterBar>
+      {canTriage && canRead ? (
+        <div className="flex gap-2">
+          <Button
+            className="min-h-11"
+            onClick={() => setTab("occurrences")}
+            type="button"
+            variant={activeTab === "occurrences" ? "default" : "outline"}
+          >
+            Ocorrências
+          </Button>
+          <Button
+            className="min-h-11"
+            onClick={() => setTab("public_reports")}
+            type="button"
+            variant={activeTab === "public_reports" ? "default" : "outline"}
+          >
+            Denúncias pendentes
+          </Button>
+        </div>
+      ) : null}
+
+      {activeTab === "public_reports" ? (
+        <PublicReportsTriagePanel />
+      ) : (
+        <>
+          <FilterBar>
         <div className="flex min-w-40 flex-1 flex-col gap-2">
           <Label htmlFor="occ-all-category">Categoria</Label>
           <select
@@ -132,12 +165,14 @@ export function OccurrencesListPage() {
         </div>
       </FilterBar>
 
-      <OccurrenceCardList
-        emptyDescription="Nenhuma ocorrência encontrada com os filtros atuais."
-        occurrences={results}
-        onLoadMore={() => loadMore(25)}
-        paginationStatus={status}
-      />
+          <OccurrenceCardList
+            emptyDescription="Nenhuma ocorrência encontrada com os filtros atuais."
+            occurrences={results}
+            onLoadMore={() => loadMore(25)}
+            paginationStatus={status}
+          />
+        </>
+      )}
     </section>
   );
 }

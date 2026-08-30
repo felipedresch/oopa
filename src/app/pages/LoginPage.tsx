@@ -73,6 +73,15 @@ export function LoginPage() {
             Esqueci minha senha
           </Link>
         </form>
+        <div className="mt-6 border-t pt-4 text-center">
+          <p className="text-xs text-muted-foreground">Viu um animal em situação de risco?</p>
+          <Link
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            to="/denuncia"
+          >
+            Fazer uma denúncia
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

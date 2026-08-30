@@ -4,6 +4,7 @@ import { notFound, uploadRejected } from "../errors";
 
 export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 export const MAX_GALLERY_PHOTOS = 20;
+export const MAX_PUBLIC_REPORT_PHOTOS = 5;
 
 export const ALLOWED_IMAGE_CONTENT_TYPES = new Set([
   "image/jpeg",

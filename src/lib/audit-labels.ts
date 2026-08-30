@@ -104,6 +104,17 @@ const ACTION_LABELS: Record<string, AuditActionInfo> = {
     icon: BellIcon,
     tone: "danger",
   },
+
+  "public_reports.convert_to_occurrence": {
+    label: "Denúncia convertida em ocorrência",
+    icon: ArrowRightLeftIcon,
+    tone: "update",
+  },
+  "public_reports.archive": {
+    label: "Denúncia arquivada",
+    icon: ShieldOffIcon,
+    tone: "neutral",
+  },
 };
 
 /** Rótulo + ícone + tom para uma ação de auditoria; fallback neutro para ações não mapeadas. */
@@ -119,6 +130,7 @@ const ENTITY_LABELS: Record<string, string> = {
   permission_template: "Template de permissão",
   bairro: "Bairro",
   occurrence_type: "Tipo de ocorrência",
+  public_report: "Denúncia externa",
 };
 
 export function getEntityLabel(entityType: string): string {
@@ -133,6 +145,7 @@ const ENTITY_ID_LABELS: Record<string, string> = {
   permission_template: "ID do template",
   bairro: "ID do bairro",
   occurrence_type: "ID do tipo de ocorrência",
+  public_report: "ID da denúncia",
 };
 
 export function getEntityIdLabel(entityType: string): string {

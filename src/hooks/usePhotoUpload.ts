@@ -6,8 +6,12 @@ import type { Id } from "../../convex/_generated/dataModel";
 
 type UploadState = "idle" | "uploading" | "success" | "error";
 
-export function usePhotoUpload() {
-  const createSignedUploadUrl = useMutation(api.storage.createSignedUploadUrl);
+type UploadUrlMutation = typeof api.storage.createSignedUploadUrl;
+
+export function usePhotoUpload(
+  uploadUrlMutation: UploadUrlMutation = api.storage.createSignedUploadUrl,
+) {
+  const createSignedUploadUrl = useMutation(uploadUrlMutation);
   const [state, setState] = useState<UploadState>("idle");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
