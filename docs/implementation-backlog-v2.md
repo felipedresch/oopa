@@ -7,6 +7,21 @@ tarefas executáveis o que está especificado em `docs/ajustes-cliente-modulos.m
 qualquer item daqui, os campos completos de cada tabela estão descritos por
 lá, não repetidos aqui em detalhe).
 
+## Estado atual (conferido no código em 2026-08-30)
+
+Último merge de produto: Fase 20 (`996564b`). Conferência feita contra
+`convex/schema.ts`, funções em `convex/`, rotas em `src/app/routes.tsx` e
+páginas/testes em `src/` — não contra o texto dos commits.
+
+- **Fases 12–20:** backend e telas existem. `[x]` abaixo só ficou em item
+  que o código cobre de verdade. Itens `[ ]` dentro dessas fases são
+  lacunas reais (testes dedicados, editor/derivação de papéis, upload de
+  termo na UI).
+- **Fases 21–26:** não iniciadas. Não há tabelas `service_appointments`,
+  `medical_records` nem `adoption_followups`; não há `convex/crons.ts`,
+  `convex/lib/nfe.ts` nem `fast-xml-parser`; não há rotas `/appointments*`,
+  `/adoptions/followups`, `/calendar` nem `/reports`.
+
 ## Como usar (fluxo com 3 pessoas)
 
 - A ordem das fases já respeita as dependências entre elas — confira a seção
@@ -39,6 +54,8 @@ desktop, testes criados ou atualizados no mesmo conjunto de mudanças,
 
 ## Rotas novas (fases 12+)
 
+Já no `src/app/routes.tsx`:
+
 - `/people`, `/people/new`, `/people/:personId`, `/people/:personId/edit`
   (substituem `/tutors/*`)
 - `/occurrences`
@@ -48,6 +65,9 @@ desktop, testes criados ou atualizados no mesmo conjunto de mudanças,
 - `/castration`, `/castration/new`, `/castration/:id`
 - `/settings/organization`
 - `/catalog/services`, `/catalog/supplies`
+
+Ainda não existem (Fases 21–24):
+
 - `/appointments`, `/appointments/new`, `/appointments/:id`,
   `/appointments/:id/receipt`
 - `/adoptions/followups`
@@ -97,7 +117,7 @@ Ver `docs/ajustes-cliente-modulos.md` seção 3.1.
       órfã no dashboard; pode ser removida por lá se já tiver dado de teste).
 - [x] Testar toda a suíte já existente (`people.test.ts`, `dogs.test.ts`,
       `occurrences.test.ts`, `adoptions.test.ts`) passando com os novos
-      nomes — 65/65 testes de backend verdes.
+      nomes.
 
 ### Frontend
 
@@ -114,17 +134,13 @@ Ver `docs/ajustes-cliente-modulos.md` seção 3.1.
       (`TutorAlertBadge` -> `PersonAlertBadge` etc.) e seus testes.
 - [x] Testar navegação, listagem, ficha e formulário de pessoa nos novos
       nomes/rotas — cobertura via testes de componente existentes
-      renomeados (`PersonCard.test.tsx`, `badges.test.tsx`).
+      renomeados (`PersonCard.test.tsx`, `badges.test.tsx`). Sem teste de
+      rota E2E dedicado; as páginas `PeopleListPage`/`PersonDetailPage`/
+      `PersonFormPage` existem e o router aponta para `/people*`.
 
-**Nota:** `convex/_generated/api.d.ts` e `dataModel.d.ts` continuam
-referenciando os nomes antigos (`tutors`, `lib/tutorDogHistory`) até
-alguém rodar `npx convex dev` — não editados manualmente por serem
-gerados. Isso faz `npm run lint` falhar com ~285 erros
-`@typescript-eslint/no-unsafe-*` (todos concentrados nos arquivos que usam
-`api.people.*`) até essa primeira execução. `npm run test` e
-`npm run typecheck` já passam limpos porque não dependem do mesmo
-mecanismo de resolução de tipos. Ver seção "Como rodar localmente" no
-início deste arquivo — primeiro passo é sempre `npx convex dev`.
+**Nota:** `convex/_generated` já reflete `people` / `pessoa` (não há mais
+referências a `tutors` nos tipos gerados). A nota antiga sobre ~285 erros
+de lint até o primeiro `npx convex dev` está superada.
 
 ## Fase 13 - Ajustes de schema base (pessoa, animal, ocorrência, usuário)
 
@@ -147,27 +163,26 @@ Ver `docs/ajustes-cliente-modulos.md` seções 3.1 a 3.3.
 - [x] Ajustar toda lógica que assume `dog_id` presente (snapshot de pessoa
       em ocorrência, timeline na ficha do animal, `person_dog_history`) para
       tolerar `dog_id === undefined` — guards em `occurrences.get`,
-      `occurrences.rectify` e `lib/adoptions.ts`. **Nota:** a mutation
-      `occurrences.create` continua exigindo `dogId` (não existe ainda
-      caminho para criar ocorrência sem animal — isso é Fase 15/16); aqui
-      só a base de tipos/schema ficou pronta para quando esse caminho
-      existir.
+      `occurrences.rectify` e `lib/adoptions.ts`. **Ainda aberto:**
+      `occurrences.create` autenticada continua exigindo `dogId`. Ocorrência
+      sem animal só é criada por `publicReports.convertToOccurrence`.
 - [x] Adicionar `people.data_cadastro_cadunico: v.optional(v.number())`.
-- [x] Adicionar `people.papeis: v.array(...)`, editável manualmente via
-      `people.create`/`people.update`. **Nota:** a derivação automática
-      (marcar "denunciante" ao converter denúncia, "solicitante_castracao"
-      ao abrir solicitação etc.) fica para as Fases 16/17/18, quando essas
-      tabelas existirem — não dá para derivar de algo que ainda não existe.
+- [x] Adicionar `people.papeis: v.optional(v.array(personPapelValidator))`
+      em `people.create`/`people.update` (schema opcional, persistido como
+      array; default `[]`). **Não há UI para editar papéis** — só badges
+      na ficha. **Derivação automática** (`denunciante` /
+      `solicitante_castracao` / `solicitante_resgate`) **não foi feita**
+      nas Fases 16–18 (ver lacunas no fim da Fase 20).
 - [x] Adicionar `users.veterinario: v.optional(v.boolean())` e
       `users.receber_alertas_resgate: v.optional(v.boolean())`.
 - [x] Auditar mudanças de `veterinario` (`users.set_veterinario`) e status
       `comunitario` (já coberto por `dogs.change_status` existente).
       **Nota:** `papeis` ainda não tem action dedicada de auditoria — muda
       junto com `people.update`, que já é auditado.
-- [x] Testar microchip opcional/duplicado só quando preenchido e status
-      comunitário via suíte existente (65/65 backend verde). **Nota:**
-      testes dedicados para papéis/flags de usuário ficam para quando a
-      Fase 16/17/18 os exercitar de ponta a ponta.
+- [ ] Testes backend dedicados: `dogs.create` sem microchip; unicidade só
+      quando o microchip está preenchido; `status_atual: "comunitario"`.
+      A suíte `dogs.test.ts` ainda exige microchip nos casos de `create` e
+      não exercita o status comunitário.
 
 ### Frontend
 
@@ -180,14 +195,17 @@ Ver `docs/ajustes-cliente-modulos.md` seções 3.1 a 3.3.
       `src/lib/domain-colors.ts`.
 - [x] Adicionar campo de data do CadÚnico em `PersonFormPage`
       (date-picker) e exibição em `PersonDetailPage`.
-- [x] Exibir badges de papéis (`papeis`) em `PersonDetailPage`.
+- [x] Exibir badges de papéis (`papeis`) em `PersonDetailPage` (somente
+      leitura; `PersonFormPage` não envia nem edita `papeis`).
+- [ ] Editor de papéis em `PersonFormPage` (create/update já aceitam
+      `papeis` no backend).
 - [x] Adicionar toggle "Veterinário" em `/team/:userId` e "Receber alertas
       de resgate" em `/profile` (rota `/profile` era só placeholder; virou
       `ProfilePage` real neste passo).
-- [x] Testar formulário de animal sem microchip, filtro comunitário, campo
-      CadÚnico e badges de papéis — validado via `npm run typecheck` +
-      suíte de componentes existente; sem teste de componente novo dedicado
-      a esses campos ainda (ficaria para quem pegar a tela em seguida).
+- [ ] Testes de componente para formulário de animal sem microchip, filtro
+      comunitário, campo CadÚnico e badges de papéis. Não há
+      `DogFormPage.test` / `PersonFormPage.test` / `PersonDetailPage.test`
+      cobrindo esses campos.
 
 ## Fase 14 - Termo de adoção em PDF
 
@@ -222,9 +240,9 @@ Ver `docs/ajustes-cliente-modulos.md` seção 3.4 (primeira parte).
       Essa tela já é alcançável a partir da timeline do animal e da tela de
       sucesso da adoção, então cobre o pedido sem espalhar a mesma
       informação em três lugares.
-- [x] Testar upload do termo e fluxo completo de adoção com PDF via testes
-      de backend (`adoptions.test.ts`); sem teste de componente E2E dedicado
-      ao upload no formulário ainda.
+- [ ] Teste de componente do upload de PDF no formulário de adoção
+      (`PdfUpload` / `AdoptionNewPage`). Backend cobre upload válido e
+      rejeição > 8 MB em `adoptions.test.ts`; não há teste de UI.
 
 ## Fase 15 - Ocorrências: visão geral consolidada
 
@@ -234,20 +252,27 @@ Ver `docs/ajustes-cliente-modulos.md` seção 3.5. Pré-requisito da Fase 16
 ### Backend
 
 - [x] Implementar query `occurrences.listAll` paginada, sem exigir
-      `dog_id`, com filtros por categoria, gravidade, status, bairro e
-      período, respeitando `occurrences.read`/`occurrences.read_legal`.
+      `dog_id`, com filtros por categoria, gravidade, bairro e período,
+      respeitando `occurrences.read`/`occurrences.read_legal`. (Filtro
+      "status" do spec é o de `public_reports`, Fase 16 — `occurrences`
+      não tem campo `status`.)
 - [x] Garantir formato de retorno comum para ocorrências com e sem
       `dog_id` (nome do animal opcional, nome/snapshot de pessoa opcional).
-- [x] Testar listagem geral com ocorrências mistas, filtros e permissão.
+- [x] Testar listagem geral com ocorrências mistas, filtros e permissão
+      (`occurrences.test.ts`).
 
 ### Frontend
 
-- [x] Criar `/occurrences` com `FilterBar` (categoria, gravidade, status,
-      bairro, período) e paginação.
+- [x] Criar `/occurrences` com `FilterBar` (categoria, gravidade, bairro,
+      período) e paginação. Sem filtro de status de ocorrência (campo
+      inexistente).
 - [x] Extrair componente de listagem compartilhado entre `/occurrences` e a
-      timeline de ocorrências em `DogDetailPage`, para não duplicar código.
-- [x] Testar listagem geral, filtros e navegação para o detalhe da
-      ocorrência.
+      timeline de ocorrências em `DogDetailPage`, para não duplicar código
+      (`OccurrenceCardList`).
+- [x] Testar listagem geral, aba de denúncias e permissão
+      (`OccurrencesListPage.test.tsx`, `OccurrenceCardList.test.tsx`).
+      Navegação ao detalhe de ocorrência sem `dog_id` ainda não existe
+      (só `/dogs/:dogId/occurrences/:occurrenceId`).
 
 **Notas:**
 - `occurrences` ainda não tem campo `status` no schema (não fazia parte do
@@ -293,7 +318,10 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.1.
 - [x] Implementar mutation `publicReports.archive`.
 - [x] Auditar conversão e arquivamento.
 - [x] Testar criação pública, listagem, conversão em ocorrência e
-      arquivamento.
+      arquivamento (`publicReports.test.ts`).
+- [ ] Ao converter denúncia, marcar papel `denunciante` na pessoa quando
+      houver vínculo (hoje a conversão não cria/atualiza `people.papeis`;
+      nome/contato só entram na descrição da ocorrência).
 
 ### Frontend
 
@@ -302,8 +330,12 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.1.
 - [x] Criar `/denuncia/:id/confirmacao`.
 - [x] Adicionar aba/filtro de denúncias pendentes dentro de `/occurrences`
       (Fase 15), com ações "Converter em ocorrência" e "Arquivar".
-- [x] Divulgar o link do portal público em local visível fora do login.
-- [x] Testar envio público, confirmação, triagem, conversão e arquivamento.
+- [x] Divulgar o link do portal público em local visível fora do login
+      (`LoginPage`, link "Fazer uma denúncia" → `/denuncia`). Sem asserção
+      no `LoginPage.test.tsx`.
+- [x] Testar envio público, confirmação, triagem, conversão e arquivamento
+      (`PublicReportPage.test.tsx`, `PublicReportConfirmationPage.test.tsx`,
+      `OccurrencesListPage.test.tsx`, `PublicReportsTriagePanel.test.tsx`).
 
 **Notas:**
 - Novo módulo de permissão `public_reports` (única permissão
@@ -365,7 +397,9 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.2.
       data.
 - [x] Auditar criação e mudança de status/descrição.
 - [x] Testar alerta de gravidade alta, preferência de usuário desativada,
-      transições de status e permissões.
+      transições de status e permissões (`rescues.test.ts`).
+- [ ] Ao criar resgate com `solicitante_id`, marcar papel
+      `solicitante_resgate` em `people.papeis` (não implementado).
 
 ### Frontend
 
@@ -373,7 +407,10 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.2.
 - [x] Criar `/rescues/new`.
 - [x] Criar `/rescues/:id` com campo "O que aconteceu" (`descricao_ong`) e
       mudança de status.
-- [x] Testar lista, criação, detalhe e recebimento do alerta.
+- [x] Testar lista, criação e detalhe (`RescuesListPage.test.tsx`,
+      `RescueNewPage.test.tsx`, `RescueDetailPage.test.tsx`). Recebimento
+      do alerta é coberto no backend (`rescues.test.ts`), não na UI de
+      notificações.
 
 **Notas:**
 - `users.receber_alertas_resgate` e o toggle em `/profile` já existiam
@@ -419,7 +456,9 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.3.
       `castration_request` ao novo animal.
 - [x] Implementar query `castration.list` ordenada por `data_solicitacao`.
 - [x] Testar fila FIFO, reordenação manual auditada, conclusão com criação
-      de animal e permissões.
+      de animal e permissões (`castration.test.ts`).
+- [ ] Ao criar solicitação, marcar papel `solicitante_castracao` em
+      `people.papeis` (não implementado).
 
 ### Frontend
 
@@ -427,7 +466,9 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.3.
 - [x] Criar `/castration/new` com descrição leve do animal, sem exigir
       cadastro completo.
 - [x] Criar `/castration/:id` com mudança de status e reordenação de data.
-- [x] Testar fila, criação, reordenação e conclusão.
+- [x] Testar fila, criação, reordenação e conclusão
+      (`CastrationsListPage.test.tsx`, `CastrationNewPage.test.tsx`,
+      `CastrationDetailPage.test.tsx`).
 
 **Notas:**
 - Novo módulo de permissão completo `castration` (read/create/manage),
@@ -478,7 +519,10 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.4e. Pré-requisito da Fase 21
 
 - [x] Criar `/settings/organization` com razão social, nome fantasia,
       CNPJ, inscrição estadual, endereço, telefone, email e logo.
-- [x] Testar preenchimento, validação de CNPJ e upload de logo.
+- [x] Testar preenchimento e validação de CNPJ
+      (`OrganizationSettingsPage.test.tsx`). Upload de logo coberto no
+      backend (`organization.test.ts`); a UI tem o campo (`PhotoUpload`),
+      sem teste de componente do upload.
 
 **Notas:**
 - Novo módulo de permissão `organization` com uma única permissão
@@ -524,7 +568,8 @@ menu, não em Atendimentos.
 - [x] Criar `/catalog/services` dentro de Cadastros (lista, criar, editar,
       ativar/desativar).
 - [x] Criar `/catalog/supplies` dentro de Cadastros (mesmo padrão).
-- [x] Testar CRUD dos dois catálogos na UI.
+- [x] Testar CRUD dos dois catálogos na UI (`ServicesCatalogPage.test.tsx`,
+      `SuppliesCatalogPage.test.tsx`).
 
 **Notas:**
 - Decisão de permissão: em vez de dois `UI_MODULES` novos com níveis
@@ -553,6 +598,24 @@ menu, não em Atendimentos.
   alterna para "Salvar alterações" com opção de cancelar.
 - Novo `formatCurrency` em `src/lib/formatters.ts` (primeiro valor
   monetário exibido no app) usando `Intl.NumberFormat` com `BRL`.
+
+### Lacunas das Fases 12–20 (ainda abertas)
+
+Resumo do que o código **não** faz, para não misturar com a Fase 21:
+
+- Testes dedicados de microchip opcional e status `comunitario` em
+  `dogs.test.ts`; testes de UI de CadÚnico, papéis e formulário de animal
+  sem microchip.
+- Editor de `papeis` em `PersonFormPage`.
+- Derivação automática de papéis nas Fases 16–18 (itens `[ ]` nessas
+  fases).
+- Teste de UI do upload do termo de adoção em PDF.
+- Rota de detalhe de ocorrência sem `dog_id` (conversão de denúncia sem
+  animal ainda cai em `/occurrences`).
+- `occurrences.create` autenticada ainda exige `dogId`; ocorrência sem
+  animal só entra via `publicReports.convertToOccurrence`.
+- Agrupamento de menu "Cadastros" (Fase 26): catálogos e dados da ONG
+  ficam em `/settings`.
 
 ## Fase 21 - Atendimentos, prontuário médico e notas fiscais
 
