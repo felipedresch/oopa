@@ -15,6 +15,7 @@ import { ResetPasswordPage } from "@/app/pages/ResetPasswordPage";
 import { TeamInvitePage } from "@/app/pages/TeamInvitePage";
 import { TeamPage } from "@/app/pages/TeamPage";
 import { TeamUserPage } from "@/app/pages/TeamUserPage";
+import { CalendarPage } from "@/app/pages/CalendarPage";
 import { DashboardPage } from "@/app/pages/DashboardPage";
 import { DogDetailPage } from "@/app/pages/DogDetailPage";
 import { DogFormPage } from "@/app/pages/DogFormPage";
@@ -64,6 +65,7 @@ export const appRoutes: RouteObject[] = [
     children: [
       { index: true, element: <DashboardPage /> },
       { path: "identify", element: <IdentifyPage /> },
+      { path: "calendar", element: <CalendarPage /> },
       { path: "dogs", element: <DogsListPage /> },
       { path: "dogs/new", element: <DogFormPage /> },
       { path: "dogs/:dogId", element: <DogDetailPage /> },

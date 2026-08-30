@@ -22,8 +22,9 @@ páginas/testes em `src/` — não contra o texto dos commits.
 - **Fase 22:** implementada neste conjunto de mudanças, com ciclo de
   acompanhamento, cron diário, notificações internas, ocorrência automática,
   telas e testes.
-- **Fases 23–26:** não iniciadas. Ainda não existem as rotas `/calendar` ou
-  `/reports`.
+- **Fase 23:** implementada neste conjunto de mudanças (`convex/calendar.ts`,
+  `/calendar`, item no menu principal e testes).
+- **Fases 24–26:** não iniciadas. Ainda não existe a rota `/reports`.
 
 ## Como usar (fluxo com 3 pessoas)
 
@@ -68,10 +69,10 @@ Já no `src/app/routes.tsx`:
 - `/castration`, `/castration/new`, `/castration/:id`
 - `/settings/organization`
 - `/catalog/services`, `/catalog/supplies`
-
-Ainda não existem (Fases 23–24):
-
 - `/calendar`
+
+Ainda não existe (Fase 24):
+
 - `/reports` (+ subrotas por relatório, definidas na Fase 24)
 
 ## Fase 12 - Rename Tutores -> Pessoas
@@ -730,26 +731,58 @@ Ver `docs/ajustes-cliente-modulos.md` seção 4.7. Depende das Fases 18, 21 e
 
 ### Backend
 
-- [ ] Implementar query `calendar.list` unindo `adoption_followups`,
+- [x] Implementar query `calendar.list` unindo `adoption_followups`,
       `castration_requests` (agendadas) e `service_appointments`
       (agendados), normalizando
       `{ data, tipo, titulo, entidade_tipo, entidade_id, status }`,
       filtrando por permissão de cada fonte (`adoptions.read`,
       `castration.read`, `appointments.read`).
-- [ ] Aceitar filtros de período (`inicio`/`fim`) e tipo (multi-seleção).
-- [ ] Testar união das fontes, filtros de período e tipo, e filtragem por
-      permissão.
+- [x] Aceitar filtros de período (`inicio`/`fim`) e tipo (multi-seleção).
+- [x] Testar união das fontes, filtros de período e tipo, e filtragem por
+      permissão (`convex/calendar.test.ts`).
 
 ### Frontend
 
-- [ ] Criar `/calendar` com lista agrupada por dia.
-- [ ] Criar presets de período: Este mês, Mês passado, Últimos 30 dias,
+- [x] Criar `/calendar` com lista agrupada por dia.
+- [x] Criar presets de período: Este mês, Mês passado, Últimos 30 dias,
       Personalizado (com seletor de intervalo, reaproveitando o
       `date-picker` já usado em `TutorFormPage`/`AuditPage`).
-- [ ] Criar filtro de tipo em chips de seleção múltipla.
-- [ ] Adicionar item "Calendário" no menu principal.
-- [ ] Testar presets de período, filtro de tipo e navegação para a
-      entidade de origem.
+- [x] Criar filtro de tipo em chips de seleção múltipla.
+- [x] Adicionar item "Calendário" no menu principal.
+- [x] Testar presets de período, filtro de tipo e navegação para a
+      entidade de origem (`CalendarPage.test.tsx`, `src/lib/calendar.test.ts`).
+
+**Notas:**
+- `calendar.list` é uma view agregada sem tabela própria. Só exige usuário
+  ativo: cada fonte entra no resultado apenas se o usuário tiver a permissão
+  de leitura do módulo (`adoptions.read`, `castration.read`,
+  `appointments.read`). Sem nenhuma das três, a query retorna lista vazia e a
+  tela mostra `PermissionDenied`.
+- Só entram itens ainda em aberto: follow-ups com `status = "pendente"`,
+  castrações com `status = "agendada"` e atendimentos com
+  `status = "agendado"`.
+- Novo índice `castration_requests.by_status_and_data_agendada` em
+  `convex/schema.ts` para consultar castrações agendadas por intervalo de data
+  sem varredura; as outras duas fontes já tinham índice equivalente
+  (`adoption_followups.by_status_and_due`,
+  `service_appointments.by_status_and_date`).
+- Novos validators `calendarEventTypeValidator` e
+  `calendarEntityTypeValidator` em `convex/domainValidators.ts`. O tipo
+  `castracao` pode vir tanto de `castration_requests` quanto de um atendimento
+  com `tipo_atendimento = "castracao"` — `entidade_tipo` distingue a origem.
+- A query retorna no máximo `limite` eventos (padrão 200, máximo 500) já
+  ordenados por data, em vez de paginar: o calendário sempre trabalha sobre um
+  período fechado.
+- O evento não carrega link pronto; a rota de origem é derivada no frontend em
+  `calendarEventLink` (`/castration/:id`, `/appointments/:id` e
+  `/adoptions/followups` para os lembretes, que não têm rota própria por
+  follow-up).
+- `src/lib/calendar.ts` concentra rótulos, presets de período
+  (`resolvePeriodPreset`/`resolveCustomPeriod`, sempre em datas locais do
+  início ao fim do dia) e o agrupamento por dia, mantido puro para teste
+  isolado.
+- Item "Calendário" adicionado ao menu principal entre "Identificar" e "Cães"
+  (o menu mobile continua com os mesmos 5 itens).
 
 ## Fase 24 - Relatórios
 

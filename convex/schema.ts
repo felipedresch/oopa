@@ -286,6 +286,7 @@ export default defineSchema({
     criado_em: v.number(),
   })
     .index("by_status", ["status"])
+    .index("by_status_and_data_agendada", ["status", "data_agendada"])
     .index("by_data_solicitacao", ["data_solicitacao"])
     .index("by_pessoa", ["pessoa_id"])
     .index("by_dog", ["dog_id"]),

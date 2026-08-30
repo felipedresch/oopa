@@ -4,6 +4,7 @@ import {
   BellIcon,
   HeartHandshakeIcon,
   ClipboardListIcon,
+  CalendarDaysIcon,
   CalendarHeartIcon,
   DogIcon,
   HomeIcon,
@@ -46,6 +47,13 @@ const desktopNavItems: NavItemConfig[] = [
     label: "Identificar",
     icon: ScanLineIcon,
     canAccess: ({ can }) => can("dogs.read"),
+  },
+  {
+    to: "/calendar",
+    label: "Calendário",
+    icon: CalendarDaysIcon,
+    canAccess: ({ canAny }) =>
+      canAny(["adoptions.read", "castration.read", "appointments.read"]),
   },
   {
     to: "/dogs",

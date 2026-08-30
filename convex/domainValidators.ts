@@ -135,6 +135,28 @@ export const adoptionFollowupStatusValidator = v.union(
   v.literal("concluido"),
 );
 
+/**
+ * Tipos de evento do calendário (Fase 23). `lembrete_adocao` vem de
+ * `adoption_followups`; os demais vêm de `castration_requests` (sempre
+ * `castracao`) e de `service_appointments` (conforme `tipo_atendimento`).
+ */
+export const calendarEventTypeValidator = v.union(
+  v.literal("lembrete_adocao"),
+  v.literal("consulta"),
+  v.literal("vacina"),
+  v.literal("cirurgia"),
+  v.literal("exame"),
+  v.literal("castracao"),
+  v.literal("emergencia"),
+  v.literal("outro"),
+);
+
+export const calendarEntityTypeValidator = v.union(
+  v.literal("adoption_followup"),
+  v.literal("castration_request"),
+  v.literal("service_appointment"),
+);
+
 export const supplyCategoryValidator = v.union(
   v.literal("medicamento"),
   v.literal("material"),

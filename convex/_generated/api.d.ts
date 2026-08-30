@@ -15,6 +15,7 @@ import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as bairros from "../bairros.js";
 import type * as bootstrap from "../bootstrap.js";
+import type * as calendar from "../calendar.js";
 import type * as castration from "../castration.js";
 import type * as crons from "../crons.js";
 import type * as dogPhotos from "../dogPhotos.js";
@@ -72,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   bairros: typeof bairros;
   bootstrap: typeof bootstrap;
+  calendar: typeof calendar;
   castration: typeof castration;
   crons: typeof crons;
   dogPhotos: typeof dogPhotos;
