@@ -123,6 +123,14 @@ const MODULE_LEVEL_PERMISSIONS: Record<
       "people.read",
     ],
   },
+  // Modulo somente leitura: qualquer nivel diferente de "none" concede a
+  // mesma permissao (espelha `convex/permissions.ts`).
+  reports: {
+    none: [],
+    read: ["reports.read"],
+    write: ["reports.read"],
+    manage: ["reports.read"],
+  },
 };
 
 export function moduleMapToPermissions(map: ModulePermissionMap): Permission[] {

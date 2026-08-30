@@ -40,6 +40,7 @@ export const PERMISSION_CATALOG = [
   "appointments.read",
   "appointments.create",
   "appointments.manage",
+  "reports.read",
 ] as const;
 
 export type Permission = (typeof PERMISSION_CATALOG)[number];
@@ -57,6 +58,7 @@ export const UI_MODULES = [
   "castration",
   "organization",
   "appointments",
+  "reports",
 ] as const;
 
 export type UiModule = (typeof UI_MODULES)[number];
@@ -78,6 +80,7 @@ export const uiModuleValidator = v.union(
   v.literal("castration"),
   v.literal("organization"),
   v.literal("appointments"),
+  v.literal("reports"),
 );
 
 export const permissionLevelValidator = v.union(
@@ -85,6 +88,16 @@ export const permissionLevelValidator = v.union(
   v.literal("read"),
   v.literal("write"),
   v.literal("manage"),
+);
+
+/**
+ * Validator do mapa modulo -> nivel, derivado de `UI_MODULES` para nao
+ * precisar ser reescrito a cada modulo novo.
+ */
+export const modulePermissionMapValidator = v.object(
+  Object.fromEntries(
+    UI_MODULES.map((module) => [module, permissionLevelValidator]),
+  ) as Record<UiModule, typeof permissionLevelValidator>,
 );
 
 export const permissionValidator = v.union(
@@ -127,6 +140,7 @@ export const permissionValidator = v.union(
   v.literal("appointments.read"),
   v.literal("appointments.create"),
   v.literal("appointments.manage"),
+  v.literal("reports.read"),
 );
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
@@ -142,6 +156,7 @@ export const UI_MODULE_LABELS: Record<UiModule, string> = {
   castration: "Castracao",
   organization: "Dados da ONG",
   appointments: "Atendimentos",
+  reports: "Relatorios",
 };
 
 export const PERMISSION_LEVEL_LABELS: Record<PermissionLevel, string> = {
@@ -265,6 +280,14 @@ const MODULE_LEVEL_PERMISSIONS: Record<UiModule, Record<PermissionLevel, readonl
       "people.read",
     ],
   },
+  // Modulo somente leitura: qualquer nivel diferente de "none" concede a
+  // mesma permissao, entao ler relatorios nao exige nivel de gestao.
+  reports: {
+    none: [],
+    read: ["reports.read"],
+    write: ["reports.read"],
+    manage: ["reports.read"],
+  },
 };
 
 export type ModulePermissionMap = Record<UiModule, PermissionLevel>;
@@ -345,6 +368,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       castration: "manage",
       organization: "manage",
       appointments: "manage",
+      reports: "manage",
     } satisfies ModulePermissionMap,
   },
   {
@@ -363,6 +387,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       castration: "write",
       organization: "none",
       appointments: "read",
+      reports: "read",
     } satisfies ModulePermissionMap,
   },
   {
@@ -381,6 +406,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       castration: "write",
       organization: "none",
       appointments: "none",
+      reports: "none",
     } satisfies ModulePermissionMap,
   },
   {
@@ -399,6 +425,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       castration: "none",
       organization: "none",
       appointments: "write",
+      reports: "none",
     } satisfies ModulePermissionMap,
   },
   {
@@ -417,6 +444,7 @@ export const SEED_PERMISSION_TEMPLATES = [
       castration: "read",
       organization: "none",
       appointments: "read",
+      reports: "read",
     } satisfies ModulePermissionMap,
   },
 ] as const;

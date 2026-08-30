@@ -5,6 +5,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { getCurrentUser, requirePermission } from "./lib/auth";
 import {
   moduleMapToPermissions,
+  modulePermissionMapValidator,
   permissionsToModuleMap,
   SEED_PERMISSION_TEMPLATES,
 } from "./permissions";
@@ -304,80 +305,7 @@ export const getPermissionTemplateMaps = query({
   returns: v.array(
     v.object({
       nome: v.string(),
-      moduleMap: v.object({
-        dogs: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        people: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        occurrences: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        adoptions: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        team: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        settings: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        system: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        public_reports: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        rescues: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        castration: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        organization: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-        appointments: v.union(
-          v.literal("none"),
-          v.literal("read"),
-          v.literal("write"),
-          v.literal("manage"),
-        ),
-      }),
+      moduleMap: modulePermissionMapValidator,
     }),
   ),
   handler: async (ctx) => {

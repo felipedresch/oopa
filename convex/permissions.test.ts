@@ -11,8 +11,8 @@ import {
 } from "./permissions";
 
 test("catalogo granular contem todas as permissoes de dominio", () => {
-  expect(PERMISSION_CATALOG).toHaveLength(39);
-  expect(UI_MODULES).toHaveLength(12);
+  expect(PERMISSION_CATALOG).toHaveLength(40);
+  expect(UI_MODULES).toHaveLength(13);
 });
 
 test("traduz modulo e nivel para permissoes granulares", () => {
@@ -77,6 +77,7 @@ test("mapa de modulos e permissoes faz round-trip para modulos independentes", (
     castration: "manage",
     organization: "manage",
     appointments: "none",
+    reports: "manage",
   } as const;
 
   const permissions = moduleMapToPermissions(map);
@@ -99,6 +100,7 @@ test("helpers de permissao avaliam conjuntos esperados", () => {
     castration: "manage",
     organization: "manage",
     appointments: "manage",
+    reports: "manage",
   });
 
   expect(hasPermission(permissions, "dogs.change_status")).toBe(true);

@@ -13,6 +13,7 @@ export const fixtureModuleMap: ModulePermissionMap = {
   castration: "none",
   organization: "none",
   appointments: "none",
+  reports: "none",
 };
 
 export const fixtureUser = {
@@ -79,5 +80,6 @@ export const fixturePermissionTemplate = {
     castration: "none",
     organization: "none",
     appointments: "none",
+    reports: "none",
   } satisfies ModulePermissionMap,
 };

@@ -252,7 +252,8 @@ export default defineSchema({
     criado_em: v.number(),
   })
     .index("by_status", ["status"])
-    .index("by_bairro", ["bairro_id"]),
+    .index("by_bairro", ["bairro_id"])
+    .index("by_criado_em", ["criado_em"]),
 
   rescue_requests: defineTable({
     solicitante_id: v.optional(v.id("people")),
@@ -272,7 +273,8 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_gravity", ["gravidade"])
     .index("by_bairro", ["bairro_id"])
-    .index("by_dog", ["dog_id"]),
+    .index("by_dog", ["dog_id"])
+    .index("by_criado_em", ["criado_em"]),
 
   castration_requests: defineTable({
     pessoa_id: v.id("people"),

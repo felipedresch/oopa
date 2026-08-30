@@ -34,6 +34,8 @@ import { AdoptionNewPage } from "@/app/pages/AdoptionNewPage";
 import { AdoptionFollowupsPage } from "@/app/pages/AdoptionFollowupsPage";
 import { ReturnNewPage } from "@/app/pages/ReturnNewPage";
 import { ProfilePage } from "@/app/pages/ProfilePage";
+import { ReportDetailPage } from "@/app/pages/ReportDetailPage";
+import { ReportsPage } from "@/app/pages/ReportsPage";
 import { RescueDetailPage } from "@/app/pages/RescueDetailPage";
 import { RescueNewPage } from "@/app/pages/RescueNewPage";
 import { RescuesListPage } from "@/app/pages/RescuesListPage";
@@ -107,6 +109,8 @@ export const appRoutes: RouteObject[] = [
       { path: "settings/organization", element: <OrganizationSettingsPage /> },
       { path: "catalog/services", element: <ServicesCatalogPage /> },
       { path: "catalog/supplies", element: <SuppliesCatalogPage /> },
+      { path: "reports", element: <ReportsPage /> },
+      { path: "reports/:reportId", element: <ReportDetailPage /> },
       { path: "audit", element: <AuditPage /> },
       { path: "notifications", element: <NotificationsPage /> },
       { path: "profile", element: <ProfilePage /> },

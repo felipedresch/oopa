@@ -30,6 +30,7 @@ import {
 import { normalizePaginationOpts } from "./lib/pagination";
 import { generateRawToken, hashToken, INVITE_TTL_MS, RESET_TTL_MS } from "./lib/tokens";
 import {
+  modulePermissionMapValidator,
   permissionValidator,
   permissionsToModuleMap,
   PERMISSION_CATALOG,
@@ -44,80 +45,7 @@ const userSummaryValidator = v.object({
   organizacao: v.string(),
   ativo: v.boolean(),
   permissions: v.array(v.string()),
-  moduleMap: v.object({
-    dogs: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    people: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    occurrences: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    adoptions: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    team: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    settings: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    system: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    public_reports: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    rescues: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    castration: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    organization: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    appointments: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-  }),
+  moduleMap: modulePermissionMapValidator,
   ultimo_acesso_em: v.optional(v.number()),
   criado_em: v.number(),
   veterinario: v.boolean(),

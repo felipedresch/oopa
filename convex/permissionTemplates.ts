@@ -6,93 +6,19 @@ import { recordAudit } from "./audit";
 import { conflict, notFound, validationError } from "./errors";
 import { getCurrentUser, requirePermission } from "./lib/auth";
 import {
+  modulePermissionMapValidator,
   permissionValidator,
   permissionsToModuleMap,
   PERMISSION_CATALOG,
   type Permission,
 } from "./permissions";
 
-const moduleMapValidator = v.object({
-    dogs: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    people: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    occurrences: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    adoptions: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    team: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    settings: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    system: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    public_reports: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    rescues: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    castration: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    organization: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-    appointments: v.union(
-      v.literal("none"),
-      v.literal("read"),
-      v.literal("write"),
-      v.literal("manage"),
-    ),
-  });
-
 const templateValidator = v.object({
   _id: v.id("permission_templates"),
   nome: v.string(),
   descricao: v.string(),
   permissions: v.array(permissionValidator),
-  moduleMap: moduleMapValidator,
+  moduleMap: modulePermissionMapValidator,
   ativo: v.boolean(),
   criado_em: v.number(),
 });
@@ -133,7 +59,7 @@ export const listForInvite = query({
       _id: v.id("permission_templates"),
       nome: v.string(),
       descricao: v.string(),
-      moduleMap: moduleMapValidator,
+      moduleMap: modulePermissionMapValidator,
     }),
   ),
   handler: async (ctx) => {

@@ -24,7 +24,10 @@ páginas/testes em `src/` — não contra o texto dos commits.
   telas e testes.
 - **Fase 23:** implementada neste conjunto de mudanças (`convex/calendar.ts`,
   `/calendar`, item no menu principal e testes).
-- **Fases 24–26:** não iniciadas. Ainda não existe a rota `/reports`.
+- **Fase 24:** implementada neste conjunto de mudanças (`convex/reports.ts`,
+  permissão `reports.read`, hub `/reports`, tela `/reports/:reportId` e
+  testes).
+- **Fases 25–26:** não iniciadas.
 
 ## Como usar (fluxo com 3 pessoas)
 
@@ -70,10 +73,7 @@ Já no `src/app/routes.tsx`:
 - `/settings/organization`
 - `/catalog/services`, `/catalog/supplies`
 - `/calendar`
-
-Ainda não existe (Fase 24):
-
-- `/reports` (+ subrotas por relatório, definidas na Fase 24)
+- `/reports`, `/reports/:reportId`
 
 ## Fase 12 - Rename Tutores -> Pessoas
 
@@ -791,18 +791,58 @@ anteriores (consome dados de todos os módulos).
 
 ### Backend
 
-- [ ] Implementar queries de relatório protegidas por `reports.read`:
+- [x] Implementar queries de relatório protegidas por `reports.read`:
       castrações, denúncias, atendimentos urgentes, atendimentos
       veterinários/financeiro (colunas da seção 4.4d), adoções e
       acompanhamento.
-- [ ] Reaproveitar `convex/lib/csv.ts` para exportação de cada relatório.
-- [ ] Testar cada relatório com filtros de período e permissão.
+- [x] Reaproveitar `convex/lib/csv.ts` para exportação de cada relatório.
+- [x] Testar cada relatório com filtros de período e permissão
+      (`convex/reports.test.ts`).
 
 ### Frontend
 
-- [ ] Criar `/reports` (hub) com cards para cada relatório.
-- [ ] Criar tela de cada relatório com filtros e exportação CSV.
-- [ ] Testar navegação a partir do hub, filtros e exportação.
+- [x] Criar `/reports` (hub) com cards para cada relatório.
+- [x] Criar tela de cada relatório com filtros e exportação CSV.
+- [x] Testar navegação a partir do hub, filtros e exportação
+      (`ReportsPage.test.tsx`, `ReportDetailPage.test.tsx`,
+      `src/lib/reports.test.ts`).
+
+**Notas:**
+- Nova permissão `reports.read` e novo módulo de UI `reports` em
+  `convex/permissions.ts` (espelhado em `src/lib/permissions.ts` e
+  `src/lib/permission-map.ts`). É um módulo **somente leitura**: `read`,
+  `write` e `manage` concedem a mesma permissão, então ler relatórios não
+  exige nível de gestão. Templates seed: Administrador ONG `manage`, Agente
+  Prefeitura e Leitura Restrita `read`, os demais `none`.
+- Os três mapas modulo→nível escritos à mão em `convex/permissionTemplates.ts`,
+  `convex/users.ts` e `convex/seeds.ts` foram substituídos por
+  `modulePermissionMapValidator`, derivado de `UI_MODULES` — módulo novo não
+  exige mais editar validator em três lugares.
+- Em vez de uma query por relatório, `convex/reports.ts` expõe
+  `reports.run({ relatorio, ... })` e `reports.exportCsv({ relatorio, ... })`.
+  Os cinco relatórios (`castracoes`, `denuncias`, `atendimentos_urgentes`,
+  `atendimentos_veterinarios`, `adocoes`) compartilham o mesmo contrato
+  `{ colunas, linhas, resumo, truncado }`, o que dá uma única tela de
+  relatório no frontend em vez de cinco.
+- Cada linha é `{ id, rota?, celulas }` e cada célula é `{ texto, href? }`.
+  `rota` é a rota interna da entidade de origem (ausente para ocorrência sem
+  animal, que não tem rota de detalhe); `href` é URL externa e hoje só é usada
+  no download da nota fiscal. O CSV emite `href ?? texto`, então a coluna de
+  nota fiscal sai com o link utilizável.
+- Filtros por relatório: período em todos; bairro em denúncias e atendimentos
+  urgentes; animal/pessoa em atendimentos veterinários e adoções. Teto de
+  2000 linhas por relatório (mesmo de `convex/exports.ts`), sinalizado por
+  `truncado` na UI.
+- Novos índices `public_reports.by_criado_em` e `rescue_requests.by_criado_em`
+  para o filtro de período sem varredura; as demais fontes já tinham índice de
+  data.
+- `reports.searchEntities` alimenta os seletores de animal/pessoa. Vive em
+  `reports.ts` sob `reports.read` para que quem só lê relatórios não precise
+  de `dogs.read`/`people.read` para filtrar.
+- Rótulos PT-BR do conteúdo dos relatórios ficam em
+  `convex/lib/reportLabels.ts` porque as linhas já saem prontas para exibição
+  e para o CSV.
+- Item "Relatórios" adicionado ao menu principal, antes de "Notificações".
 
 ## Fase 25 - Busca global
 
