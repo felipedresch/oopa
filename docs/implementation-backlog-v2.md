@@ -29,7 +29,9 @@ páginas/testes em `src/` — não contra o texto dos commits.
   testes).
 - **Fase 25:** implementada neste conjunto de mudanças (`convex/search.ts`,
   `GlobalSearch` no header desktop e mobile, e testes).
-- **Fase 26:** não iniciada.
+- **Fase 26:** implementada neste conjunto de mudanças (menu agrupado por
+  módulo em `src/app/layouts/navigation.ts`, bottom nav de campo e testes).
+  Com isso, as Fases 12–26 deste arquivo estão concluídas.
 
 ## Como usar (fluxo com 3 pessoas)
 
@@ -898,11 +900,52 @@ depois que todos os módulos novos existirem.
 
 ### Frontend
 
-- [ ] Reestruturar `AppLayout.tsx` para o agrupamento por módulo (Cadastros,
+- [x] Reestruturar `AppLayout.tsx` para o agrupamento por módulo (Cadastros,
       Ocorrências, Adoções e devoluções, Castração, Resgates, Atendimentos,
       Relatórios, Equipe, Configurações).
-- [ ] Ajustar navegação mobile (bottom nav) para os itens mais usados em
+- [x] Ajustar navegação mobile (bottom nav) para os itens mais usados em
       campo, mantendo no máximo 5 itens.
-- [ ] Revisar permissões de visibilidade de cada item de menu novo.
-- [ ] Testar navegação completa, permissão negada por módulo e
-      responsividade em 360px/390px/tablet/desktop.
+- [x] Revisar permissões de visibilidade de cada item de menu novo.
+- [x] Testar navegação completa, permissão negada por módulo e
+      responsividade em 360px/390px/tablet/desktop
+      (`navigation.test.ts`, `AppLayout.test.tsx`, novo projeto Playwright
+      `tablet-768`).
+
+**Notas:**
+- A configuração do menu saiu de `AppLayout.tsx` para
+  `src/app/layouts/navigation.ts` (`navSections`, `mobileNavItems`,
+  `visibleNavSections`). O layout virou só renderização; a estrutura do menu
+  passou a ser testável sem montar componente.
+- Seções: bloco inicial sem título (Início, Identificar, Calendário),
+  **Cadastros** (Animais, Pessoas, Bairros, Serviços, Insumos),
+  **Ocorrências** (Visão geral, Portal de denúncias), **Adoções e devoluções**
+  (Nova adoção, Devolução à ONG, Acompanhamento), **Operação** (Castração,
+  Resgates, Atendimentos) e **Gestão** (Relatórios, Equipe, Notificações,
+  Auditoria, Configurações).
+- Decisão não prevista no plano: os módulos de item único (Castração,
+  Resgates, Atendimentos, Relatórios, Equipe, Configurações) foram reunidos em
+  duas seções — "Operação" e "Gestão" — em vez de virarem seis títulos com um
+  link cada, que deixaria a barra lateral quase toda de cabeçalho. Cada módulo
+  continua com sua própria linha e sua própria permissão.
+- Bairros, Serviços e Insumos passam a ter entrada em **Cadastros** além de
+  continuarem em `/settings` — são dados mestres, mesmo padrão de duas
+  entradas já usado em outros pontos do produto.
+- "Portal de denúncias" aponta para `/denuncia` (rota pública, fora do
+  `ProtectedRoute`) e abre em nova aba, com `external: true` no item; é
+  visível apenas para quem tem `public_reports.triage`.
+- Uma seção só aparece quando pelo menos um item dela é permitido — o título
+  some junto com os itens.
+- Bottom nav mobile: Início, Identificar, Animais, Pessoas e Ocorrências
+  (Configurações saiu; conta e notificações continuam no header). O container
+  virou `flex justify-around` em vez de `grid-cols-5` fixo, então a barra se
+  ajusta quando o usuário não tem permissão para os 5. Item novo
+  `mobileLabel` permite rótulo curto na barra ("Ocorrências" em vez de
+  "Visão geral").
+- Novo projeto Playwright `tablet-768` (768x1024) — a config só tinha desktop,
+  360 e 390. Os fluxos autenticados do menu continuam cobertos por teste de
+  componente, não por E2E, porque ainda não existe fixture de login E2E (mesma
+  limitação registrada na Fase 6).
+- Correção de bordo: `rescues.list` empatava duas solicitações criadas no
+  mesmo milissegundo e caía na ordem de inserção, deixando o teste de
+  ordenação intermitente. O desempate passou a usar `_creationTime`
+  decrescente.

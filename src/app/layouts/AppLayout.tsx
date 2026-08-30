@@ -1,147 +1,19 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
-import {
-  BellIcon,
-  HeartHandshakeIcon,
-  ChartColumnIcon,
-  ClipboardListIcon,
-  CalendarDaysIcon,
-  CalendarHeartIcon,
-  DogIcon,
-  HomeIcon,
-  LifeBuoyIcon,
-  ListChecksIcon,
-  LogOutIcon,
-  ScanLineIcon,
-  ScissorsIcon,
-  SettingsIcon,
-  UserIcon,
-  UsersIcon,
-} from "lucide-react";
+import { BellIcon, DogIcon, LogOutIcon, UserIcon } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
+import {
+  mobileNavItems,
+  visibleNavSections,
+  type NavIcon,
+} from "@/app/layouts/navigation";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { cn } from "@/lib/utils";
-
-type NavItemConfig = {
-  to: string;
-  label: string;
-  icon: typeof HomeIcon;
-  canAccess: (permissions: {
-    can: (permission: string) => boolean;
-    canAny: (permissions: readonly string[]) => boolean;
-  }) => boolean;
-};
-
-const desktopNavItems: NavItemConfig[] = [
-  {
-    to: "/",
-    label: "Início",
-    icon: HomeIcon,
-    canAccess: () => true,
-  },
-  {
-    to: "/identify",
-    label: "Identificar",
-    icon: ScanLineIcon,
-    canAccess: ({ can }) => can("dogs.read"),
-  },
-  {
-    to: "/calendar",
-    label: "Calendário",
-    icon: CalendarDaysIcon,
-    canAccess: ({ canAny }) =>
-      canAny(["adoptions.read", "castration.read", "appointments.read"]),
-  },
-  {
-    to: "/dogs",
-    label: "Cães",
-    icon: DogIcon,
-    canAccess: ({ can }) => can("dogs.read"),
-  },
-  {
-    to: "/people",
-    label: "Pessoas",
-    icon: UsersIcon,
-    canAccess: ({ can }) => can("people.read"),
-  },
-  {
-    to: "/occurrences",
-    label: "Ocorrências",
-    icon: ListChecksIcon,
-    canAccess: ({ canAny }) => canAny(["occurrences.read", "occurrences.read_legal"]),
-  },
-  {
-    to: "/rescues",
-    label: "Resgates",
-    icon: LifeBuoyIcon,
-    canAccess: ({ can }) => can("rescues.read"),
-  },
-  {
-    to: "/castration",
-    label: "Castração",
-    icon: ScissorsIcon,
-    canAccess: ({ can }) => can("castration.read"),
-  },
-  {
-    to: "/appointments",
-    label: "Atendimentos",
-    icon: CalendarHeartIcon,
-    canAccess: ({ can }) => can("appointments.read"),
-  },
-  {
-    to: "/adoptions/followups",
-    label: "Pós-adoção",
-    icon: HeartHandshakeIcon,
-    canAccess: ({ can }) => can("adoptions.read"),
-  },
-  {
-    to: "/team",
-    label: "Equipe",
-    icon: UsersIcon,
-    canAccess: ({ canAny }) => canAny(["users.invite", "users.manage_permissions"]),
-  },
-  {
-    to: "/reports",
-    label: "Relatórios",
-    icon: ChartColumnIcon,
-    canAccess: ({ can }) => can("reports.read"),
-  },
-  {
-    to: "/notifications",
-    label: "Notificações",
-    icon: BellIcon,
-    canAccess: () => true,
-  },
-  {
-    to: "/audit",
-    label: "Auditoria",
-    icon: ClipboardListIcon,
-    canAccess: ({ can }) => can("system.audit_log"),
-  },
-  {
-    to: "/settings",
-    label: "Configurações",
-    icon: SettingsIcon,
-    canAccess: ({ canAny }) =>
-      canAny([
-        "templates.manage",
-        "occurrence_types.manage",
-        "bairros.manage",
-        "organization.manage",
-        "services.manage",
-        "supplies.manage",
-      ]),
-  },
-];
-
-const mobileNavItems = desktopNavItems.filter((item) =>
-  ["/", "/identify", "/dogs", "/people", "/settings"].includes(item.to),
-);
 
 function UnreadDot({ count, className }: { count: number; className?: string }) {
   if (count <= 0) {
@@ -160,25 +32,46 @@ function UnreadDot({ count, className }: { count: number; className?: string }) 
   );
 }
 
+const SIDEBAR_ITEM_CLASS =
+  "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors";
+const SIDEBAR_ITEM_IDLE_CLASS =
+  "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
+
 function SidebarNavItem({
   to,
   label,
   icon: Icon,
+  external = false,
   unreadCount = 0,
 }: {
   to: string;
   label: string;
-  icon: typeof HomeIcon;
+  icon: NavIcon;
+  external?: boolean;
   unreadCount?: number;
 }) {
+  if (external) {
+    return (
+      <a
+        className={cn(SIDEBAR_ITEM_CLASS, SIDEBAR_ITEM_IDLE_CLASS)}
+        href={to}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <Icon aria-hidden="true" className="size-4.5 shrink-0" />
+        <span className="flex-1">{label}</span>
+      </a>
+    );
+  }
+
   return (
     <NavLink
       className={({ isActive }) =>
         cn(
-          "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+          SIDEBAR_ITEM_CLASS,
           isActive
             ? "bg-sidebar-primary text-sidebar-primary-foreground"
-            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            : SIDEBAR_ITEM_IDLE_CLASS,
         )
       }
       end={to === "/"}
@@ -194,11 +87,13 @@ function SidebarNavItem({
 function MobileNavItem({
   to,
   label,
+  mobileLabel,
   icon: Icon,
 }: {
   to: string;
   label: string;
-  icon: typeof HomeIcon;
+  mobileLabel?: string;
+  icon: NavIcon;
 }) {
   return (
     <NavLink
@@ -221,7 +116,7 @@ function MobileNavItem({
           >
             <Icon aria-hidden="true" className="size-5" />
           </span>
-          <span>{label}</span>
+          <span>{mobileLabel ?? label}</span>
         </>
       )}
     </NavLink>
@@ -248,7 +143,7 @@ export function AppLayout() {
   const unreadCount =
     useQuery(api.notifications.unreadCount, isAuthenticated ? {} : "skip") ?? 0;
   const access = { can, canAny };
-  const visibleDesktop = desktopNavItems.filter((item) => item.canAccess(access));
+  const sections = visibleNavSections(access);
   const visibleMobile = mobileNavItems.filter((item) => item.canAccess(access));
 
   return (
@@ -266,12 +161,30 @@ export function AppLayout() {
             aria-label="Navegação principal"
             className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pb-4"
           >
-            {visibleDesktop.map((item) => (
-              <SidebarNavItem
-                key={item.to}
-                unreadCount={item.to === "/notifications" ? unreadCount : 0}
-                {...item}
-              />
+            {sections.map((section) => (
+              <div className="flex flex-col gap-1" key={section.id}>
+                {section.label ? (
+                  <p
+                    className="mt-3 px-3 pb-0.5 text-[11px] font-semibold tracking-wider text-sidebar-foreground/50 uppercase"
+                    id={`nav-section-${section.id}`}
+                  >
+                    {section.label}
+                  </p>
+                ) : null}
+                <ul
+                  aria-labelledby={section.label ? `nav-section-${section.id}` : undefined}
+                  className="flex flex-col gap-1"
+                >
+                  {section.items.map((item) => (
+                    <li key={item.to}>
+                      <SidebarNavItem
+                        unreadCount={item.to === "/notifications" ? unreadCount : 0}
+                        {...item}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </nav>
 
@@ -336,7 +249,7 @@ export function AppLayout() {
           aria-label="Navegação inferior"
           className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
         >
-          <div className="mx-auto grid max-w-lg grid-cols-5 gap-1 px-2 py-1.5">
+          <div className="mx-auto flex max-w-lg justify-around gap-1 px-2 py-1.5">
             {visibleMobile.map((item) => (
               <MobileNavItem key={item.to} {...item} />
             ))}

@@ -255,7 +255,13 @@ export const list = query({
       if (gravityDiff !== 0) {
         return gravityDiff;
       }
-      return right.criado_em - left.criado_em;
+      const dateDiff = right.criado_em - left.criado_em;
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+      // Desempate estável: dois registros criados no mesmo milissegundo
+      // continuam saindo do mais recente para o mais antigo.
+      return right._creationTime - left._creationTime;
     });
 
     return await Promise.all(sorted.map((rescue) => enrichRescue(ctx, rescue)));
