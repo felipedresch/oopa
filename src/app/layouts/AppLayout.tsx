@@ -21,6 +21,7 @@ import {
 import { NavLink, Outlet } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -254,10 +255,11 @@ export function AppLayout() {
     <ProtectedRoute>
       <div className="min-h-svh bg-background text-foreground lg:flex">
         <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground lg:flex">
-          <div className="px-5 pt-6 pb-4">
+          <div className="flex flex-col gap-4 px-5 pt-6 pb-4">
             <NavLink className="inline-block rounded-lg" to="/">
               <BrandMark subtitle="Gestão da ONG" />
             </NavLink>
+            <GlobalSearch variant="sidebar" />
           </div>
 
           <nav
@@ -319,6 +321,9 @@ export function AppLayout() {
                   </NavLink>
                 </Button>
               </div>
+            </div>
+            <div className="px-4 pb-3">
+              <GlobalSearch />
             </div>
           </header>
 

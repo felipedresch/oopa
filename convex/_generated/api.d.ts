@@ -53,6 +53,7 @@ import type * as permissions from "../permissions.js";
 import type * as publicReports from "../publicReports.js";
 import type * as reports from "../reports.js";
 import type * as rescues from "../rescues.js";
+import type * as search from "../search.js";
 import type * as seeds from "../seeds.js";
 import type * as services from "../services.js";
 import type * as storage from "../storage.js";
@@ -113,6 +114,7 @@ declare const fullApi: ApiFromModules<{
   publicReports: typeof publicReports;
   reports: typeof reports;
   rescues: typeof rescues;
+  search: typeof search;
   seeds: typeof seeds;
   services: typeof services;
   storage: typeof storage;

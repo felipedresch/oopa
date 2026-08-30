@@ -27,7 +27,9 @@ páginas/testes em `src/` — não contra o texto dos commits.
 - **Fase 24:** implementada neste conjunto de mudanças (`convex/reports.ts`,
   permissão `reports.read`, hub `/reports`, tela `/reports/:reportId` e
   testes).
-- **Fases 25–26:** não iniciadas.
+- **Fase 25:** implementada neste conjunto de mudanças (`convex/search.ts`,
+  `GlobalSearch` no header desktop e mobile, e testes).
+- **Fase 26:** não iniciada.
 
 ## Como usar (fluxo com 3 pessoas)
 
@@ -851,17 +853,42 @@ quando todas as tabelas buscáveis já existem.
 
 ### Backend
 
-- [ ] Implementar query `search.global` consultando animais, pessoas,
+- [x] Implementar query `search.global` consultando animais, pessoas,
       ocorrências, resgates e solicitações de castração com `take`
       limitado por tipo, filtrando por permissão do usuário.
-- [ ] Testar resultados por tipo, limite e filtragem por permissão.
+- [x] Testar resultados por tipo, limite e filtragem por permissão
+      (`convex/search.test.ts`).
 
 ### Frontend
 
-- [ ] Criar campo de busca fixo no header (desktop e mobile) com
+- [x] Criar campo de busca fixo no header (desktop e mobile) com
       resultados agrupados por tipo.
-- [ ] Testar busca com termos que cruzam múltiplos tipos e sem permissão
-      para algum tipo.
+- [x] Testar busca com termos que cruzam múltiplos tipos e sem permissão
+      para algum tipo (`GlobalSearch.test.tsx`).
+
+**Notas:**
+- `search.global({ termo, limitePorTipo })` exige apenas usuário ativo; cada
+  tabela só é consultada quando o usuário tem a permissão de leitura
+  correspondente (`dogs.read`, `people.read`, `occurrences.read` /
+  `occurrences.read_legal`, `rescues.read`, `castration.read`) e só grupos com
+  resultado voltam.
+- Campos buscados: animal por nome e microchip; pessoa por nome e CPF (CPF só
+  com `people.read_sensitive`, mesma regra de `people.list`); ocorrência por
+  descrição, nome do tipo e local; resgate por tipo, descrição e local;
+  castração por nome do animal, observações e nome do solicitante.
+- Ocorrências passam por `canReadOccurrenceCategory`, então quem não tem
+  `occurrences.read_legal` não vê resultados de categoria risco/legal na busca.
+- Termo mínimo de 2 caracteres (abaixo disso a query retorna `[]` e o
+  frontend nem consulta); padrão de 5 itens por tipo, máximo 20. Cada tabela
+  lê no máximo 500 documentos antes do filtro em memória — mesmo padrão
+  bounded já usado em `dogs.list` e `people.list`.
+- Retorno normalizado `{ tipo, label, itens: [{ id, titulo, subtitulo?, rota }] }`;
+  ocorrência sem animal aponta para `/occurrences`, que é onde ela aparece.
+- `src/components/GlobalSearch.tsx` é usado duas vezes no `AppLayout`: variante
+  `sidebar` no topo da barra lateral (desktop) e variante `header` numa
+  segunda linha do header mobile — no mobile não havia espaço na linha da
+  marca sem espremer os botões de notificação e conta. Debounce de 250 ms,
+  fecha com Escape ou blur, e limpa o campo ao navegar.
 
 ## Fase 26 - Reorganização do menu em módulos
 
