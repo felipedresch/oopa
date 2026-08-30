@@ -13,7 +13,7 @@ describe("permissions ui map", () => {
   });
 
   it("resume módulos ativos", () => {
-    expect(summarizeModuleMap(fixtureModuleMap)).toContain("Cães: Gestão");
+    expect(summarizeModuleMap(fixtureModuleMap)).toContain("Animais: Gestão");
     expect(summarizeModuleMap(createEmptyModuleMap())).toBe("Sem acesso a módulos.");
   });
 });

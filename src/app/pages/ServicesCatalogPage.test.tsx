@@ -69,7 +69,11 @@ describe("ServicesCatalogPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Consulta")).toBeInTheDocument();
+    // Categoria aparece com rótulo PT-BR, não com o valor cru do enum.
+    expect(screen.queryByText("consulta")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "Consulta" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("R$ 80,00")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Desativar" }));

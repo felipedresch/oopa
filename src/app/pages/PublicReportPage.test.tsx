@@ -59,4 +59,21 @@ describe("PublicReportPage", () => {
     expect(screen.getByRole("button", { name: /enviar denúncia/i })).toBeDisabled();
     expect(mockCreateReport).not.toHaveBeenCalled();
   });
+  it("envia o tipo escolhido nos cartões de tipo de denúncia", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <PublicReportPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole("radio", { name: /abandono/i }));
+    await user.type(screen.getByLabelText(/o que você viu/i), "Cadela abandonada na praça.");
+    await user.click(screen.getByRole("button", { name: /enviar denúncia/i }));
+
+    expect(mockCreateReport).toHaveBeenCalledWith(
+      expect.objectContaining({ tipo_denuncia: "abandono" }),
+    );
+  });
 });

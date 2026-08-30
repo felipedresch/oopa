@@ -81,7 +81,7 @@ export function PdfUpload({ label, storageId, required = false, onChange }: PdfU
           type="button"
         >
           <FileTextIcon aria-hidden="true" className="size-6" />
-          {isUploading ? "Enviando..." : "Selecionar PDF (ate 8 MB)"}
+          {isUploading ? "Enviando..." : "Selecionar PDF (até 8 MB)"}
         </button>
       )}
 

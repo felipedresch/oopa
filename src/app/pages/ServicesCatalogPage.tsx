@@ -3,6 +3,10 @@ import { useState } from "react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import {
+  SERVICE_CATEGORY_LABELS,
+  type ServiceCategory,
+} from "@/lib/domain-colors";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterBar } from "@/components/FilterBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
@@ -16,14 +20,14 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { formatCurrency } from "@/lib/formatters";
 
-const CATEGORY_OPTIONS = ["consulta", "vacina", "cirurgia", "castracao", "exame", "outro"] as const;
+const CATEGORY_OPTIONS = Object.keys(SERVICE_CATEGORY_LABELS) as ServiceCategory[];
 
 export function ServicesCatalogPage() {
   const { can } = usePermissions();
   const [search, setSearch] = useState("");
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [categoria, setCategoria] = useState<(typeof CATEGORY_OPTIONS)[number]>("consulta");
+  const [categoria, setCategoria] = useState<ServiceCategory>("consulta");
   const [valorPadrao, setValorPadrao] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -142,13 +146,13 @@ export function ServicesCatalogPage() {
               className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="service-category"
               onChange={(event) =>
-                setCategoria(event.target.value as (typeof CATEGORY_OPTIONS)[number])
+                setCategoria(event.target.value as ServiceCategory)
               }
               value={categoria}
             >
               {CATEGORY_OPTIONS.map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {SERVICE_CATEGORY_LABELS[value]}
                 </option>
               ))}
             </select>
@@ -208,7 +212,7 @@ export function ServicesCatalogPage() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{service.nome}</p>
-                  <Badge variant="secondary">{service.categoria}</Badge>
+                  <Badge variant="secondary">{SERVICE_CATEGORY_LABELS[service.categoria]}</Badge>
                   <Badge variant="secondary">{formatCurrency(service.valor_padrao)}</Badge>
                   <Badge
                     className={

@@ -151,9 +151,16 @@ export const updateStatus = mutation({
       throw notFound("Solicitação de castração");
     }
 
+    const dataAgendada = args.data_agendada ?? request.data_agendada;
+    // Sem data, uma castração "agendada" nunca aparece no calendário nem na
+    // fila de agenda — vira um registro invisível.
+    if (args.status === "agendada" && dataAgendada === undefined) {
+      throw validationError("Informe a data agendada para agendar a castração.");
+    }
+
     await ctx.db.patch(args.castrationId, {
       status: args.status,
-      data_agendada: args.data_agendada ?? request.data_agendada,
+      data_agendada: dataAgendada,
     });
 
     await recordAudit(ctx, {

@@ -51,12 +51,12 @@ export function PersonAssessmentPanel({
 
           {alert.level === "red" ? (
             <p className="text-sm font-medium text-destructive">
-              Alerta vermelho: ocorrências altas atribuidas ao tutor.
+              Alerta vermelho: ocorrências altas atribuídas ao tutor.
             </p>
           ) : null}
           {alert.level === "yellow" ? (
             <p className="text-sm font-medium text-warning">
-              Alerta amarelo: ocorrências medias atribuidas ao tutor.
+              Alerta amarelo: ocorrências médias atribuídas ao tutor.
             </p>
           ) : null}
 
@@ -76,7 +76,7 @@ export function PersonAssessmentPanel({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">Nenhuma ocorrência media ou alta atribuida.</p>
+            <p className="text-sm text-muted-foreground">Nenhuma ocorrência média ou alta atribuída.</p>
           )}
         </>
       )}

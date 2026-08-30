@@ -56,8 +56,8 @@ export function DogStatusChangeDialog({
       confirmLabel={loading ? "Salvando..." : "Confirmar status"}
       description={
         needsConfirmation
-          ? `Confirme a alteracao para "${DOG_STATUS_LABELS[nextStatus]}". Está ação atualiza a ficha do cão.`
-          : "Selecione o novo status do cão."
+          ? `Confirme a alteração para "${DOG_STATUS_LABELS[nextStatus]}". Esta ação atualiza a ficha do animal.`
+          : "Selecione o novo status do animal."
       }
       onConfirm={() => void applyStatus()}
       onOpenChange={onOpenChange}

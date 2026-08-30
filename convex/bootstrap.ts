@@ -19,6 +19,25 @@ export const getUserByEmail = internalQuery({
   },
 });
 
+/**
+ * Realinha o admin de desenvolvimento com o template "Administrador ONG"
+ * atual. Sem isso, um admin criado antes de um modulo novo fica sem as
+ * permissoes desse modulo e as telas novas aparecem como "Permissao negada".
+ */
+export const syncBootstrapPermissions = internalMutation({
+  args: { userId: v.id("users") },
+  returns: v.array(v.string()),
+  handler: async (ctx, args) => {
+    const permissions = moduleMapToPermissions(SEED_PERMISSION_TEMPLATES[0].moduleMap);
+    await ctx.db.patch(args.userId, {
+      permissions,
+      ativo: true,
+      atualizado_em: Date.now(),
+    });
+    return permissions;
+  },
+});
+
 export const insertBootstrapUser = internalMutation({
   args: {
     email: v.string(),
@@ -67,6 +86,9 @@ export const ensureDevAdmin = internalAction({
 
     const existingUserId = await ctx.runQuery(internal.bootstrap.getUserByEmail, { email });
     if (existingUserId) {
+      await ctx.runMutation(internal.bootstrap.syncBootstrapPermissions, {
+        userId: existingUserId,
+      });
       return { created: false, email };
     }
 

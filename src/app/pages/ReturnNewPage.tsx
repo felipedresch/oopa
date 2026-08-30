@@ -66,12 +66,12 @@ export function ReturnNewPage() {
     return (
       <section className="flex flex-col gap-6">
         <PageHeader
-          description="O cão voltou para a ONG e o histórico de tutoria foi encerrado."
+          description="O animal voltou para a ONG e o histórico de tutoria foi encerrado."
           title="Devolução registrada"
         />
         <div className="flex flex-wrap gap-2">
           <Button asChild className="min-h-11">
-            <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cão</Link>
+            <Link to={`/dogs/${selectedDogId}`}>Ver ficha do animal</Link>
           </Button>
           <Button asChild className="min-h-11" variant="outline">
             <Link to={`/dogs/${selectedDogId}/occurrences/${successOccurrenceId}`}>
@@ -124,7 +124,7 @@ export function ReturnNewPage() {
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
-        description="Registre a devolução de um cão adotado. Fotos são obrigatórias."
+        description="Registre a devolução de um animal adotado. Fotos são obrigatórias."
         title="Nova devolução"
       />
 
@@ -136,7 +136,7 @@ export function ReturnNewPage() {
         ) : null}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="return-dog-search">Buscar cão</Label>
+          <Label htmlFor="return-dog-search">Buscar animal</Label>
           <Input
             id="return-dog-search"
             onChange={(event) => setSearch(event.target.value)}
@@ -182,7 +182,7 @@ export function ReturnNewPage() {
             </p>
             {!selectedDog.pessoa_atual_id ? (
               <p className="mt-2 text-sm text-warning">
-                Este cão não possui tutor atual. Selecione outro cão para devolução.
+                Este animal não possui tutor atual. Selecione outro animal para devolução.
               </p>
             ) : currentPerson === undefined ? (
               <LoadingSkeleton rows={1} />
@@ -234,7 +234,7 @@ export function ReturnNewPage() {
       <ConfirmDialog
         confirmLabel={submitting ? "Registrando..." : "Confirmar devolução"}
         confirmVariant="destructive"
-        description="O tutor atual será removido e o cão voltará para a ONG. Esta ação gera uma ocorrência de devolução."
+        description="O tutor atual será removido e o animal voltará para a ONG. Esta ação gera uma ocorrência de devolução."
         onConfirm={() => void handleSubmit()}
         onOpenChange={setConfirmOpen}
         open={confirmOpen}

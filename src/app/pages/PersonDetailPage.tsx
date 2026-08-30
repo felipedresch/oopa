@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { formatCep, formatCpf, formatDate, formatPhone } from "@/lib/formatters";
 
-const TABS = ["Dados", "Cães atuais", "Histórico", "Ocorrências"] as const;
+const TABS = ["Dados", "Animais atuais", "Histórico", "Ocorrências"] as const;
 
 const PAPEL_LABELS: Record<string, string> = {
   tutor: "Tutor",
@@ -188,9 +188,9 @@ export function PersonDetailPage() {
         </div>
       ) : null}
 
-      {activeTab === "Cães atuais" ? (
+      {activeTab === "Animais atuais" ? (
         person.current_dogs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum cão vinculado atualmente.</p>
+          <p className="text-sm text-muted-foreground">Nenhum animal vinculado atualmente.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {person.current_dogs.map((dog: (typeof person.current_dogs)[number]) => (
@@ -208,7 +208,7 @@ export function PersonDetailPage() {
 
       {activeTab === "Histórico" ? (
         person.history.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sem histórico tutor-cão registrado.</p>
+          <p className="text-sm text-muted-foreground">Sem histórico de tutoria registrado.</p>
         ) : (
           <ul className="divide-y divide-border">
             {person.history.map((entry: (typeof person.history)[number]) => (

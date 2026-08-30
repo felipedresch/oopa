@@ -20,7 +20,7 @@ import {
   ADOPTION_FOLLOWUP_STATUS_LABELS,
   type AdoptionFollowupStatus,
 } from "@/lib/domain-colors";
-import { formatDate } from "@/lib/formatters";
+import { formatDate, formatPhone } from "@/lib/formatters";
 import { getErrorMessage } from "@/lib/auth-errors";
 
 type AdoptionFollowupListProps = {
@@ -173,7 +173,12 @@ export function AdoptionFollowupList({ dogId, status }: AdoptionFollowupListProp
                 {followup.pessoa &&
                 (followup.pessoa.telefone || followup.pessoa.email) ? (
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {[followup.pessoa.telefone, followup.pessoa.email]
+                    {[
+                      followup.pessoa.telefone
+                        ? formatPhone(followup.pessoa.telefone)
+                        : undefined,
+                      followup.pessoa.email,
+                    ]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>

@@ -228,6 +228,18 @@ export const mobileNavItems = MOBILE_NAV_ROUTES.map((route) =>
   allNavItems.find((item) => item.to === route),
 ).filter((item): item is NavItemConfig => item !== undefined);
 
+/** Seção que contém a rota atual, para abri-la por padrão na barra lateral. */
+export function sectionIdForPath(pathname: string): string | undefined {
+  const match = navSections
+    .flatMap((section) => section.items.map((item) => ({ section, item })))
+    .filter(({ item }) => !item.external && item.to !== "/")
+    .filter(({ item }) => pathname === item.to || pathname.startsWith(`${item.to}/`))
+    // Rota mais específica vence (/adoptions/followups antes de /adoptions).
+    .sort((a, b) => b.item.to.length - a.item.to.length)[0];
+
+  return match?.section.id;
+}
+
 export function visibleNavSections(access: NavAccess): NavSection[] {
   return navSections
     .map((section) => ({

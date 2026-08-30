@@ -72,7 +72,7 @@ export function DashboardPage() {
           {firstName ? `Olá, ${firstName}` : "Olá"}
         </h1>
         <p className="max-w-prose text-sm leading-6 text-muted-foreground">
-          Por onde começamos hoje? Identifique um cão na rua ou navegue pelos
+          Por onde começamos hoje? Identifique um animal na rua ou navegue pelos
           cadastros da ONG.
         </p>
       </header>
@@ -85,7 +85,7 @@ export function DashboardPage() {
         >
           <Link to="/identify">
             <ScanLineIcon aria-hidden="true" className="mr-2 size-5" />
-            Identificar cão pela câmera
+            Identificar animal pela câmera
           </Link>
         </Button>
 
@@ -120,7 +120,7 @@ export function DashboardPage() {
             <QuickLink
               description="Lista completa com filtros e alertas"
               icon={DogIcon}
-              title="Cães"
+              title="Animais"
               to="/dogs"
             />
           ) : null}
@@ -128,7 +128,7 @@ export function DashboardPage() {
             <QuickLink
               description="Microchip, fotos e dados iniciais"
               icon={PlusIcon}
-              title="Cadastrar novo cão"
+              title="Cadastrar novo animal"
               to="/dogs/new"
             />
           ) : null}
@@ -150,7 +150,7 @@ export function DashboardPage() {
           ) : null}
           {can("occurrences.create_adocao") ? (
             <QuickLink
-              description="Encerrar tutoria e voltar o cão para a ONG"
+              description="Encerrar tutoria e devolver o animal para a ONG"
               icon={RotateCcwIcon}
               title="Nova devolução"
               to="/returns/new"

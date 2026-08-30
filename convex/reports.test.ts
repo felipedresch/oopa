@@ -130,6 +130,8 @@ test("relatório de castrações traz fila, status e taxa de não comparecimento
 
   expect(result.linhas).toHaveLength(2);
   expect(result.linhas[0]?.rota).toBe(`/castration/${ids[0]}`);
+  // Data em dd/mm/aaaa, nao ISO, e sem deslocar o dia por UTC.
+  expect(result.linhas[0]?.celulas[1]?.texto).toBe("10/04/2026");
   expect(result.linhas.map((linha) => linha.celulas[3]?.texto)).toEqual([
     "Bolinha",
     "Nina",
@@ -297,6 +299,7 @@ test("relatório veterinário usa as colunas pedidas e soma valores", async () =
   expect(result.linhas).toHaveLength(1);
   expect(result.linhas[0]?.celulas[2]?.texto).toBe("Mel");
   expect(result.linhas[0]?.celulas[4]?.texto).toBe("Solicitante Atendimento");
+  expect(result.linhas[0]?.celulas[6]?.texto).toBe("R$ 80,00");
   expect(result.resumo).toContainEqual({ label: "Valor total", valor: "R$ 80,00" });
 
   const outroDogId = await seedDog(t, adminId, "Outro", "444444444444444");

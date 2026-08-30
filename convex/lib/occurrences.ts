@@ -1,6 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
-import { validationError } from "../errors";
+import { notFound, validationError } from "../errors";
 import {
   hasAllPermissions,
   hasPermission,
@@ -128,6 +128,24 @@ export async function getOccurrenceTypeByName(
     .query("occurrence_types")
     .withIndex("by_nome", (q) => q.eq("nome", nome))
     .unique();
+}
+
+/**
+ * Igual a `getOccurrenceTypeByName`, mas falha com uma mensagem acionavel.
+ * Tipos de catalogo vem do seed; se o deploy nao reaplicou `seeds:seedAll`, a
+ * feature que depende do tipo quebra e o erro precisa dizer o porque.
+ */
+export async function requireOccurrenceTypeByName(
+  ctx: Pick<QueryCtx, "db">,
+  nome: string,
+): Promise<Doc<"occurrence_types">> {
+  const type = await getOccurrenceTypeByName(ctx, nome);
+  if (!type) {
+    throw notFound(
+      `Tipo de ocorrência "${nome}" (rode os seeds do catálogo para criá-lo)`,
+    );
+  }
+  return type;
 }
 
 export type OccurrenceWithType = Doc<"occurrences"> & {

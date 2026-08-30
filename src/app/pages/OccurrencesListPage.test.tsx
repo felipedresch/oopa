@@ -2,6 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
+import { getFunctionName } from "convex/server";
+
+import { api } from "../../../convex/_generated/api";
 import { OccurrencesListPage } from "@/app/pages/OccurrencesListPage";
 
 const mockUsePermissions = vi.fn();
@@ -14,14 +17,19 @@ vi.mock("@/hooks/usePermissions", () => ({
 }));
 
 vi.mock("convex/react", () => ({
-  useQuery: (): ReturnType<typeof mockUseQuery> => mockUseQuery(),
+  useQuery: (reference: unknown): ReturnType<typeof mockUseQuery> =>
+    mockUseQuery(reference),
   usePaginatedQuery: (): ReturnType<typeof mockUsePaginatedQuery> => mockUsePaginatedQuery(),
   useMutation: (): ReturnType<typeof mockUseMutation> => mockUseMutation(),
 }));
 
 describe("OccurrencesListPage", () => {
   beforeEach(() => {
-    mockUseQuery.mockReturnValue([{ _id: "bairro1", nome: "Centro" }]);
+    mockUseQuery.mockImplementation((reference: unknown) =>
+      reference && getFunctionName(reference as never) === getFunctionName(api.publicReports.pendingCount)
+        ? 3
+        : [{ _id: "bairro1", nome: "Centro" }],
+    );
     mockUseMutation.mockReturnValue(vi.fn());
   });
 
@@ -93,7 +101,40 @@ describe("OccurrencesListPage", () => {
     );
 
     expect(screen.queryByText("Sem denúncias")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Denúncias pendentes" })).toHaveTextContent(
+      "3",
+    );
     await user.click(screen.getByRole("button", { name: "Denúncias pendentes" }));
     expect(screen.getByText("Sem denúncias")).toBeInTheDocument();
+  });
+  it("filtra por gravidade pelos chips e limpa os filtros avançados", async () => {
+    const user = userEvent.setup();
+    mockUsePermissions.mockReturnValue({ can: () => false, canAny: () => true });
+    mockUsePaginatedQuery.mockReturnValue({
+      results: [],
+      status: "Exhausted",
+      loadMore: vi.fn(),
+    });
+
+    render(
+      <MemoryRouter>
+        <OccurrencesListPage />
+      </MemoryRouter>,
+    );
+
+    const alta = screen.getByRole("button", { name: "Alta" });
+    expect(alta).toHaveAttribute("aria-pressed", "false");
+    await user.click(alta);
+    expect(alta).toHaveAttribute("aria-pressed", "true");
+
+    // O painel avançado começa fechado e só aparece ao pedir "Filtros".
+    expect(screen.queryByLabelText("Categoria")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /filtros/i }));
+
+    await user.selectOptions(screen.getByLabelText("Categoria"), "risco");
+    expect(screen.getByRole("button", { name: "Remover filtro Risco" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /limpar filtros/i }));
+    expect(screen.queryByRole("button", { name: "Remover filtro Risco" })).not.toBeInTheDocument();
   });
 });

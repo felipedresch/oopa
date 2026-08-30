@@ -215,3 +215,37 @@ test("archive marca denuncia arquivada e bloqueia arquivar denuncia convertida",
     ),
   ).rejects.toThrow(/já convertida/i);
 });
+
+test("pendingCount conta apenas a fila de triagem e exige permissao", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const readerId = await seedUser(t, {
+    nome: "Leitor sem triagem",
+    email: "public-reports-count-reader@ong.local",
+    permissions: ["occurrences.read"],
+  });
+
+  await t.mutation(api.publicReports.create, {
+    tipo_denuncia: "abandono",
+    descricao: "Filhotes abandonados na praça.",
+    photo_storage_ids: [],
+  });
+  const arquivadaId = await t.mutation(api.publicReports.create, {
+    tipo_denuncia: "outro",
+    descricao: "Denúncia duplicada.",
+    photo_storage_ids: [],
+  });
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.publicReports.archive, { publicReportId: arquivadaId }),
+  );
+
+  await expect(
+    asUser(t, readerId, async (client) => client.query(api.publicReports.pendingCount, {})),
+  ).rejects.toThrow();
+
+  const count = await asUser(t, adminId, async (client) =>
+    client.query(api.publicReports.pendingCount, {}),
+  );
+  expect(count).toBe(1);
+});

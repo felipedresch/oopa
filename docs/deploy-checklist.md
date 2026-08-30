@@ -34,7 +34,13 @@ npx convex deploy
 ## Pos-deploy
 
 - [ ] Login com usuario admin de producao
-- [ ] Rodar seeds iniciais (`templates.manage`) se ambiente novo
+- [ ] **Rodar `seeds:seedAll` em TODO deploy** (nao apenas em ambiente novo).
+      Os seeds sao idempotentes por nome: reaplicar so insere o que falta.
+      Toda fase que adiciona um tipo de ocorrencia ou bairro depende disso —
+      sem reaplicar, a feature vai para producao sem o registro que ela
+      procura e quebra em runtime (foi o que aconteceu com "Denuncia Externa"
+      da Fase 16 e "Visita de acompanhamento" da Fase 22).
+- [ ] Conferir contagem de tipos de ocorrencia com `seeds:getSeedSummary`
 - [ ] Testar identificacao por camera/OCR
 - [ ] Testar convite de usuario e e-mail
 - [ ] Verificar notificacoes e exportacao de auditoria
@@ -44,5 +50,7 @@ npx convex deploy
 
 - [ ] Nenhum segredo commitado no repositorio
 - [ ] `seedAll` exige `templates.manage`
+- [ ] Admin existente realinhado com o template atual (`bootstrap:ensureDevAdmin`
+      sincroniza permissoes de modulos novos)
 - [ ] Upload de arquivos exige permissao de escrita relevante
 - [ ] Exportacoes operacionais exigem `system.audit_log`

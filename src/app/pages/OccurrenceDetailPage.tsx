@@ -10,6 +10,7 @@ import { SensitiveDataHidden } from "@/components/SensitiveDataHidden";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PlaceholderPage } from "@/app/pages/PlaceholderPage";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { formatOccurrenceCategoria } from "@/lib/domain-colors";
 import { Button } from "@/components/ui/button";
 import { formatCep, formatCpf, formatDate, formatPhone } from "@/lib/formatters";
 
@@ -23,7 +24,7 @@ export function OccurrenceDetailPage() {
     occurrenceId ? { occurrenceId: occurrenceId as Id<"occurrences"> } : "skip",
   );
 
-  if (!occurrenceId || !dogId) {
+  if (!occurrenceId) {
     return <PermissionDenied message="Ocorrência não informada." />;
   }
 
@@ -40,20 +41,25 @@ export function OccurrenceDetailPage() {
     );
   }
 
+  /** A ocorrencia pode existir sem animal (ex.: denuncia externa convertida). */
+  const linkedDogId = dogId ?? occurrence.dog_id;
+
   return (
     <section className="flex flex-col gap-6">
       <PageHeader
         actions={
           <div className="flex flex-wrap gap-2">
-            {occurrence.can_rectify ? (
+            {occurrence.can_rectify && linkedDogId ? (
               <Button asChild className="min-h-11" variant="outline">
-                <Link to={`/dogs/${dogId}/occurrences/${occurrenceId}/rectify`}>
+                <Link to={`/dogs/${linkedDogId}/occurrences/${occurrenceId}/rectify`}>
                   Registrar retificação
                 </Link>
               </Button>
             ) : null}
             <Button asChild className="min-h-11" variant="outline">
-              <Link to={`/dogs/${dogId}`}>Voltar ao cão</Link>
+              <Link to={linkedDogId ? `/dogs/${linkedDogId}` : "/occurrences"}>
+                {linkedDogId ? "Voltar ao animal" : "Voltar às ocorrências"}
+              </Link>
             </Button>
           </div>
         }
@@ -63,7 +69,9 @@ export function OccurrenceDetailPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <SeverityBadge severity={occurrence.gravidade} />
-        <span className="text-sm text-muted-foreground">{occurrence.categoria}</span>
+        <span className="text-sm text-muted-foreground">
+          {formatOccurrenceCategoria(occurrence.categoria)}
+        </span>
         {occurrence.atribuivel_a_pessoa ? (
           <span className="text-sm text-warning">
             Conta para alerta do tutor
@@ -75,8 +83,19 @@ export function OccurrenceDetailPage() {
         <h3 className="mb-3 font-semibold">Registro</h3>
         <dl className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 [&_dd]:mt-0.5 [&_dd]:leading-6 [&_dt]:text-xs [&_dt]:font-medium [&_dt]:tracking-wide [&_dt]:text-muted-foreground [&_dt]:uppercase">
           <div>
-            <dt className="text-muted-foreground">Cão</dt>
-            <dd>{occurrence.dog_nome}</dd>
+            <dt className="text-muted-foreground">Animal</dt>
+            <dd>
+              {linkedDogId ? (
+                <Link
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                  to={`/dogs/${linkedDogId}`}
+                >
+                  {occurrence.dog_nome}
+                </Link>
+              ) : (
+                (occurrence.dog_nome ?? "Sem animal vinculado")
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Bairro</dt>

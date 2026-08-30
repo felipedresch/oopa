@@ -38,6 +38,30 @@ export type DogStatus =
 
 export type PersonAlertLevel = "none" | "yellow" | "red";
 
+export type OccurrenceCategoria =
+  | "rotina"
+  | "clinica"
+  | "risco"
+  | "legal"
+  | "adocao"
+  | "outro"
+  | "denuncia_externa";
+
+export const OCCURRENCE_CATEGORY_LABELS: Record<OccurrenceCategoria, string> = {
+  rotina: "Rotina",
+  clinica: "Clínica",
+  risco: "Risco",
+  legal: "Legal",
+  adocao: "Adoção",
+  outro: "Outro",
+  denuncia_externa: "Denúncia externa",
+};
+
+/** Categorias antigas podem ter valor livre; cai no proprio valor. */
+export function formatOccurrenceCategoria(categoria: string): string {
+  return OCCURRENCE_CATEGORY_LABELS[categoria as OccurrenceCategoria] ?? categoria;
+}
+
 export const SEVERITY_LABELS: Record<Severity, string> = {
   info: "Informativa",
   baixa: "Baixa",
@@ -141,6 +165,52 @@ export const appointmentStatusBadgeClass: Record<AppointmentStatus, string> = {
   realizado: "bg-success/12 text-success",
   cancelado: "bg-muted text-muted-foreground",
 };
+
+export type ServiceCategory =
+  | "consulta"
+  | "vacina"
+  | "cirurgia"
+  | "castracao"
+  | "exame"
+  | "outro";
+
+export const SERVICE_CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  consulta: "Consulta",
+  vacina: "Vacina",
+  cirurgia: "Cirurgia",
+  castracao: "Castração",
+  exame: "Exame",
+  outro: "Outro",
+};
+
+export type SupplyCategory = "medicamento" | "material" | "vacina" | "outro";
+
+export const SUPPLY_CATEGORY_LABELS: Record<SupplyCategory, string> = {
+  medicamento: "Medicamento",
+  material: "Material",
+  vacina: "Vacina",
+  outro: "Outro",
+};
+
+export type PublicReportTipo =
+  | "maus_tratos"
+  | "animal_ferido"
+  | "abandono"
+  | "acumulo_animais"
+  | "outro";
+
+export const PUBLIC_REPORT_TIPO_LABELS: Record<PublicReportTipo, string> = {
+  maus_tratos: "Maus-tratos",
+  animal_ferido: "Animal ferido",
+  abandono: "Abandono",
+  acumulo_animais: "Acúmulo de animais",
+  outro: "Outro",
+};
+
+/** Denúncias antigas podem ter tipo livre; cai no próprio valor. */
+export function formatPublicReportTipo(tipo: string): string {
+  return PUBLIC_REPORT_TIPO_LABELS[tipo as PublicReportTipo] ?? tipo;
+}
 
 export type AdoptionFollowupStatus =
   | "pendente"

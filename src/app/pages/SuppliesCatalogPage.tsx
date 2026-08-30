@@ -3,6 +3,10 @@ import { useState } from "react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import {
+  SUPPLY_CATEGORY_LABELS,
+  type SupplyCategory,
+} from "@/lib/domain-colors";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterBar } from "@/components/FilterBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
@@ -16,14 +20,14 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { formatCurrency } from "@/lib/formatters";
 
-const CATEGORY_OPTIONS = ["medicamento", "material", "vacina", "outro"] as const;
+const CATEGORY_OPTIONS = Object.keys(SUPPLY_CATEGORY_LABELS) as SupplyCategory[];
 
 export function SuppliesCatalogPage() {
   const { can } = usePermissions();
   const [search, setSearch] = useState("");
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [categoria, setCategoria] = useState<(typeof CATEGORY_OPTIONS)[number]>("medicamento");
+  const [categoria, setCategoria] = useState<SupplyCategory>("medicamento");
   const [unidadeMedida, setUnidadeMedida] = useState("");
   const [valorPadrao, setValorPadrao] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -147,13 +151,13 @@ export function SuppliesCatalogPage() {
               className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               id="supply-category"
               onChange={(event) =>
-                setCategoria(event.target.value as (typeof CATEGORY_OPTIONS)[number])
+                setCategoria(event.target.value as SupplyCategory)
               }
               value={categoria}
             >
               {CATEGORY_OPTIONS.map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {SUPPLY_CATEGORY_LABELS[value]}
                 </option>
               ))}
             </select>
@@ -222,7 +226,7 @@ export function SuppliesCatalogPage() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{supply.nome}</p>
-                  <Badge variant="secondary">{supply.categoria}</Badge>
+                  <Badge variant="secondary">{SUPPLY_CATEGORY_LABELS[supply.categoria]}</Badge>
                   {supply.unidade_medida ? (
                     <Badge variant="secondary">{supply.unidade_medida}</Badge>
                   ) : null}

@@ -133,7 +133,7 @@ export function IdentifyPage() {
     <section className="flex flex-col gap-6">
       <PageHeader
         description="Use a câmera do leitor RFID ou digite os 15 dígitos. A busca so ocorre apos confirmacao."
-        title="Identificar cão"
+        title="Identificar animal"
       />
 
       {error ? (
@@ -204,20 +204,20 @@ export function IdentifyPage() {
             status={result.status_atual}
           />
           <Button asChild className="min-h-12 text-base">
-            <Link to={`/dogs/${result._id}`}>Abrir ficha do cão</Link>
+            <Link to={`/dogs/${result._id}`}>Abrir ficha do animal</Link>
           </Button>
         </div>
       ) : null}
 
       {showNotFound ? (
         <EmptyState
-          description="Nenhum cão foi encontrado com este microchip."
+          description="Nenhum animal foi encontrado com este microchip."
           title="Microchip não encontrado"
         >
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
             {can("dogs.create") ? (
               <Button asChild className="min-h-12 text-base">
-                <Link to={`/dogs/new?microchip=${submittedChip}`}>Cadastrar novo cão</Link>
+                <Link to={`/dogs/new?microchip=${submittedChip}`}>Cadastrar novo animal</Link>
               </Button>
             ) : (
               <Button

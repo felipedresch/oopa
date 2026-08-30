@@ -81,7 +81,7 @@ export function GlobalSearch({ variant = "header", className }: GlobalSearchProp
             setOpen(false);
           }
         }}
-        placeholder="Buscar animais, pessoas, ocorrências..."
+        placeholder={isSidebar ? "Buscar..." : "Buscar animais, pessoas..."}
         type="search"
         value={term}
       />

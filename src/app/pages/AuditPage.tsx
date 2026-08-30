@@ -20,6 +20,7 @@ import {
   getEntityIdLabel,
   getEntityLabel,
 } from "@/lib/audit-labels";
+import { dateInputToTimestamp } from "@/lib/dates";
 import { formatDateTime } from "@/lib/formatters";
 
 const ENTITY_OPTIONS = [
@@ -62,8 +63,8 @@ export function AuditPage() {
       actorUserId: actorUserId || undefined,
       entityType: entityType || undefined,
       action: action.trim() || undefined,
-      from: from ? new Date(from).getTime() : undefined,
-      to: to ? new Date(`${to}T23:59:59`).getTime() : undefined,
+      from: dateInputToTimestamp(from, "start"),
+      to: dateInputToTimestamp(to, "end"),
     }),
     [action, actorUserId, entityType, from, to],
   );

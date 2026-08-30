@@ -283,3 +283,61 @@ test("list e get exigem castration.read", async () => {
   );
   expect(detail?.pessoa_nome).toBe("Solicitante Castração");
 });
+
+test("updateStatus recusa agendar sem data agendada", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const personId = await seedPerson(t, adminId);
+
+  const castrationId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.castration.create, {
+      pessoa_id: personId,
+      animal_descricao: { especie: "cao", porte: "medio", sexo: "macho" },
+    }),
+  );
+
+  await expect(
+    asUser(t, adminId, async (client) =>
+      client.mutation(api.castration.updateStatus, {
+        castrationId,
+        status: "agendada",
+      }),
+    ),
+  ).rejects.toThrow();
+
+  const stillWaiting = await asUser(t, adminId, async (client) =>
+    client.query(api.castration.get, { castrationId }),
+  );
+  expect(stillWaiting?.status).toBe("aguardando");
+});
+
+test("updateStatus mantém a data já agendada ao reagendar sem informá-la", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const personId = await seedPerson(t, adminId);
+  const agendada = Date.UTC(2026, 4, 20, 13);
+
+  const castrationId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.castration.create, {
+      pessoa_id: personId,
+      animal_descricao: { especie: "cao", porte: "medio", sexo: "macho" },
+    }),
+  );
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.castration.updateStatus, {
+      castrationId,
+      status: "agendada",
+      data_agendada: agendada,
+    }),
+  );
+  await asUser(t, adminId, async (client) =>
+    client.mutation(api.castration.updateStatus, { castrationId, status: "agendada" }),
+  );
+
+  const detail = await asUser(t, adminId, async (client) =>
+    client.query(api.castration.get, { castrationId }),
+  );
+  expect(detail?.data_agendada).toBe(agendada);
+});

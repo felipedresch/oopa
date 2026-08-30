@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { usePermissions } from "@/hooks/usePermissions";
-import { boundaryFromDateInput, findReport, reportCsvFileName } from "@/lib/reports";
+import { dateInputToTimestamp } from "@/lib/dates";
+import { findReport, reportCsvFileName } from "@/lib/reports";
 
 const SELECT_CLASS =
   "h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -34,8 +35,8 @@ export function ReportDetailPage() {
   const [exporting, setExporting] = useState(false);
 
   const canRead = can("reports.read");
-  const inicio = boundaryFromDateInput(from, "start");
-  const fim = boundaryFromDateInput(to, "end");
+  const inicio = dateInputToTimestamp(from, "start");
+  const fim = dateInputToTimestamp(to, "end");
   const periodoInvalido = inicio !== undefined && fim !== undefined && inicio > fim;
 
   const filters = useMemo(

@@ -50,7 +50,7 @@ export function CastrationDetailPage() {
 
   const [dataSolicitacaoValue, setDataSolicitacaoValue] = useState<string | null>(null);
   const [nextStatus, setNextStatus] = useState<CastrationStatus | null>(null);
-  const [dataAgendadaValue, setDataAgendadaValue] = useState("");
+  const [dataAgendadaOverride, setDataAgendadaOverride] = useState<string | null>(null);
   const [realizadaOpen, setRealizadaOpen] = useState(false);
   const [dogSearch, setDogSearch] = useState("");
   const [selectedDogId, setSelectedDogId] = useState<Id<"dogs"> | undefined>();
@@ -94,6 +94,11 @@ export function CastrationDetailPage() {
   }
 
   const dataSolicitacaoInput = dataSolicitacaoValue ?? toDateTimeInputValue(request.data_solicitacao);
+  // Reflete a data ja agendada, para reeditar sem reescrever tudo.
+  const dataAgendadaSalva = request.data_agendada
+    ? toDateTimeInputValue(request.data_agendada)
+    : "";
+  const dataAgendadaValue = dataAgendadaOverride ?? dataAgendadaSalva;
   const statusValue = nextStatus ?? request.status;
 
   const handleSaveDataSolicitacao = async () => {
@@ -232,36 +237,50 @@ export function CastrationDetailPage() {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="castration-status">Status</Label>
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                className="h-11 w-full max-w-60 appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                id="castration-status"
-                onChange={(event) => setNextStatus(event.target.value as CastrationStatus)}
-                value={statusValue}
-              >
-                {REORDERABLE_STATUSES.map((value) => (
-                  <option key={value} value={value}>
-                    {CASTRATION_STATUS_LABELS[value]}
-                  </option>
-                ))}
-              </select>
-              <Button
-                className="min-h-11"
-                disabled={statusValue === request.status || savingStatus}
-                onClick={() => void handleSaveStatus()}
-                type="button"
-              >
-                {savingStatus ? "Salvando..." : "Salvar status"}
-              </Button>
-            </div>
+            <select
+              className="h-11 w-full max-w-60 appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              id="castration-status"
+              onChange={(event) => setNextStatus(event.target.value as CastrationStatus)}
+              value={statusValue}
+            >
+              {REORDERABLE_STATUSES.map((value) => (
+                <option key={value} value={value}>
+                  {CASTRATION_STATUS_LABELS[value]}
+                </option>
+              ))}
+            </select>
+
             {statusValue === "agendada" ? (
-              <DatePicker
-                id="castration-data-agendada"
-                onChange={setDataAgendadaValue}
-                value={dataAgendadaValue}
-                withTime
-              />
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="castration-data-agendada">Data agendada</Label>
+                <DatePicker
+                  id="castration-data-agendada"
+                  onChange={setDataAgendadaOverride}
+                  value={dataAgendadaValue}
+                  withTime
+                />
+                {!dataAgendadaValue ? (
+                  <p className="text-sm text-muted-foreground">
+                    Informe a data para a castração aparecer no calendário.
+                  </p>
+                ) : null}
+              </div>
             ) : null}
+
+            <Button
+              className="min-h-11 self-start"
+              disabled={
+                savingStatus ||
+                // Reagendar (so a data muda) tambem precisa poder salvar.
+                (statusValue === request.status &&
+                  dataAgendadaValue === dataAgendadaSalva) ||
+                (statusValue === "agendada" && !dataAgendadaValue)
+              }
+              onClick={() => void handleSaveStatus()}
+              type="button"
+            >
+              {savingStatus ? "Salvando..." : "Salvar status"}
+            </Button>
             {statusError ? <p className="text-sm text-destructive">{statusError}</p> : null}
           </div>
 

@@ -100,6 +100,44 @@ describe("CastrationDetailPage", () => {
     );
   });
 
+  it("bloqueia agendar sem data e mostra o campo antes do botão de salvar", async () => {
+    const user = userEvent.setup();
+    mockUsePermissions.mockReturnValue({ can: () => true });
+    mockUseQuery.mockReturnValue(baseRequest);
+
+    renderPage();
+
+    await user.selectOptions(screen.getByLabelText("Status"), "agendada");
+
+    expect(screen.getByLabelText("Data agendada")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvar status" })).toBeDisabled();
+    expect(
+      screen.getByText("Informe a data para a castração aparecer no calendário."),
+    ).toBeInTheDocument();
+
+    // A data precisa vir antes do botão, senão passa despercebida.
+    const campoData = screen.getByLabelText("Data agendada");
+    const salvar = screen.getByRole("button", { name: "Salvar status" });
+    expect(campoData.compareDocumentPosition(salvar)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it("permite reagendar mesmo sem trocar o status", () => {
+    mockUsePermissions.mockReturnValue({ can: () => true });
+    mockUseQuery.mockReturnValue({
+      ...baseRequest,
+      status: "agendada" as const,
+      data_agendada: Date.UTC(2024, 5, 20, 15),
+    });
+
+    renderPage();
+
+    // Sem alterar nada ainda, salvar continua desabilitado.
+    expect(screen.getByRole("button", { name: "Salvar status" })).toBeDisabled();
+    expect(screen.getByLabelText("Data agendada")).toBeInTheDocument();
+  });
+
   it("marca como realizada sem vincular animal existente", async () => {
     const user = userEvent.setup();
     mockUsePermissions.mockReturnValue({ can: () => true });

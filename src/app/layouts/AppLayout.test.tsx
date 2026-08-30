@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import { AppLayout } from "@/app/layouts/AppLayout";
@@ -25,7 +26,7 @@ vi.mock("@/components/GlobalSearch", () => ({
   GlobalSearch: () => <div data-testid="global-search" />,
 }));
 
-function renderLayout(permissions: string[]) {
+function renderLayout(permissions: string[], pathname = "/") {
   mockUsePermissions.mockReturnValue({
     user: { nome: "Ana" },
     isAuthenticated: true,
@@ -35,7 +36,7 @@ function renderLayout(permissions: string[]) {
   });
 
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[pathname]}>
       <AppLayout />
     </MemoryRouter>,
   );
@@ -65,20 +66,52 @@ beforeEach(() => {
 
 describe("AppLayout", () => {
   it("mostra o menu agrupado por módulo", () => {
-    renderLayout(ALL);
+    renderLayout(ALL, "/dogs");
 
     const nav = screen.getByRole("navigation", { name: "Navegação principal" });
-    expect(within(nav).getByText("Cadastros")).toBeInTheDocument();
-    expect(within(nav).getByText("Adoções e devoluções")).toBeInTheDocument();
-    expect(within(nav).getByText("Gestão")).toBeInTheDocument();
+    for (const label of ["Cadastros", "Ocorrências", "Adoções e devoluções", "Gestão"]) {
+      expect(within(nav).getByRole("button", { name: label })).toBeInTheDocument();
+    }
+    // A seção da rota atual abre sozinha.
     expect(within(nav).getByRole("link", { name: "Animais" })).toHaveAttribute(
       "href",
       "/dogs",
     );
   });
 
+  it("abre só a seção da rota atual e deixa as outras recolhidas", async () => {
+    renderLayout(ALL, "/dogs");
+
+    const nav = screen.getByRole("navigation", { name: "Navegação principal" });
+    expect(within(nav).getByRole("button", { name: "Cadastros" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(within(nav).getByRole("button", { name: "Gestão" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(within(nav).queryByRole("link", { name: "Relatórios" })).not.toBeInTheDocument();
+
+    await userEvent.click(within(nav).getByRole("button", { name: "Gestão" }));
+
+    expect(within(nav).getByRole("link", { name: "Relatórios" })).toHaveAttribute(
+      "href",
+      "/reports",
+    );
+  });
+
+  it("mantém o bloco de acesso rápido sempre visível", () => {
+    renderLayout(ALL, "/reports");
+
+    const nav = screen.getByRole("navigation", { name: "Navegação principal" });
+    expect(within(nav).getByRole("link", { name: "Início" })).toBeInTheDocument();
+    expect(within(nav).getByRole("link", { name: "Identificar" })).toBeInTheDocument();
+    expect(within(nav).getByRole("link", { name: "Calendário" })).toBeInTheDocument();
+  });
+
   it("abre o portal público de denúncias fora do app", () => {
-    renderLayout(ALL);
+    renderLayout(ALL, "/occurrences");
 
     const nav = screen.getByRole("navigation", { name: "Navegação principal" });
     const portal = within(nav).getByRole("link", { name: "Portal de denúncias" });
@@ -87,12 +120,14 @@ describe("AppLayout", () => {
   });
 
   it("esconde módulos sem permissão, incluindo o título da seção", () => {
-    renderLayout(["dogs.read"]);
+    renderLayout(["dogs.read"], "/dogs");
 
     const nav = screen.getByRole("navigation", { name: "Navegação principal" });
-    expect(within(nav).getByText("Cadastros")).toBeInTheDocument();
-    expect(within(nav).queryByText("Operação")).not.toBeInTheDocument();
-    expect(within(nav).queryByText("Adoções e devoluções")).not.toBeInTheDocument();
+    expect(within(nav).getByRole("button", { name: "Cadastros" })).toBeInTheDocument();
+    expect(within(nav).queryByRole("button", { name: "Operação" })).not.toBeInTheDocument();
+    expect(
+      within(nav).queryByRole("button", { name: "Adoções e devoluções" }),
+    ).not.toBeInTheDocument();
     expect(within(nav).queryByRole("link", { name: "Insumos" })).not.toBeInTheDocument();
   });
 

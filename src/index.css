@@ -148,3 +148,26 @@
     @apply outline-2 outline-offset-2 outline-ring;
   }
 }
+
+@utility scrollbar-slim {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, currentColor 18%, transparent) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: color-mix(in oklch, currentColor 18%, transparent);
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklch, currentColor 32%, transparent);
+  }
+}

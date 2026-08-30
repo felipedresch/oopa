@@ -5,11 +5,14 @@ import { recordAudit } from "./audit";
 import { publicReportStatusValidator } from "./domainValidators";
 import { forbidden, notFound, validationError } from "./errors";
 import { getCurrentUser } from "./lib/auth";
-import { getOccurrenceTypeByName } from "./lib/occurrences";
+import { requireOccurrenceTypeByName } from "./lib/occurrences";
 import { normalizePaginationOpts } from "./lib/pagination";
 import { MAX_PUBLIC_REPORT_PHOTOS, validateImageStorage } from "./lib/storage";
 import { hasPermission } from "./permissions";
 import { mutation, query } from "./_generated/server";
+
+/** Teto do contador da fila de triagem; acima disso a UI mostra "99+". */
+const PENDING_COUNT_CAP = 99;
 
 const MAX_DESCRIPTION_LENGTH = 4000;
 const MAX_SHORT_TEXT_LENGTH = 200;
@@ -169,6 +172,36 @@ export const list = query({
   },
 });
 
+/**
+ * Contador da fila de triagem, para a aba "Denuncias pendentes" mostrar que ha
+ * trabalho parado sem obrigar o usuario a entrar nela. Limitado a
+ * `PENDING_COUNT_CAP` porque o numero exato acima disso nao muda a decisao.
+ */
+export const pendingCount = query({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const actor = await getCurrentUser(ctx);
+    if (!hasPermission(actor.permissions, "public_reports.triage")) {
+      throw forbidden();
+    }
+
+    const pending = await Promise.all(
+      (["novo", "em_analise"] as const).map((status) =>
+        ctx.db
+          .query("public_reports")
+          .withIndex("by_status", (q) => q.eq("status", status))
+          .take(PENDING_COUNT_CAP),
+      ),
+    );
+
+    return Math.min(
+      pending.reduce((total, reports) => total + reports.length, 0),
+      PENDING_COUNT_CAP,
+    );
+  },
+});
+
 export const convertToOccurrence = mutation({
   args: {
     publicReportId: v.id("public_reports"),
@@ -200,9 +233,11 @@ export const convertToOccurrence = mutation({
       }
     }
 
-    const type = await getOccurrenceTypeByName(ctx, "Denúncia Externa");
-    if (!type?.ativo) {
-      throw notFound("Tipo de ocorrência");
+    const type = await requireOccurrenceTypeByName(ctx, "Denúncia Externa");
+    if (!type.ativo) {
+      throw validationError(
+        'O tipo de ocorrência "Denúncia Externa" está inativo. Reative-o em Configurações para converter denúncias.',
+      );
     }
 
     const contatoLine = [report.nome_denunciante, report.contato].filter(Boolean).join(" · ");

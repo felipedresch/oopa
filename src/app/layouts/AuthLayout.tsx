@@ -11,7 +11,7 @@ export function AuthLayout() {
           </span>
           <div className="leading-tight">
             <p className="font-heading text-2xl font-bold tracking-tight">oopa</p>
-            <p className="text-sm text-muted-foreground">Protecao animal, bem cuidada</p>
+            <p className="text-sm text-muted-foreground">Proteção animal, bem cuidada</p>
           </div>
         </div>
         <Outlet />

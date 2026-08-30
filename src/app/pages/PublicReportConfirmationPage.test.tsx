@@ -6,7 +6,9 @@ import { PublicReportConfirmationPage } from "@/app/pages/PublicReportConfirmati
 describe("PublicReportConfirmationPage", () => {
   it("mostra confirmação e o protocolo da denúncia", () => {
     render(
-      <MemoryRouter initialEntries={["/denuncia/report123/confirmacao"]}>
+      <MemoryRouter
+        initialEntries={["/denuncia/n57bp98yrnnj8rr9h188bygs4n8dew89/confirmacao"]}
+      >
         <Routes>
           <Route
             element={<PublicReportConfirmationPage />}
@@ -17,6 +19,10 @@ describe("PublicReportConfirmationPage", () => {
     );
 
     expect(screen.getByText("Denúncia recebida")).toBeInTheDocument();
-    expect(screen.getByText("report123")).toBeInTheDocument();
+    // Protocolo curto e anotável, não o id de 32 caracteres.
+    expect(screen.getByText("s4n8dew89".slice(-8))).toBeInTheDocument();
+    expect(
+      screen.queryByText("n57bp98yrnnj8rr9h188bygs4n8dew89"),
+    ).not.toBeInTheDocument();
   });
 });

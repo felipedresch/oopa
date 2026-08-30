@@ -2,6 +2,7 @@ import { appRoutes } from "@/app/routes";
 import {
   mobileNavItems,
   navSections,
+  sectionIdForPath,
   visibleNavSections,
   type NavAccess,
 } from "@/app/layouts/navigation";
@@ -122,5 +123,23 @@ describe("mobileNavItems", () => {
     const visible = mobileNavItems.filter((item) => item.canAccess(access(["dogs.read"])));
 
     expect(visible.map((item) => item.to)).toEqual(["/", "/identify", "/dogs"]);
+  });
+});
+
+describe("sectionIdForPath", () => {
+  it("encontra a seção da rota atual", () => {
+    expect(sectionIdForPath("/dogs")).toBe("cadastros");
+    expect(sectionIdForPath("/reports")).toBe("gestao");
+    expect(sectionIdForPath("/castration")).toBe("operacao");
+  });
+
+  it("resolve rotas filhas pela rota mais específica", () => {
+    expect(sectionIdForPath("/dogs/abc123")).toBe("cadastros");
+    // /adoptions/followups não pode ser capturada por um prefixo mais curto.
+    expect(sectionIdForPath("/adoptions/followups")).toBe("adocoes");
+  });
+
+  it("não casa a raiz com qualquer rota", () => {
+    expect(sectionIdForPath("/qualquer-coisa")).toBeUndefined();
   });
 });

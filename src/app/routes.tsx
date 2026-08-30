@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from "react-router-do
 
 import { AppLayout } from "@/app/layouts/AppLayout";
 import { AuthLayout } from "@/app/layouts/AuthLayout";
+import { PublicLayout } from "@/app/layouts/PublicLayout";
 import { AcceptInvitePage } from "@/app/pages/AcceptInvitePage";
 import { LoginPage } from "@/app/pages/LoginPage";
 import { PublicReportConfirmationPage } from "@/app/pages/PublicReportConfirmationPage";
@@ -58,6 +59,11 @@ export const appRoutes: RouteObject[] = [
       { path: "/reset-password", element: <RequestResetPage /> },
       { path: "/reset-password/:token", element: <ResetPasswordPage /> },
       { path: "/accept-invite/:token", element: <AcceptInvitePage /> },
+    ],
+  },
+  {
+    element: <PublicLayout />,
+    children: [
       { path: "/denuncia", element: <PublicReportPage /> },
       { path: "/denuncia/:id/confirmacao", element: <PublicReportConfirmationPage /> },
     ],
@@ -74,6 +80,7 @@ export const appRoutes: RouteObject[] = [
       { path: "dogs/:dogId/edit", element: <DogFormPage /> },
       { path: "dogs/:dogId/occurrences/new", element: <OccurrenceFormPage /> },
       { path: "occurrences", element: <OccurrencesListPage /> },
+      { path: "occurrences/:occurrenceId", element: <OccurrenceDetailPage /> },
       { path: "dogs/:dogId/occurrences/:occurrenceId", element: <OccurrenceDetailPage /> },
       {
         path: "dogs/:dogId/occurrences/:occurrenceId/rectify",

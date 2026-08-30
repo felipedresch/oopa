@@ -20,13 +20,14 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePermissions } from "@/hooks/usePermissions";
+import { dateInputToTimestamp, todayAsDateInput } from "@/lib/dates";
 import { getErrorMessage } from "@/lib/auth-errors";
 import { formatDate, formatMicrochip } from "@/lib/formatters";
 import { maskCpf } from "@/lib/masks";
 import { validateCpf, validateRequired } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["Cão", "Tutor", "Avaliação", "Dados", "Revisão"] as const;
+const STEPS = ["Animal", "Tutor", "Avaliação", "Dados", "Revisão"] as const;
 
 export function AdoptionNewPage() {
   const { can, canAny, user } = usePermissions();
@@ -46,7 +47,7 @@ export function AdoptionNewPage() {
 
   const [numeroTermo, setNumeroTermo] = useState("");
   const [termoStorageId, setTermoStorageId] = useState<Id<"_storage"> | undefined>();
-  const [dataAdocao, setDataAdocao] = useState(new Date(now).toISOString().slice(0, 10));
+  const [dataAdocao, setDataAdocao] = useState(() => todayAsDateInput(now));
   const [responsavelId, setResponsavelId] = useState<Id<"users"> | "">("");
   const [condicoes, setCondicoes] = useState("");
   const [observacoes, setObservacoes] = useState("");
@@ -109,19 +110,19 @@ export function AdoptionNewPage() {
     return (
       <section className="flex flex-col gap-6">
         <PageHeader
-          description="A adoção foi registrada e o histórico do cão foi atualizado."
-          title="Adoção concluida"
+          description="A adoção foi registrada e o histórico do animal foi atualizado."
+          title="Adoção concluída"
         />
         <div className="flex flex-col gap-4 rounded-2xl bg-success/10 p-6">
           <span className="flex size-12 items-center justify-center rounded-full bg-success/15 text-success">
             <PawPrintIcon aria-hidden="true" className="size-6" />
           </span>
           <p className="text-sm text-muted-foreground">
-            Ocorrencia #{success.occurrenceId}
+            Ocorrência registrada
           </p>
           <div className="flex flex-wrap gap-2">
             <Button asChild className="min-h-11">
-              <Link to={`/dogs/${selectedDogId}`}>Ver ficha do cão</Link>
+              <Link to={`/dogs/${selectedDogId}`}>Ver ficha do animal</Link>
             </Button>
             <Button asChild className="min-h-11" variant="outline">
               <Link to={`/people/${selectedPersonId}`}>Ver ficha do tutor</Link>
@@ -190,7 +191,7 @@ export function AdoptionNewPage() {
       const occurrenceId = await createAdoption({
         dogId: selectedDogId,
         personId: selectedPersonId,
-        data_adocao: new Date(dataAdocao).getTime(),
+        data_adocao: dateInputToTimestamp(dataAdocao) ?? Date.now(),
         numero_termo_adocao: numeroTermo.trim(),
         responsavel_ong_user_id: staffId,
         condicoes_adocao: condicoes.trim(),
@@ -274,7 +275,7 @@ export function AdoptionNewPage() {
         {step === 0 ? (
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="dog-search-adoption">Buscar cão</Label>
+              <Label htmlFor="dog-search-adoption">Buscar animal</Label>
               <Input
                 id="dog-search-adoption"
                 onChange={(event) => setDogSearch(event.target.value)}
@@ -435,7 +436,7 @@ export function AdoptionNewPage() {
         {step === 3 ? (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-2 md:col-span-2">
-              <Label htmlFor="numero-termo">Numero do termo de adocao</Label>
+              <Label htmlFor="numero-termo">Número do termo de adoção</Label>
               <Input
                 id="numero-termo"
                 onChange={(event) => setNumeroTermo(event.target.value)}
@@ -451,7 +452,7 @@ export function AdoptionNewPage() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="responsavel-ong">Responsavel ONG</Label>
+              <Label htmlFor="responsavel-ong">Responsável pela ONG</Label>
               <select
                 className="flex h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="responsavel-ong"
@@ -467,7 +468,7 @@ export function AdoptionNewPage() {
               </select>
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
-              <Label htmlFor="condicoes-adocao">Condicoes de adocao</Label>
+              <Label htmlFor="condicoes-adocao">Condições da adoção</Label>
               <textarea
                 className="min-h-24 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 id="condicoes-adocao"
@@ -507,7 +508,7 @@ export function AdoptionNewPage() {
                 onChange={(event) => setConfirmouOrientacoes(event.target.checked)}
                 type="checkbox"
               />
-              <span className="text-sm">Confirmo as orientacoes de cuidado ao tutor.</span>
+              <span className="text-sm">Confirmo as orientações de cuidado ao tutor.</span>
             </label>
           </div>
         ) : null}
@@ -515,7 +516,7 @@ export function AdoptionNewPage() {
         {step === 4 ? (
           <div className="flex flex-col gap-4 text-sm">
             <div className="rounded-xl border bg-card p-4 shadow-xs">
-              <h3 className="mb-2 font-semibold">Cao</h3>
+              <h3 className="mb-2 font-semibold">Animal</h3>
               <p>{selectedDog?.nome}</p>
               <p className="text-muted-foreground">
                 {selectedDog?.microchip ? formatMicrochip(selectedDog.microchip) : "Sem microchip"}
@@ -539,10 +540,10 @@ export function AdoptionNewPage() {
               />
             ) : null}
             <div className="rounded-xl border bg-card p-4 shadow-xs">
-              <h3 className="mb-2 font-semibold">Dados da adocao</h3>
+              <h3 className="mb-2 font-semibold">Dados da adoção</h3>
               <p>Termo: {numeroTermo}</p>
-              <p>Data: {formatDate(new Date(dataAdocao).getTime())}</p>
-              <p>Condicoes: {condicoes}</p>
+              <p>Data: {formatDate(dateInputToTimestamp(dataAdocao) ?? now)}</p>
+              <p>Condições: {condicoes}</p>
               {observacoes ? <p>Observações: {observacoes}</p> : null}
             </div>
           </div>

@@ -16,7 +16,7 @@ import {
   canCreateOccurrenceCategory,
   canReadOccurrenceCategory,
   defaultAtribuivelForCategory,
-  getOccurrenceTypeByName,
+  requireOccurrenceTypeByName,
   HISTORY_AFFECTING_TYPE_NAMES,
   isSensitiveCategory,
   loadOccurrenceWithType,
@@ -263,9 +263,11 @@ export const rectify = mutation({
 
     assertCanReadOccurrence(original.type.categoria, actor.permissions);
 
-    const rectificationType = await getOccurrenceTypeByName(ctx, "Correção/Retificação");
-    if (!rectificationType?.ativo) {
-      throw notFound("Tipo de ocorrência");
+    const rectificationType = await requireOccurrenceTypeByName(ctx, "Correção/Retificação");
+    if (!rectificationType.ativo) {
+      throw validationError(
+        'O tipo "Correção/Retificação" está inativo. Reative-o em Configurações para registrar retificações.',
+      );
     }
 
     const descricao = args.descricao.trim();

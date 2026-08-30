@@ -98,7 +98,7 @@ export function OccurrenceFormPage() {
     (!requiresNewPerson || Boolean(newPersonId));
 
   if (!dogId) {
-    return <PermissionDenied message="Cão não informado." />;
+    return <PermissionDenied message="Animal não informado." />;
   }
 
   if (dog === undefined || types === undefined) {
@@ -106,7 +106,7 @@ export function OccurrenceFormPage() {
   }
 
   if (!dog) {
-    return <PermissionDenied message="Cão não encontrado." />;
+    return <PermissionDenied message="Animal não encontrado." />;
   }
 
   if (!types || types.length === 0) {
@@ -339,7 +339,7 @@ export function OccurrenceFormPage() {
 
           <dl className="grid gap-2 text-sm">
             <div>
-              <dt className="text-muted-foreground">Cão</dt>
+              <dt className="text-muted-foreground">Animal</dt>
               <dd>{dog.nome}</dd>
             </div>
             <div>

@@ -26,7 +26,7 @@ describe("OccurrenceCard", () => {
     );
   });
 
-  it("renderiza sem link e com aviso quando não há animal vinculado", () => {
+  it("aponta para a rota sem animal quando não há animal vinculado", () => {
     render(
       <MemoryRouter>
         <OccurrenceCard
@@ -40,6 +40,6 @@ describe("OccurrenceCard", () => {
     );
 
     expect(screen.getByText("Sem animal vinculado")).toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/occurrences/occ2");
   });
 });

@@ -1,13 +1,16 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
-import { BellIcon, DogIcon, LogOutIcon, UserIcon } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import { useState } from "react";
+import { BellIcon, ChevronDownIcon, DogIcon, LogOutIcon, UserIcon } from "lucide-react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
 import {
   mobileNavItems,
+  sectionIdForPath,
   visibleNavSections,
   type NavIcon,
+  type NavSection,
 } from "@/app/layouts/navigation";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -123,6 +126,67 @@ function MobileNavItem({
   );
 }
 
+/**
+ * Seção do menu lateral. Com 21 itens o menu completo nao cabe numa tela de
+ * 900px, entao as seções sao recolhiveis e apenas a do modulo atual abre por
+ * padrao; o estado escolhido pelo usuario sobrevive a navegacao.
+ */
+function SidebarSection({
+  section,
+  expanded,
+  onToggle,
+  unreadCount,
+}: {
+  section: NavSection;
+  expanded: boolean;
+  onToggle: () => void;
+  unreadCount: number;
+}) {
+  const listId = `nav-section-${section.id}`;
+
+  if (!section.label) {
+    return (
+      <ul className="flex flex-col gap-1">
+        {section.items.map((item) => (
+          <li key={item.to}>
+            <SidebarNavItem {...item} />
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        aria-controls={listId}
+        aria-expanded={expanded}
+        className="mt-3 flex min-h-8 items-center gap-1.5 rounded-lg px-3 text-[11px] font-semibold tracking-wider text-sidebar-foreground/50 uppercase transition-colors hover:text-sidebar-foreground/80"
+        onClick={onToggle}
+        type="button"
+      >
+        <ChevronDownIcon
+          aria-hidden="true"
+          className={cn("size-3.5 transition-transform", !expanded && "-rotate-90")}
+        />
+        {section.label}
+      </button>
+      {expanded ? (
+        <ul className="flex flex-col gap-1" id={listId}>
+          {section.items.map((item) => (
+            <li key={item.to}>
+              <SidebarNavItem
+                unreadCount={item.to === "/notifications" ? unreadCount : 0}
+                {...item}
+              />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function BrandMark({ subtitle }: { subtitle?: string }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -142,8 +206,17 @@ export function AppLayout() {
   const { signOut } = useAuthActions();
   const unreadCount =
     useQuery(api.notifications.unreadCount, isAuthenticated ? {} : "skip") ?? 0;
+  const { pathname } = useLocation();
   const access = { can, canAny };
   const sections = visibleNavSections(access);
+  const activeSectionId = sectionIdForPath(pathname);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  const toggleSection = (id: string) =>
+    setCollapsedSections((current) => ({
+      ...current,
+      [id]: !(current[id] ?? id !== activeSectionId),
+    }));
   const visibleMobile = mobileNavItems.filter((item) => item.canAccess(access));
 
   return (
@@ -159,32 +232,16 @@ export function AppLayout() {
 
           <nav
             aria-label="Navegação principal"
-            className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pb-4"
+            className="scrollbar-slim flex flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-3 pb-4"
           >
             {sections.map((section) => (
-              <div className="flex flex-col gap-1" key={section.id}>
-                {section.label ? (
-                  <p
-                    className="mt-3 px-3 pb-0.5 text-[11px] font-semibold tracking-wider text-sidebar-foreground/50 uppercase"
-                    id={`nav-section-${section.id}`}
-                  >
-                    {section.label}
-                  </p>
-                ) : null}
-                <ul
-                  aria-labelledby={section.label ? `nav-section-${section.id}` : undefined}
-                  className="flex flex-col gap-1"
-                >
-                  {section.items.map((item) => (
-                    <li key={item.to}>
-                      <SidebarNavItem
-                        unreadCount={item.to === "/notifications" ? unreadCount : 0}
-                        {...item}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <SidebarSection
+                expanded={!(collapsedSections[section.id] ?? section.id !== activeSectionId)}
+                key={section.id}
+                onToggle={() => toggleSection(section.id)}
+                section={section}
+                unreadCount={unreadCount}
+              />
             ))}
           </nav>
 

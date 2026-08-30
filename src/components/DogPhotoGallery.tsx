@@ -60,7 +60,7 @@ export function DogPhotoGallery({ dogId, canEdit }: DogPhotoGalleryProps) {
 
       {gallery.photos.length === 0 ? (
         <EmptyState
-          description="Adicione fotos complementares para enriquecer a ficha do cão."
+          description="Adicione fotos complementares para enriquecer a ficha do animal."
           title="Galeria vazia"
         />
       ) : (
@@ -69,7 +69,7 @@ export function DogPhotoGallery({ dogId, canEdit }: DogPhotoGalleryProps) {
             <figure className="flex flex-col gap-1.5" key={photo._id}>
               {photo.url ? (
                 <img
-                  alt={photo.descricao ?? "Foto adicional do cão"}
+                  alt={photo.descricao ?? "Foto adicional do animal"}
                   className="aspect-square w-full rounded-xl border object-cover"
                   src={photo.url}
                 />

@@ -1,16 +1,18 @@
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { useState } from "react";
+import { ClockIcon, MapPinIcon, UserIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
-import { FilterBar } from "@/components/FilterBar";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { formatPublicReportTipo } from "@/lib/domain-colors";
 import { formatDate } from "@/lib/formatters";
 import { getErrorMessage } from "@/lib/auth-errors";
 
@@ -23,6 +25,13 @@ const STATUS_OPTIONS: { value: PublicReportStatus | ""; label: string }[] = [
   { value: "arquivado", label: "Arquivadas" },
   { value: "", label: "Todas" },
 ];
+
+const STATUS_BADGE_CLASS: Record<PublicReportStatus, string> = {
+  novo: "bg-warning/14 text-warning",
+  em_analise: "bg-info/12 text-info",
+  convertido: "bg-success/12 text-success",
+  arquivado: "bg-muted text-muted-foreground",
+};
 
 const STATUS_LABELS: Record<PublicReportStatus, string> = {
   novo: "Novo",
@@ -96,23 +105,24 @@ export function PublicReportsTriagePanel() {
 
   return (
     <div className="flex flex-col gap-4">
-      <FilterBar>
-        <div className="flex min-w-40 flex-1 flex-col gap-2">
-          <Label htmlFor="public-report-status">Status</Label>
-          <select
-            className="h-11 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            id="public-report-status"
-            onChange={(event) => setStatus(event.target.value as PublicReportStatus | "")}
-            value={status}
+      <div className="flex flex-wrap items-center gap-2" role="group">
+        {STATUS_OPTIONS.map((option) => (
+          <button
+            aria-pressed={status === option.value}
+            className={cn(
+              "min-h-9 rounded-full border px-3.5 text-sm font-medium transition-colors",
+              status === option.value
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-muted-foreground hover:border-ring/40 hover:text-foreground",
+            )}
+            key={option.value || "all"}
+            onClick={() => setStatus(option.value)}
+            type="button"
           >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value || "all"} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </FilterBar>
+            {option.label}
+          </button>
+        ))}
+      </div>
 
       {results === undefined ? <LoadingSkeleton rows={4} /> : null}
 
@@ -126,24 +136,44 @@ export function PublicReportsTriagePanel() {
       {results && results.length > 0 ? (
         <div className="flex flex-col gap-3">
           {results.map((report) => (
-            <div className="flex flex-col gap-2 rounded-xl border bg-card p-4 shadow-xs" key={report._id}>
+            <div
+              className="flex flex-col gap-2.5 rounded-xl border bg-card p-4 shadow-xs"
+              key={report._id}
+            >
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-semibold">{report.tipo_denuncia}</p>
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                <p className="font-semibold">{formatPublicReportTipo(report.tipo_denuncia)}</p>
+                <span
+                  className={cn(
+                    "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                    STATUS_BADGE_CLASS[report.status],
+                  )}
+                >
                   {STATUS_LABELS[report.status]}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {[formatDate(report.criado_em), report.bairro_nome, report.local_descricao]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <ClockIcon aria-hidden="true" className="size-3.5" />
+                  {formatDate(report.criado_em)}
+                </span>
+                {report.bairro_nome || report.local_descricao ? (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPinIcon aria-hidden="true" className="size-3.5" />
+                    {[report.bairro_nome, report.local_descricao].filter(Boolean).join(" · ")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-warning">
+                    <MapPinIcon aria-hidden="true" className="size-3.5" />
+                    Sem localização informada
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1">
+                  <UserIcon aria-hidden="true" className="size-3.5" />
+                  {[report.nome_denunciante, report.contato].filter(Boolean).join(" · ") ||
+                    "Denúncia anônima"}
+                </span>
+              </div>
               <p className="text-sm leading-6">{report.descricao}</p>
-              {report.nome_denunciante || report.contato ? (
-                <p className="text-xs text-muted-foreground">
-                  Denunciante: {[report.nome_denunciante, report.contato].filter(Boolean).join(" · ")}
-                </p>
-              ) : null}
               {report.photo_urls.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {report.photo_urls.map((url) => (
@@ -180,9 +210,9 @@ export function PublicReportsTriagePanel() {
               {report.status === "convertido" && report.occurrence_id_gerada ? (
                 <Link
                   className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                  to="/occurrences"
+                  to={`/occurrences/${report.occurrence_id_gerada}`}
                 >
-                  Ver na lista de ocorrências
+                  Ver ocorrência gerada
                 </Link>
               ) : null}
             </div>

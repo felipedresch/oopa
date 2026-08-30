@@ -4,7 +4,7 @@ import { validationError } from "../errors";
 import {
   buildPersonSnapshot,
   defaultAtribuivelForCategory,
-  getOccurrenceTypeByName,
+  requireOccurrenceTypeByName,
   resolveSeverity,
 } from "./occurrences";
 import { applyHistoryForOccurrence } from "./personDogHistory";
@@ -195,8 +195,8 @@ export async function createOccurrenceWithHistory(
     atribuivel_a_pessoa?: boolean;
   },
 ): Promise<Id<"occurrences">> {
-  const type = await getOccurrenceTypeByName(ctx, args.typeName);
-  if (!type?.ativo) {
+  const type = await requireOccurrenceTypeByName(ctx, args.typeName);
+  if (!type.ativo) {
     throw validationError(`Tipo de ocorrência indisponível: ${args.typeName}`);
   }
 

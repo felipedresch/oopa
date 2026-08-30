@@ -68,10 +68,10 @@ export type PermissionLevel = (typeof PERMISSION_LEVELS)[number];
 export type ModulePermissionMap = Record<UiModule, PermissionLevel>;
 
 export const UI_MODULE_LABELS: Record<UiModule, string> = {
-  dogs: "Cães",
+  dogs: "Animais",
   people: "Pessoas",
   occurrences: "Ocorrências",
-  adoptions: "Adocoes e devoluções",
+  adoptions: "Adoções e devoluções",
   team: "Equipe",
   settings: "Configurações",
   system: "Sistema",

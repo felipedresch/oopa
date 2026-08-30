@@ -68,15 +68,30 @@ type ReportFilters = {
 
 const text = (value: string | undefined | null): ReportCell => ({ texto: value?.trim() || "—" });
 
+/**
+ * Data em dd/mm/aaaa no fuso de Sao Paulo. `toISOString()` usaria UTC e jogaria
+ * atendimentos noturnos para o dia seguinte.
+ */
+const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
 function formatDate(timestamp: number | undefined): ReportCell {
   if (timestamp === undefined) {
     return text(undefined);
   }
-  return { texto: new Date(timestamp).toISOString().slice(0, 10) };
+  return { texto: DATE_FORMATTER.format(new Date(timestamp)) };
+}
+
+function formatMoney(value: number): string {
+  return `R$ ${value.toFixed(2).replace(".", ",")}`;
 }
 
 function formatCurrency(value: number): ReportCell {
-  return { texto: value.toFixed(2).replace(".", ",") };
+  return { texto: formatMoney(value) };
 }
 
 async function dogName(ctx: QueryCtx, id: Id<"dogs"> | undefined) {
@@ -548,12 +563,10 @@ async function buildVeterinaryReport(
     linhas,
     resumo: [
       { label: "Atendimentos no período", valor: String(linhas.length) },
-      { label: "Valor total", valor: `R$ ${total.toFixed(2).replace(".", ",")}` },
+      { label: "Valor total", valor: formatMoney(total) },
       {
         label: "Ticket médio",
-        valor: `R$ ${(linhas.length === 0 ? 0 : total / linhas.length)
-          .toFixed(2)
-          .replace(".", ",")}`,
+        valor: formatMoney(linhas.length === 0 ? 0 : total / linhas.length),
       },
       { label: "Com nota fiscal", valor: String(comNota) },
     ],

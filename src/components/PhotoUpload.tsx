@@ -106,7 +106,7 @@ export function PhotoUpload({
           type="button"
         >
           <ImagePlusIcon aria-hidden="true" className="size-8" />
-          Selecionar JPEG, PNG ou WebP (ate 8 MB)
+          Selecionar JPEG, PNG ou WebP (até 8 MB)
         </button>
       )}
 

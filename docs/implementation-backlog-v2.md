@@ -31,7 +31,8 @@ páginas/testes em `src/` — não contra o texto dos commits.
   `GlobalSearch` no header desktop e mobile, e testes).
 - **Fase 26:** implementada neste conjunto de mudanças (menu agrupado por
   módulo em `src/app/layouts/navigation.ts`, bottom nav de campo e testes).
-  Com isso, as Fases 12–26 deste arquivo estão concluídas.
+- **Fase 27:** primeira rodada de teste manual do produto no navegador, com as
+  correções que ela produziu. Ver a seção "Fase 27" no fim deste arquivo.
 
 ## Como usar (fluxo com 3 pessoas)
 
@@ -949,3 +950,160 @@ depois que todos os módulos novos existirem.
   mesmo milissegundo e caía na ordem de inserção, deixando o teste de
   ordenação intermitente. O desempate passou a usar `_creationTime`
   decrescente.
+
+## Fase 27 - Correções da primeira rodada de teste manual
+
+Primeiro teste manual real do produto (navegador + deployment de dev), feito
+depois que as Fases 12-26 foram escritas sem nunca terem sido executadas.
+Cada item abaixo foi encontrado usando o sistema e corrigido no mesmo
+conjunto de mudanças.
+
+### Correções de dados e correção funcional
+
+- [x] **Fuso horário em datas sem hora.** `new Date("2026-08-30")` é meia-noite
+      **UTC**; em UTC-3 a data voltava um dia. A adoção registrada em 30/08
+      era gravada como 29/08 21:00 e o acompanhamento caía em 29/11 em vez de
+      30/11. Novo `src/lib/dates.ts` (`todayAsDateInput`,
+      `dateInputToTimestamp`) concentra a conversão sempre em horário local;
+      `AdoptionNewPage` (default, gravação e revisão), `AuditPage` (o filtro
+      "De" usava UTC enquanto o "Até" usava local) e `ReportDetailPage`
+      passaram a usá-lo.
+- [x] **Seeds nunca reaplicados.** "Denúncia Externa" (Fase 16) e "Visita de
+      acompanhamento" (Fase 22) não existiam no deployment: as duas features
+      foram para o ar mortas, e converter uma denúncia falhava com "Tipo de
+      ocorrência não encontrado". `docs/deploy-checklist.md` passou a exigir
+      `seeds:seedAll` em **todo** deploy (não só em ambiente novo), e
+      `requireOccurrenceTypeByName` substitui a busca solta nos três pontos
+      que dependem de tipo semeado, com erro que diz o que fazer.
+- [x] **Castração agendada sem data.** Dava para salvar status "Agendada" sem
+      informar data: o registro ficava agendado com data "—" e sumia do
+      calendário. `castration.updateStatus` agora recusa agendar sem data.
+- [x] **Reagendamento impossível.** O botão "Salvar status" só habilitava com
+      mudança de *status*, então trocar apenas a data de uma castração já
+      agendada não podia ser salvo. Agora habilita também quando a data muda.
+- [x] **Admin com permissões congeladas.** `bootstrap:ensureDevAdmin` só criava
+      o usuário; um admin criado antes de um módulo novo ficava sem as
+      permissões dele e via "Permissão negada" nas telas novas. Agora
+      realinha as permissões com o template "Administrador ONG" a cada
+      execução.
+- [x] **Ordenação instável em `rescues.list`** (dois resgates no mesmo
+      milissegundo caíam na ordem de inserção) — desempate por
+      `_creationTime`.
+
+### Correções de interface
+
+- [x] **Menu lateral não cabia na tela.** Com os módulos da Fase 26 o menu
+      pedia 1193px de altura contra 639px disponíveis num viewport de 900px —
+      metade dos itens fora da tela. As seções viraram recolhíveis: só a do
+      módulo atual abre por padrão, o bloco de acesso rápido (Início,
+      Identificar, Calendário) fica sempre visível, e o estado escolhido pelo
+      usuário sobrevive à navegação. Overflow passou de 554px para 0.
+- [x] **Valores crus de enum na UI:** categoria em Serviços e Insumos (select
+      e badge) e tipo de denúncia na triagem mostravam `consulta`,
+      `castracao`, `maus_tratos`. Novos `SERVICE_CATEGORY_LABELS`,
+      `SUPPLY_CATEGORY_LABELS` e `PUBLIC_REPORT_TIPO_LABELS` em
+      `src/lib/domain-colors.ts`; o formulário público passou a consumir o
+      mesmo mapa da triagem para os rótulos não divergirem.
+- [x] **Relatórios:** datas saíam em ISO (`2026-08-30`) e por UTC, e a coluna
+      "Valor" vinha sem `R$`. Agora dd/mm/aaaa no fuso de São Paulo e moeda
+      formatada, iguais ao resto do produto.
+- [x] **Campo de data depois do botão de salvar** em `CastrationDetailPage`,
+      sem `<Label>` — reordenado, rotulado e com texto explicando por que a
+      data importa.
+- [x] **Copy:** acentuação corrigida em `AuthLayout` ("Proteção"),
+      `AdoptionNewPage` (número, adoção, condições, orientações),
+      `PersonAssessmentPanel`, `PdfUpload`, `PhotoUpload`,
+      `DogStatusChangeDialog` (também "Está ação" → "Esta ação") e no rótulo
+      de módulo "Adoções e devoluções".
+- [x] **Rename Fase 11 concluído:** rótulos visíveis "Cão/Cães" viraram
+      "Animal/Animais" em Dashboard, Identificar, Adoção, Devolução,
+      Ocorrências, ficha de Pessoa, galeria de fotos e no módulo de permissão
+      (a espécie continua "Cão", que é o significado correto ali).
+- [x] Telefone do tutor formatado na fila de pós-adoção; protocolo da denúncia
+      pública encurtado para 8 caracteres em vez do id de 32; placeholder da
+      busca global encurtado na barra lateral, onde truncava.
+
+### Testes
+
+- [x] `src/lib/dates.test.ts` cobrindo a regressão de fuso.
+- [x] `convex/castration.test.ts`: recusa agendar sem data e preserva a data já
+      agendada.
+- [x] `convex/reports.test.ts`: data dd/mm/aaaa e valor com `R$`.
+- [x] `CastrationDetailPage.test.tsx`: ordem do campo de data e bloqueio.
+- [x] `AppLayout.test.tsx` / `navigation.test.ts`: seções recolhíveis,
+      `sectionIdForPath` e bloco de acesso rápido.
+- [x] `npm run quality` verde (lint, typecheck, 305 testes, build).
+
+**Não corrigido nesta rodada:** os fluxos com upload de arquivo (foto de
+animal, termo de adoção em PDF, XML de nota fiscal) não foram exercitados no
+navegador — o ambiente de teste não permite selecionar arquivo. Continuam
+cobertos apenas por teste de backend.
+
+## Rodada 27 — scrollbar da sidebar, portal de denúncias e tela de ocorrências
+
+### Navegação
+
+- [x] **Scrollbar do menu lateral:** o `nav` rolável usava a barra nativa
+      (larga, com trilho claro sobre a sidebar escura). Novo utilitário
+      `scrollbar-slim` em `src/index.css` (thin + trilho transparente + polegar
+      derivado de `currentColor`) aplicado ao menu, com `overscroll-contain`.
+
+### Portal público de denúncias
+
+- [x] **Layout próprio (`PublicLayout`)**: o portal dividia o `AuthLayout` com
+      as telas de login (`max-w-md`), o que espremia o formulário. Agora tem
+      cabeçalho de canal público, largura `max-w-3xl` e rodapé com orientação
+      de emergência (190) e a referência legal.
+- [x] **Formulário reescrito:** cabeçalho com o que esperar (anônima, ~2 min,
+      dados não publicados), três seções numeradas (o que aconteceu / onde /
+      contato opcional), tipo de denúncia em cartões de rádio com explicação de
+      cada tipo, textarea com exemplo e dica de conteúdo, campos de local lado a
+      lado, alerta de erro com ícone e barra de envio fixa no mobile com o
+      motivo de o botão estar desabilitado.
+- [x] **Confirmação:** protocolo em destaque e "o que acontece agora" em três
+      passos, em vez de só o número solto.
+
+### Ocorrências
+
+- [x] **Ocorrência sem animal deixou de ser beco sem saída:** nova rota
+      `/occurrences/:occurrenceId` e `OccurrenceDetailPage` funcionando sem
+      `dogId` (voltar vai para a lista; o nome do animal, quando existe, vira
+      link). O card sempre navega.
+- [x] **Filtros ergonômicos:** gravidade e período (7/30/90 dias) viraram chips
+      sempre visíveis; categoria, bairro e intervalo ficam num painel "Filtros"
+      com contador, chips de filtro ativo removíveis e "Limpar filtros".
+- [x] **Abas segmentadas** com contador de denúncias pendentes
+      (`publicReports.pendingCount`, novo query com `public_reports.triage`).
+- [x] **Lista agrupada por dia** ("Hoje", "Ontem", "12 de agosto" via
+      `dayGroupLabel`), card com faixa lateral por gravidade, metadados com
+      ícones e chevron de navegação.
+- [x] **Bug de fuso:** os filtros De/Até usavam `Date.parse(...T00:00:00Z)`;
+      passaram a usar `dateInputToTimestamp`.
+- [x] **Triagem de denúncias:** status em chips, badge colorido por status,
+      metadados com ícones (inclusive aviso de "sem localização informada" e
+      "denúncia anônima") e link direto para a ocorrência gerada.
+- [x] **Selects com chevron:** novo `src/components/ui/select.tsx` — sem ele o
+      `appearance-none` deixava o campo idêntico a um input de texto. Aplicado
+      nas telas desta rodada; as demais telas ainda usam o `<select>` cru.
+- [x] **Categoria da ocorrência** deixou de aparecer crua
+      (`denuncia_externa`) no detalhe: `OCCURRENCE_CATEGORY_LABELS` e
+      `formatOccurrenceCategoria` em `src/lib/domain-colors.ts`.
+
+### Testes
+
+- [x] `src/lib/dates.test.ts`: `dayGroupLabel` (hoje/ontem/ano corrente/outro
+      ano).
+- [x] `convex/publicReports.test.ts`: `pendingCount` conta só a fila e exige
+      permissão.
+- [x] `OccurrencesListPage.test.tsx`: chips de gravidade, painel de filtros,
+      chips de filtro ativo e contador na aba.
+- [x] `PublicReportPage.test.tsx`: envio com o tipo escolhido nos cartões.
+- [x] `OccurrenceCard.test.tsx`: card sem animal aponta para `/occurrences/:id`.
+- [x] `npm run quality` verde (lint, typecheck, testes, build).
+
+### Identidade
+
+- [x] **Favicon:** `public/favicon.svg` era o raio roxo padrão do Vite. Agora é
+      a mesma marca do app — quadrado arredondado em `#a6611e` (o `--primary`
+      claro) com o focinho do lucide `dog` em `#fefaf1`, legível a 16px.
+      `index.html` ganhou `theme-color` e o `lang` passou de `en` para `pt-BR`.

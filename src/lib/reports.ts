@@ -61,20 +61,6 @@ export function findReport(id: string | undefined): ReportDefinition | undefined
   return REPORTS.find((report) => report.id === id);
 }
 
-/** Converte uma data `yyyy-MM-dd` no início ou no fim do dia local, em ms. */
-export function boundaryFromDateInput(
-  value: string,
-  boundary: "start" | "end",
-): number | undefined {
-  const [year, month, day] = value.split("-").map(Number);
-  if (!year || !month || !day) {
-    return undefined;
-  }
-  return boundary === "start"
-    ? new Date(year, month - 1, day).getTime()
-    : new Date(year, month - 1, day, 23, 59, 59, 999).getTime();
-}
-
 /** Nome de arquivo estável para o CSV baixado. */
 export function reportCsvFileName(id: ReportId, agora: number): string {
   return `relatorio-${id}-${new Date(agora).toISOString().slice(0, 10)}.csv`;

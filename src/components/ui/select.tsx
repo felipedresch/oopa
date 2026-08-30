@@ -1,0 +1,30 @@
+import type * as React from "react";
+import { ChevronDownIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+/**
+ * Select nativo com a mesma altura/borda do `Input`, mas com o chevron que o
+ * `appearance-none` remove — sem ele o campo fica indistinguivel de um campo de
+ * texto e o usuario nao percebe que ha opcoes para escolher.
+ */
+function Select({ className, ...props }: React.ComponentProps<"select">) {
+  return (
+    <div className="relative w-full">
+      <select
+        className={cn(
+          "h-11 w-full appearance-none rounded-lg border border-input bg-card py-2 pr-9 pl-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        data-slot="select"
+        {...props}
+      />
+      <ChevronDownIcon
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+      />
+    </div>
+  );
+}
+
+export { Select };
