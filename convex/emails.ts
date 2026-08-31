@@ -5,11 +5,20 @@ import { Resend } from "resend";
 
 import { internalAction } from "./_generated/server";
 
-const fromEmail = () =>
-  process.env.RESEND_FROM_EMAIL ?? "OOPA <noreply@oopa.local>";
+function fromEmail(): string {
+  const value = process.env.RESEND_FROM_EMAIL?.trim();
+  if (!value) {
+    throw new Error("Envio de e-mail não configurado: defina RESEND_FROM_EMAIL.");
+  }
+  return value;
+}
 
 function appBaseUrl(): string {
-  return process.env.SITE_URL ?? "http://localhost:5173";
+  const value = process.env.SITE_URL?.trim();
+  if (!value) {
+    throw new Error("Envio de e-mail não configurado: defina SITE_URL.");
+  }
+  return value.replace(/\/$/, "");
 }
 
 async function sendEmail(args: {
@@ -19,11 +28,7 @@ async function sendEmail(args: {
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn("RESEND_API_KEY ausente; email não enviado.", {
-      to: args.to,
-      subject: args.subject,
-    });
-    return;
+    throw new Error("Envio de e-mail não configurado: defina RESEND_API_KEY.");
   }
 
   const resend = new Resend(apiKey);

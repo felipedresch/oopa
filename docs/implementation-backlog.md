@@ -239,12 +239,15 @@ mesmo conjunto de mudancas.
       `ultimo_acesso_em`.
 - [x] Implementar reset de senha com token aleatorio, hash do token no banco,
       uso unico e expiracao de 60 minutos.
-- [x] Enviar email de convite e reset por Resend em Convex actions.
+- [x] Enviar email de convite e reset por Resend em Convex actions; o convite
+      falha explicitamente e não persiste o usuário se o envio não estiver
+      configurado ou for rejeitado pelo provedor.
 - [x] Implementar guard `requireActiveUser`.
 - [x] Implementar guard `requirePermission`.
 - [x] Implementar query `users.list` protegida por `users.invite` ou
       `users.manage_permissions`.
-- [x] Implementar mutation `users.invite` protegida por `users.invite`.
+- [x] Implementar action `users.invite` protegida por `users.invite`, com
+      persistencia somente após confirmação do envio do e-mail.
 - [x] Implementar mutation `users.updatePermissions` protegida por
       `users.manage_permissions`.
 - [x] Implementar mutation `users.deactivate` protegida por `users.deactivate`.

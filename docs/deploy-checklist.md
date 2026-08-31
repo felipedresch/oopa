@@ -11,6 +11,8 @@ Use este checklist antes de publicar em producao.
 | `CONVEX_DEPLOYMENT` | Sim (CI) | Identificador do deployment de producao |
 | `OPENAI_API_KEY` | Sim (OCR) | Chave OpenAI para leitura de microchip |
 | `RESEND_API_KEY` | Sim (convites) | Envio de e-mail de convite e reset |
+| `RESEND_FROM_EMAIL` | Sim (convites) | Remetente verificado no Resend |
+| `SITE_URL` | Sim (convites) | URL pública usada nos links de convite e reset |
 | `R2_ACCOUNT_ID` | Opcional | Cloudflare R2 para midia publica |
 | `R2_ACCESS_KEY_ID` | Opcional | Credencial R2 |
 | `R2_SECRET_ACCESS_KEY` | Opcional | Credencial R2 |

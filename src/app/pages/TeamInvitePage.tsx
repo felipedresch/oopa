@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -18,7 +18,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 export function TeamInvitePage() {
   const { can } = usePermissions();
   const navigate = useNavigate();
-  const invite = useMutation(api.users.invite);
+  const invite = useAction(api.users.invite);
   const templates = useQuery(api.permissionTemplates.listForInvite, can("users.invite") ? {} : "skip");
 
   const [nome, setNome] = useState("");

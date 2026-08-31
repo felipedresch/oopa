@@ -9,7 +9,13 @@ import { v } from "convex/values";
 
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
-import { action, internalMutation, mutation, query } from "./_generated/server";
+import {
+  action,
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
+} from "./_generated/server";
 import { recordAudit } from "./audit";
 import { isValidEmail } from "./domainValidators";
 import {
@@ -31,6 +37,7 @@ import { normalizePaginationOpts } from "./lib/pagination";
 import { generateRawToken, hashToken, INVITE_TTL_MS, RESET_TTL_MS } from "./lib/tokens";
 import {
   modulePermissionMapValidator,
+  hasPermission,
   permissionValidator,
   permissionsToModuleMap,
   PERMISSION_CATALOG,
@@ -82,6 +89,19 @@ function validatePermissions(permissions: string[]): Permission[] {
   }
   return permissions as Permission[];
 }
+
+const inviteArgs = {
+  nome: v.string(),
+  email: v.string(),
+  organizacao: v.string(),
+  telefone: v.optional(v.string()),
+  permissions: v.array(permissionValidator),
+};
+
+const inviteActorValidator = v.object({
+  actorId: v.id("users"),
+  permissions: v.array(permissionValidator),
+});
 
 export const me = query({
   args: {},
@@ -179,69 +199,119 @@ export const get = query({
   },
 });
 
-export const invite = mutation({
+export const getInviteActor = internalQuery({
+  args: {},
+  returns: inviteActorValidator,
+  handler: async (ctx) => {
+    const actor = await getCurrentUser(ctx);
+    return {
+      actorId: actor._id,
+      permissions: validatePermissions(actor.permissions),
+    };
+  },
+});
+
+export const findUserByEmail = internalQuery({
+  args: { email: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.email))
+      .unique();
+    return user !== null;
+  },
+});
+
+export const createInvite = internalMutation({
   args: {
-    nome: v.string(),
-    email: v.string(),
-    organizacao: v.string(),
-    telefone: v.optional(v.string()),
-    permissions: v.array(permissionValidator),
+    ...inviteArgs,
+    token: v.string(),
+    actorId: v.id("users"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const actor = await getCurrentUser(ctx);
-    requirePermission(actor, "users.invite");
-
-    const email = normalizeEmail(args.email);
-    if (!isValidEmail(email)) {
-      throw validationError("Email inválido.");
-    }
-
     const existing = await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", email))
+      .withIndex("email", (q) => q.eq("email", args.email))
       .unique();
     if (existing) {
       throw conflict("Já existe um usuário com este email.");
     }
 
     const now = Date.now();
-    const permissions = validatePermissions(args.permissions);
     const userId = await ctx.db.insert("users", {
       nome: args.nome.trim(),
       name: args.nome.trim(),
-      email,
+      email: args.email,
       telefone: args.telefone,
       organizacao: args.organizacao.trim(),
       ativo: false,
-      permissions,
+      permissions: args.permissions,
       criado_em: now,
-      criado_por: actor._id,
+      criado_por: args.actorId,
     });
 
-    const rawToken = generateRawToken();
     await ctx.db.insert("user_invites", {
       user_id: userId,
-      email,
-      token_hash: await hashToken(rawToken),
+      email: args.email,
+      token_hash: await hashToken(args.token),
       expires_at: now + INVITE_TTL_MS,
       criado_em: now,
-      criado_por: actor._id,
+      criado_por: args.actorId,
     });
 
     await recordAudit(ctx, {
-      actorUserId: actor._id,
+      actorUserId: args.actorId,
       action: "users.invite",
       entityType: "user",
       entityId: userId,
-      summary: `Convite enviado para ${email}`,
+      summary: `Convite enviado para ${args.email}`,
       metadata: { nome: args.nome, organizacao: args.organizacao },
     });
 
-    await ctx.scheduler.runAfter(0, internal.emails.sendInviteEmail, {
+    return null;
+  },
+});
+
+export const invite = action({
+  args: inviteArgs,
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const actor = await ctx.runQuery(internal.users.getInviteActor, {});
+    if (!hasPermission(actor.permissions, "users.invite")) {
+      throw forbidden();
+    }
+
+    const email = normalizeEmail(args.email);
+    if (!isValidEmail(email)) {
+      throw validationError("Email inválido.");
+    }
+
+    const existing = await ctx.runQuery(internal.users.findUserByEmail, { email });
+    if (existing) {
+      throw conflict("Já existe um usuário com este email.");
+    }
+
+    const permissions = validatePermissions(args.permissions);
+    const nome = args.nome.trim();
+    const organizacao = args.organizacao.trim();
+    const rawToken = generateRawToken();
+
+    await ctx.runAction(internal.emails.sendInviteEmail, {
       email,
-      nome: args.nome,
+      nome,
       token: rawToken,
+    });
+
+    await ctx.runMutation(internal.users.createInvite, {
+      nome,
+      email,
+      organizacao,
+      telefone: args.telefone,
+      permissions,
+      token: rawToken,
+      actorId: actor.actorId,
     });
 
     return null;
