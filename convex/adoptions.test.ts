@@ -83,6 +83,64 @@ test("create exige confirmacoes e atualiza pessoa e historico", async () => {
   expect(occurrence?.adoption_payload?.numero_termo_adocao).toBe("TERM-001");
 });
 
+test("create rejeita animal ja adotado sem criar nova ocorrencia", async () => {
+  const t = convexTest(schema, modules);
+  await ensureSeeds(t);
+  const adminId = await seedAdmin(t);
+  const dogId = await seedDog(t, adminId);
+  const firstPersonId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      nome_completo: "Primeiro Tutor",
+      cpf: "39053344705",
+    }),
+  );
+  const secondPersonId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.people.create, {
+      nome_completo: "Segundo Tutor",
+      cpf: "52998224725",
+    }),
+  );
+
+  await asUser(t, adminId, async (client) => {
+    await client.mutation(api.adoptions.create, {
+      dogId,
+      personId: firstPersonId,
+      responsavel_ong_user_id: adminId,
+      ...adoptionPayload,
+    });
+  });
+
+  await expect(
+    asUser(t, adminId, async (client) => {
+      await client.mutation(api.adoptions.create, {
+        dogId,
+        personId: secondPersonId,
+        responsavel_ong_user_id: adminId,
+        ...adoptionPayload,
+        numero_termo_adocao: "TERM-002",
+      });
+    }),
+  ).rejects.toThrow(/disponível para adoção/i);
+
+  const state = await t.run(async (ctx) => {
+    const dog = await ctx.db.get("dogs", dogId);
+    const occurrences = await ctx.db
+      .query("occurrences")
+      .withIndex("by_dog", (q) => q.eq("dog_id", dogId))
+      .collect();
+    const history = await ctx.db
+      .query("person_dog_history")
+      .withIndex("by_dog", (q) => q.eq("dog_id", dogId))
+      .collect();
+    return { dog, occurrences, history };
+  });
+
+  expect(state.dog?.status_atual).toBe("adotado");
+  expect(state.dog?.pessoa_atual_id).toBe(firstPersonId);
+  expect(state.occurrences).toHaveLength(1);
+  expect(state.history).toHaveLength(1);
+});
+
 test("evaluatePerson retorna alerta e warning de bairro", async () => {
   const t = convexTest(schema, modules);
   await ensureSeeds(t);

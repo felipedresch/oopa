@@ -128,6 +128,47 @@ test("findByMicrochip retorna cao cadastrado", async () => {
   expect(found?.nome).toBe(FIXTURE_DOG.nome);
 });
 
+test("list filtra animais pelo status informado", async () => {
+  const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
+  const storageId = await storeTestImage(t);
+
+  const availableDogId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.dogs.create, {
+      ...baseDogInput,
+      nome: "Disponível",
+      microchip: "111222333444555",
+      foto_perfil_storage_id: storageId,
+    }),
+  );
+  const adoptedDogId = await asUser(t, adminId, async (client) =>
+    client.mutation(api.dogs.create, {
+      ...baseDogInput,
+      nome: "Já adotado",
+      microchip: "555444333222111",
+      foto_perfil_storage_id: storageId,
+    }),
+  );
+
+  await asUser(t, adminId, async (client) => {
+    await client.mutation(api.dogs.changeStatus, {
+      dogId: adoptedDogId,
+      status: "adotado",
+    });
+  });
+
+  const result = await asUser(t, adminId, async (client) =>
+    client.query(api.dogs.list, {
+      paginationOpts: { numItems: 10, cursor: null },
+      status: "na_ong",
+      now: Date.now(),
+    }),
+  );
+
+  expect(result.page.map((dog) => dog._id)).toContain(availableDogId);
+  expect(result.page.map((dog) => dog._id)).not.toContain(adoptedDogId);
+});
+
 test("usuario sem dogs.read nao lista caes", async () => {
   const t = convexTest(schema, modules);
   const now = Date.now();

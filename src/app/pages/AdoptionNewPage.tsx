@@ -8,6 +8,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { BairroAutocomplete } from "@/components/BairroAutocomplete";
 import { BairroWarningBanner } from "@/components/BairroWarningBanner";
 import { DogCard } from "@/components/DogCard";
+import { EmptyState } from "@/components/EmptyState";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { PageHeader } from "@/components/PageHeader";
 import { PermissionDenied } from "@/components/PermissionDenied";
@@ -64,7 +65,7 @@ export function AdoptionNewPage() {
   const dogResults = usePaginatedQuery(
     api.dogs.list,
     can("dogs.read") && step === 0
-      ? { search: dogSearch || undefined, now }
+      ? { search: dogSearch || undefined, status: "na_ong" as const, now }
       : "skip",
     { initialNumItems: 8 },
   );
@@ -286,6 +287,11 @@ export function AdoptionNewPage() {
 
             {dogResults.status === "LoadingFirstPage" ? (
               <LoadingSkeleton rows={3} />
+            ) : dogResults.results.length === 0 ? (
+              <EmptyState
+                description="Ajuste a busca ou cadastre um novo animal antes de iniciar a adoção."
+                title="Nenhum animal disponível para adoção"
+              />
             ) : (
               <ul className="flex flex-col gap-2">
                 {dogResults.results.map((dog) => (

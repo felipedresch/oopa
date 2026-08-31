@@ -8,6 +8,14 @@ codigo concluir, alterar, adicionar ou remover comportamento, contrato, fluxo,
 schema, permissao, tela, teste ou decisao relevante, atualize este backlog no
 mesmo conjunto de mudancas.
 
+## Correção — disponibilidade para adoção (2026-08-30)
+
+- [x] A tela `/adoptions/new` lista somente animais com status `na_ong`.
+- [x] `adoptions.create` valida novamente no backend que o animal está
+      disponível, bloqueando também alterações concorrentes durante o fluxo.
+- [x] Testes cobrem o filtro por status e a rejeição sem criar ocorrência
+      parcial para animal já adotado.
+
 ## Como usar
 
 - Marque itens concluidos trocando `[ ]` por `[x]`.

@@ -131,6 +131,10 @@ export const create = mutation({
       throw notFound("Cão");
     }
 
+    if (dog.status_atual !== "na_ong") {
+      throw validationError("Animal não está disponível para adoção.");
+    }
+
     const person = await ctx.db.get("people", args.personId);
     if (!person) {
       throw notFound("Pessoa");
