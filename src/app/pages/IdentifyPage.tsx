@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getErrorMessage } from "@/lib/auth-errors";
+import { optimizeImageForOcr } from "@/lib/image-optimization";
 import { fileToBase64, normalizeOcrContentType } from "@/lib/ocr-client";
 import { maskMicrochipInput } from "@/lib/masks";
 
@@ -75,8 +76,9 @@ export function IdentifyPage() {
     setStep("processing");
 
     try {
-      const contentType = normalizeOcrContentType(file);
-      const imageBase64 = await fileToBase64(file);
+      const optimizedFile = await optimizeImageForOcr(file);
+      const contentType = normalizeOcrContentType(optimizedFile);
+      const imageBase64 = await fileToBase64(optimizedFile);
       const ocrResult = await extractMicrochip({ imageBase64, contentType });
 
       if (ocrResult.candidate) {

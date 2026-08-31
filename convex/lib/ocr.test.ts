@@ -41,8 +41,9 @@ test("validateOcrImageInput rejeita arquivo grande e formato invalido", () => {
   const small = new Uint8Array([1, 2, 3]);
   expect(() => validateOcrImageInput(small, "image/jpeg")).not.toThrow();
 
-  const huge = new Uint8Array(8 * 1024 * 1024 + 1);
-  expect(() => validateOcrImageInput(huge, "image/jpeg")).toThrow(/8 MB/i);
+  const huge = new Uint8Array(1024 * 1024 + 1);
+  expect(() => validateOcrImageInput(huge, "image/jpeg")).toThrow(/1 MB/i);
 
   expect(() => validateOcrImageInput(small, "image/gif")).toThrow(/formato/i);
+  expect(() => validateOcrImageInput(small, "image/webp")).toThrow(/formato/i);
 });

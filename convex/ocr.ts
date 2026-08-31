@@ -21,7 +21,6 @@ const ocrResultValidator = v.object({
 const allowedContentTypeValidator = v.union(
   v.literal("image/jpeg"),
   v.literal("image/png"),
-  v.literal("image/webp"),
 );
 
 export const extractMicrochip = action({

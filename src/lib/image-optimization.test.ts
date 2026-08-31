@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { optimizeImageForUpload } from "@/lib/image-optimization";
+import { optimizeImageForOcr, optimizeImageForUpload } from "@/lib/image-optimization";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -9,8 +9,10 @@ afterEach(() => {
 
 function mockCanvas(outputSize: number, outputType?: string) {
   const drawImage = vi.fn();
+  const fillRect = vi.fn();
   const context = {
     drawImage,
+    fillRect,
     imageSmoothingEnabled: false,
     imageSmoothingQuality: "low",
   } as unknown as CanvasRenderingContext2D;
@@ -20,7 +22,7 @@ function mockCanvas(outputSize: number, outputType?: string) {
     callback(new Blob([new Uint8Array(outputSize)], { type: outputType ?? type ?? "image/png" }));
   });
 
-  return { context, drawImage };
+  return { context, drawImage, fillRect };
 }
 
 function mockBitmap(width: number, height: number) {
@@ -70,5 +72,30 @@ describe("optimizeImageForUpload", () => {
     mockCanvas(2000, "image/webp");
 
     await expect(optimizeImageForUpload(file)).resolves.toBe(file);
+  });
+});
+
+describe("optimizeImageForOcr", () => {
+  it("converte a foto para JPEG dentro do limite do OCR.space", async () => {
+    const file = new File([new Uint8Array(2_000_000)], "leitor.png", {
+      type: "image/png",
+    });
+    const { close } = mockBitmap(4000, 3000);
+    const { drawImage, fillRect } = mockCanvas(500_000, "image/jpeg");
+
+    const optimized = await optimizeImageForOcr(file);
+
+    expect(optimized.type).toBe("image/jpeg");
+    expect(optimized.name).toBe("leitor.jpg");
+    expect(optimized.size).toBe(500_000);
+    expect(fillRect).toHaveBeenCalledWith(0, 0, 2000, 1500);
+    expect(drawImage).toHaveBeenCalledWith(
+      expect.objectContaining({ width: 4000, height: 3000 }),
+      0,
+      0,
+      2000,
+      1500,
+    );
+    expect(close).toHaveBeenCalledOnce();
   });
 });

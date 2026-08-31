@@ -1,6 +1,8 @@
 const MAX_IMAGE_DIMENSION = 2400;
 const JPEG_QUALITY = 0.9;
 const WEBP_QUALITY = 0.9;
+const MAX_OCR_IMAGE_DIMENSION = 2000;
+const MAX_OCR_IMAGE_BYTES = 700 * 1024;
 
 const OPTIMIZABLE_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -73,6 +75,31 @@ function canvasToBlob(canvas: HTMLCanvasElement, contentType: string, quality?: 
   });
 }
 
+function renderImageToCanvas(
+  decoded: DecodedImage,
+  width: number,
+  height: number,
+  background?: string,
+): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Este navegador não suporta otimização de imagens.");
+  }
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  if (background) {
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
+  }
+  context.drawImage(decoded.source, 0, 0, width, height);
+  return canvas;
+}
+
 function createOptimizedFile(file: File, blob: Blob): File {
   return new File([blob], getOutputFileName(file.name, blob.type), {
     type: blob.type,
@@ -98,18 +125,7 @@ export async function optimizeImageForUpload(file: File): Promise<File> {
     const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(decoded.width, decoded.height));
     const width = Math.max(1, Math.round(decoded.width * scale));
     const height = Math.max(1, Math.round(decoded.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-
-    const context = canvas.getContext("2d");
-    if (!context) {
-      throw new Error("Este navegador não suporta otimização de imagens.");
-    }
-
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = "high";
-    context.drawImage(decoded.source, 0, 0, width, height);
+    const canvas = renderImageToCanvas(decoded, width, height);
 
     const quality = file.type === "image/png" ? undefined : file.type === "image/webp" ? WEBP_QUALITY : JPEG_QUALITY;
     let optimized = createOptimizedFile(file, await canvasToBlob(canvas, file.type, quality));
@@ -125,6 +141,53 @@ export async function optimizeImageForUpload(file: File): Promise<File> {
 
     const wasResized = width !== decoded.width || height !== decoded.height;
     return wasResized || optimized.size < file.size ? optimized : file;
+  } finally {
+    decoded.close?.();
+  }
+}
+
+/**
+ * Prepara uma foto para atravessar o action Convex e o limite de 1 MB do
+ * OCR.space. Converte para JPEG, preserva até 2000 px e reduz a compressão
+ * gradualmente apenas quando necessário.
+ */
+export async function optimizeImageForOcr(file: File): Promise<File> {
+  if (!OPTIMIZABLE_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Formato inválido. Use JPEG, PNG ou WebP.");
+  }
+
+  const decoded = await decodeImage(file);
+  try {
+    if (!decoded.width || !decoded.height) {
+      throw new Error("Não foi possível identificar as dimensões da imagem.");
+    }
+
+    let maxDimension = MAX_OCR_IMAGE_DIMENSION;
+    let quality = JPEG_QUALITY;
+
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const scale = Math.min(1, maxDimension / Math.max(decoded.width, decoded.height));
+      const width = Math.max(1, Math.round(decoded.width * scale));
+      const height = Math.max(1, Math.round(decoded.height * scale));
+      const canvas = renderImageToCanvas(decoded, width, height, "#ffffff");
+      const optimized = createOptimizedFile(
+        file,
+        await canvasToBlob(canvas, "image/jpeg", quality),
+      );
+
+      if (optimized.size <= MAX_OCR_IMAGE_BYTES) {
+        return optimized;
+      }
+
+      if (quality > 0.74) {
+        quality -= 0.08;
+      } else {
+        maxDimension = Math.max(1000, Math.round(maxDimension * 0.8));
+        quality = 0.82;
+      }
+    }
+
+    throw new Error("A foto ficou grande demais para leitura. Tente enquadrar somente o visor.");
   } finally {
     decoded.close?.();
   }

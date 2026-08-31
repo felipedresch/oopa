@@ -50,7 +50,7 @@ mesmo conjunto de mudancas.
 - OCR e implementado por action Convex (`ocr.extractMicrochip`). A imagem enviada
   ao OCR nao e persistida no banco; o sistema salva apenas microchip candidato,
   confianca, usuario, sucesso/falha e timestamp tecnico em `ocr_logs`.
-- Provedor OCR padrao: OpenAI Vision com `OPENAI_API_KEY`; testes usam
+- Provedor OCR padrao: OCR.space Engine 2 com `OCR_SPACE_API_KEY`; testes usam
   `OCR_PROVIDER=fixture` e `OCR_FIXTURE_TEXT`.
 - Bairros sao geridos na tela Configuracoes > Bairros. Seed inicial cria
   `Centro`, `Zona Rural` e `Nao informado`; a ONG completa a lista pela UI.
@@ -477,7 +477,8 @@ mesmo conjunto de mudancas.
 ### Backend
 
 - [x] Implementar action `ocr.extractMicrochip` protegida por usuario ativo.
-- [x] Aceitar imagem JPEG, PNG ou WebP ate 8 MB.
+- [x] Aceitar origem JPEG, PNG ou WebP ate 8 MB no frontend, converter para
+      JPEG de ate 700 KB e validar JPEG/PNG ate 1 MB no action.
 - [x] Retornar `candidate`, `confidence` e `needsManualReview`.
 - [x] Marcar `needsManualReview` como `true` para qualquer confianca abaixo de
       0.98 ou numero diferente de 15 digitos.
@@ -488,11 +489,15 @@ mesmo conjunto de mudancas.
       candidato.
 - [x] Testar OCR com sucesso, baixa confianca, falha, numero invalido e entrada
       manual (`convex/lib/ocr.test.ts`, `convex/ocr.test.ts`).
+- [x] Tratar chave ausente, rate limit, timeout e indisponibilidade do OCR.space;
+      repetir uma vez apenas falhas transitorias e manter entrada manual.
 - [x] Implementar `notifications.reportDogNotFound` para o CTA "Avisar a ONG".
 
 ### Frontend
 
 - [x] Criar `/identify` com camera e campo manual sempre visivel.
+- [x] Oferecer fontes separadas "Usar camera" (camera traseira preferencial via
+      `getUserMedia`) e "Selecionar arquivo" em mobile e desktop.
 - [x] Criar captura de foto da tela do leitor RFID com moldura central,
       instrucao curta e botao grande.
 - [x] Criar tela obrigatoria de confirmacao dos 15 digitos em fonte grande.

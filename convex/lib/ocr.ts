@@ -4,7 +4,10 @@ import {
   normalizeMicrochip,
 } from "../domainValidators";
 import { ERROR_CODES } from "../errors";
-import { ALLOWED_IMAGE_CONTENT_TYPES, MAX_PHOTO_BYTES } from "./storage";
+
+export const MAX_OCR_IMAGE_BYTES = 1024 * 1024;
+
+const ALLOWED_OCR_IMAGE_CONTENT_TYPES = new Set(["image/jpeg", "image/png"]);
 
 export const OCR_CONFIDENCE_THRESHOLD = 0.98;
 
@@ -19,12 +22,12 @@ export function validateOcrImageInput(bytes: Uint8Array, contentType: string): v
     throw new Error("Imagem vazia.");
   }
 
-  if (bytes.byteLength > MAX_PHOTO_BYTES) {
-    throw new Error("A imagem deve ter no maximo 8 MB.");
+  if (bytes.byteLength > MAX_OCR_IMAGE_BYTES) {
+    throw new Error("A imagem para leitura deve ter no máximo 1 MB.");
   }
 
-  if (!ALLOWED_IMAGE_CONTENT_TYPES.has(contentType)) {
-    throw new Error("Formato inválido. Use JPEG, PNG ou WebP.");
+  if (!ALLOWED_OCR_IMAGE_CONTENT_TYPES.has(contentType)) {
+    throw new Error("Formato inválido para leitura. Use JPEG ou PNG.");
   }
 }
 
@@ -89,7 +92,7 @@ export function parseMicrochipFromOcrText(text: string): OcrParseResult {
 }
 
 export function buildOcrFailureCode(message: string): string {
-  if (message.includes("8 MB")) {
+  if (message.includes("1 MB")) {
     return ERROR_CODES.UPLOAD_REJECTED;
   }
   if (message.includes("Formato inválido")) {

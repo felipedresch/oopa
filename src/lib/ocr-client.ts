@@ -8,9 +8,9 @@ export async function fileToBase64(file: File): Promise<string> {
   return btoa(binary);
 }
 
-export function normalizeOcrContentType(file: File): "image/jpeg" | "image/png" | "image/webp" {
-  if (file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp") {
+export function normalizeOcrContentType(file: File): "image/jpeg" | "image/png" {
+  if (file.type === "image/jpeg" || file.type === "image/png") {
     return file.type;
   }
-  throw new Error("Formato inválido. Use JPEG, PNG ou WebP.");
+  throw new Error("Formato inválido para leitura. Use JPEG ou PNG.");
 }

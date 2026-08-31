@@ -9,7 +9,8 @@ Use este checklist antes de publicar em producao.
 | Variavel | Obrigatoria | Descricao |
 |----------|-------------|-----------|
 | `CONVEX_DEPLOYMENT` | Sim (CI) | Identificador do deployment de producao |
-| `OPENAI_API_KEY` | Sim (OCR) | Chave OpenAI para leitura de microchip |
+| `OCR_SPACE_API_KEY` | Sim (OCR) | Chave OCR.space para leitura de microchip |
+| `OCR_SPACE_API_URL` | Não | Endpoint alternativo fornecido em planos PRO do OCR.space |
 | `RESEND_API_KEY` | Sim (convites) | Envio de e-mail de convite e reset |
 | `RESEND_FROM_EMAIL` | Sim (convites) | Remetente verificado no Resend |
 | `SITE_URL` | Sim (convites) | URL pública usada nos links de convite e reset |
@@ -19,6 +20,19 @@ Use este checklist antes de publicar em producao.
 | Variavel | Obrigatoria | Descricao |
 |----------|-------------|-----------|
 | `VITE_CONVEX_URL` | Sim | URL do deployment Convex usado pelo app |
+
+### Configuração do OCR.space
+
+1. Solicitar uma chave em `https://ocr.space/ocrapi/freekey`.
+2. Configurar o segredo no deployment Convex com
+   `npx convex env set OCR_SPACE_API_KEY sua-chave`.
+3. Manter `OCR_SPACE_API_URL` vazio no plano gratuito. Em um plano PRO,
+   preencher com um dos endpoints recebidos por email.
+
+O plano gratuito limita cada arquivo a 1 MB e aplica cotas por IP/dia e por
+mês. O frontend converte a foto para JPEG e a reduz para até 700 KB antes de
+chamar o action. A chave fica somente no backend Convex e nunca deve usar
+prefixo `VITE_`.
 
 ## Comandos pre-deploy
 

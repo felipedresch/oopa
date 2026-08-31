@@ -11,6 +11,9 @@ export const ERROR_CODES = {
   TOKEN_USED: "TOKEN_USED",
   UPLOAD_REJECTED: "UPLOAD_REJECTED",
   OCR_FAILED: "OCR_FAILED",
+  OCR_NOT_CONFIGURED: "OCR_NOT_CONFIGURED",
+  OCR_RATE_LIMITED: "OCR_RATE_LIMITED",
+  OCR_UNAVAILABLE: "OCR_UNAVAILABLE",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
@@ -64,4 +67,22 @@ export function uploadRejected(message: string) {
 
 export function ocrFailed(message = "Não foi possível ler o microchip na foto.") {
   return new DomainError(ERROR_CODES.OCR_FAILED, message);
+}
+
+export function ocrNotConfigured(
+  message = "Leitura por foto não configurada. Informe o microchip manualmente.",
+) {
+  return new DomainError(ERROR_CODES.OCR_NOT_CONFIGURED, message);
+}
+
+export function ocrRateLimited(
+  message = "O limite de leituras por foto foi atingido. Informe o microchip manualmente e tente novamente mais tarde.",
+) {
+  return new DomainError(ERROR_CODES.OCR_RATE_LIMITED, message);
+}
+
+export function ocrUnavailable(
+  message = "A leitura por foto está temporariamente indisponível. Informe o microchip manualmente.",
+) {
+  return new DomainError(ERROR_CODES.OCR_UNAVAILABLE, message);
 }

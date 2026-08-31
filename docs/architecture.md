@@ -43,5 +43,6 @@ e2e                 Fluxos Playwright
 - Convex File Storage para fotos e anexos, com otimização de imagens no
   navegador antes do upload.
 - Resend para convites e reset de senha.
-- OCR na ultima etapa, atras de uma action Convex e sempre com confirmacao
-  manual dos 15 digitos antes da busca.
+- OCR.space na ultima etapa, atras de uma action Convex e sempre com confirmacao
+  manual dos 15 digitos antes da busca. Falhas, indisponibilidade e limite do
+  provedor mantêm a entrada manual disponível.

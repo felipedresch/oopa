@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
-import { afterEach, beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { api, internal } from "./_generated/api";
 import { asUser, seedAdmin } from "./testHelpers";
@@ -10,6 +10,7 @@ const modules = import.meta.glob("./**/*.ts");
 
 const originalProvider = process.env.OCR_PROVIDER;
 const originalFixture = process.env.OCR_FIXTURE_TEXT;
+const originalApiKey = process.env.OCR_SPACE_API_KEY;
 
 beforeEach(() => {
   process.env.OCR_PROVIDER = "fixture";
@@ -19,6 +20,8 @@ beforeEach(() => {
 afterEach(() => {
   process.env.OCR_PROVIDER = originalProvider;
   process.env.OCR_FIXTURE_TEXT = originalFixture;
+  process.env.OCR_SPACE_API_KEY = originalApiKey;
+  vi.restoreAllMocks();
 });
 
 test("extractMicrochip retorna candidato e registra log tecnico", async () => {
@@ -57,6 +60,37 @@ test("extractMicrochip rejeita imagem invalida", async () => {
 
   const logs = await t.run(async (ctx) => ctx.db.query("ocr_logs").collect());
   expect(logs[0]?.success).toBe(false);
+});
+
+test("extractMicrochip registra limite do OCR.space e mantém fallback manual", async () => {
+  process.env.OCR_PROVIDER = "ocrspace";
+  process.env.OCR_SPACE_API_KEY = "test-key";
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        OCRExitCode: 4,
+        IsErroredOnProcessing: true,
+        ErrorMessage: ["Rate limit reached"],
+      }),
+      { status: 429, headers: { "Content-Type": "application/json" } },
+    ),
+  );
+  const t = convexTest(schema, modules);
+  const adminId = await seedAdmin(t);
+  const tinyJpeg = Buffer.from([255, 216, 255]).toString("base64");
+
+  await expect(
+    asUser(t, adminId, async (client) =>
+      client.action(api.ocr.extractMicrochip, {
+        imageBase64: tinyJpeg,
+        contentType: "image/jpeg",
+      }),
+    ),
+  ).rejects.toThrow(/limite de leituras/i);
+
+  const log = await t.run(async (ctx) => ctx.db.query("ocr_logs").first());
+  expect(log?.success).toBe(false);
+  expect(log?.failure_code).toBe("OCR_RATE_LIMITED");
 });
 
 test("logAttempt persiste falha sem imagem", async () => {
