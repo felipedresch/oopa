@@ -38,9 +38,10 @@ e2e                 Fluxos Playwright
 - Fluxos sensiveis devem ter estados de carregamento, vazio, erro e permissao
   negada.
 
-## Integracoes futuras
+## Integracoes externas
 
-- Cloudflare R2 para fotos via URLs assinadas emitidas por Convex actions.
+- Convex File Storage para fotos e anexos, com otimização de imagens no
+  navegador antes do upload.
 - Resend para convites e reset de senha.
 - OCR na ultima etapa, atras de uma action Convex e sempre com confirmacao
   manual dos 15 digitos antes da busca.

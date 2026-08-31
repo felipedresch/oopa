@@ -13,11 +13,6 @@ Use este checklist antes de publicar em producao.
 | `RESEND_API_KEY` | Sim (convites) | Envio de e-mail de convite e reset |
 | `RESEND_FROM_EMAIL` | Sim (convites) | Remetente verificado no Resend |
 | `SITE_URL` | Sim (convites) | URL pública usada nos links de convite e reset |
-| `R2_ACCOUNT_ID` | Opcional | Cloudflare R2 para midia publica |
-| `R2_ACCESS_KEY_ID` | Opcional | Credencial R2 |
-| `R2_SECRET_ACCESS_KEY` | Opcional | Credencial R2 |
-| `R2_BUCKET_NAME` | Opcional | Bucket R2 |
-| `R2_PUBLIC_BASE_URL` | Opcional | URL base publica dos arquivos |
 
 ### Frontend (build Vite)
 

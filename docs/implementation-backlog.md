@@ -44,7 +44,9 @@ mesmo conjunto de mudancas.
 - Permissoes sao fonte unica da verdade em `convex/permissions.ts`; a UI recebe
   apenas o mapa modulo/nivel e nunca salva papel abstrato no usuario.
 - Email transacional usa Resend via Convex action para convite e reset de senha.
-- Fotos usam Cloudflare R2 com URL assinada gerada por Convex action.
+- Fotos e anexos usam Convex File Storage com URL de upload gerada pelo Convex.
+  Imagens são redimensionadas para no máximo 2400 px no maior lado e
+  recomprimidas no navegador antes do upload; PDFs e XMLs não são alterados.
 - OCR e implementado por action Convex (`ocr.extractMicrochip`). A imagem enviada
   ao OCR nao e persistida no banco; o sistema salva apenas microchip candidato,
   confianca, usuario, sucesso/falha e timestamp tecnico em `ocr_logs`.
@@ -552,10 +554,8 @@ mesmo conjunto de mudancas.
 - [x] Implementar exportacao operacional CSV para caes, tutores, ocorrencias e
       historico tutor-cao protegida por `system.audit_log`.
 - [x] Revisar erros para retornar codigo estavel sem detalhes sensiveis.
-- [x] Criar `docs/deploy-checklist.md` com variaveis `CONVEX_DEPLOYMENT`,
-      `VITE_CONVEX_URL`, `RESEND_API_KEY`, `R2_ACCOUNT_ID`,
-      `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` e
-      `R2_PUBLIC_BASE_URL`.
+- [x] Criar `docs/deploy-checklist.md` com variaveis de Convex, OCR e
+      email usadas pelo sistema.
 - [x] Rodar testes de regressao do backend.
 
 ### Frontend

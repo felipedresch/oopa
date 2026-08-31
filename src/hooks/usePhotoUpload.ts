@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { optimizeImageForUpload } from "@/lib/image-optimization";
 
 type UploadState = "idle" | "uploading" | "success" | "error";
 
@@ -23,13 +24,15 @@ export function usePhotoUpload(
       setError(null);
 
       try {
+        const uploadFile = await optimizeImageForUpload(file);
+        setProgress(25);
         const uploadUrl = await createSignedUploadUrl({});
-        setProgress(35);
+        setProgress(40);
 
         const response = await fetch(uploadUrl, {
           method: "POST",
-          headers: { "Content-Type": file.type },
-          body: file,
+          headers: { "Content-Type": uploadFile.type },
+          body: uploadFile,
         });
 
         if (!response.ok) {
